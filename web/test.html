@@ -1,0 +1,35 @@
+<html>
+
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+	<script>
+		var bob;
+		$.ajax({
+		    type : 'POST',
+		    url : 'http://eaganr.com:3000',           
+		    data: {
+			gameID : "0041400406"
+		    },
+		    success:function (data) {
+			bob = data;    
+			console.log(data);
+			console.log("yooooo");
+		    }          
+		}); 
+
+	</script>
+
+
+</head>
+
+<body>
+
+
+
+
+
+
+
+</body>
+
+</html

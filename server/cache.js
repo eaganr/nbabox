@@ -8,7 +8,7 @@ TODO:
 
 */
 
-var folder = "/Users/eaganr/node_modules/nba/"
+var folder = "/root/nbabox/"
 
 //time
 function getTime() {
@@ -53,7 +53,7 @@ function toTime(dateString) {
 }
 
 //box score
-function requestBoxScore(gameID) {
+function requestBoxScore(res, gameID) {
 	var nba = require('nba');
 	var fs = require('fs');
 	nba.api.boxScoreScoring({gameId: gameID}, function (err, response) {
@@ -61,21 +61,20 @@ function requestBoxScore(gameID) {
 		fs.writeFile(folder+"cache/minute/"+gameID+"boxscore"+getTime()+".json", JSON.stringify(response), function(err2) {
 			if(err2) console.log(err2);
 			console.log("saved");
-			return response;
+			res.jsonp(response);
 		});
 	});
 }
 
 //period = 1 - minute, 2 - hour, 3 - day
-function getBoxScore(period, gameID) {
+function getBoxScore(res, period, gameID) {
 	var j = [];
 	if(period > 0) j = getFile("minute", gameID);
 	if(j.length === 0 && period > 1) j = getFile("hour", gameID);
 	if(j.length === 0 && period > 2) j = getFile("day", gameID);
 
-	if(j.length === 0) j = getBoxScore(gameID);
-
-	return j;
+	if(j.length === 0) requestBoxScore(res, gameID);
+	else res.jsonp(j);
 }
 
 //period = minute,hour,day
@@ -93,5 +92,25 @@ function getFile(period, gameID) {
 	return j;
 }
 
-requestBoxScore("0041400406");
+//requestBoxScore("0041400406");
 //console.log(getFile("minute","0041400406"));
+
+//port listen, communicate with frontend
+(function() {
+	var express=require('express');
+	var app=express();
+	var bodyParser = require('body-parser');
+	app.use(bodyParser.urlencoded({extended:false}));	
+
+	var server=app.listen(3000,function(){
+		console.log("We have started our server on port 3000");
+	});
+
+        app.post('/',function(req,res){
+		console.log(req.body);
+		var gameID = req.body.gameID;
+		res.header("Access-Control-Allow-Origin", "*");
+		var box = getBoxScore(res,1,"0041400406");
+	});
+}).call(this);
+

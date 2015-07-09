@@ -1,4 +1,4 @@
-var folder = "/Users/eaganr/node_modules/nba/"
+var folder = "/root/nbabox/"
 
 
 function getTimeStamp(filename) {
