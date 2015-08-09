@@ -1,0 +1,52 @@
+<html>
+
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+	<script src="pie.js"></script>
+
+	<script>
+		var cavs;
+		var warriors;
+		$.ajax({
+		    type : 'POST',
+		    url : 'http://eaganr.com:3000',           
+		    data: {
+					gameID : "0041400406"
+				},
+		    success:function (data) {
+					console.log(data);
+
+					var cavsPlayers = [];
+					var warPlayers = [];
+					for(var i=0;i<data.playerStats.length;i++) {
+						var player = data.playerStats[i];
+						if(player.teamAbbreviation == "GSW" && player.pTS > 0) {
+							warPlayers.push({player:player.playerName, points:player.pTS});
+						}
+						if(player.teamAbbreviation == "CLE"  && player.pTS > 0) {
+							cavsPlayers.push({player:player.playerName, points:player.pTS});
+						}
+					}
+					console.log(cavsPlayers);
+					console.log(warPlayers);
+					cavs = new pie("#cavs",cavsPlayers);
+					warriors = new pie("#warriors",warPlayers);	
+
+				}
+
+		  });
+
+	</script>
+
+
+</head>
+
+<body>
+
+	<div id="cavs"></div>
+	<div id="warriors"></div>
+
+</body>
+
+</html
