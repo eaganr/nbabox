@@ -3,7 +3,7 @@ function pie(selector, data) {
 	self.data=data;
 	self.selector=selector;
 
-	self.w=960,
+	self.w=400,
 	self.h=300,
 	self.radius= Math.min(self.w, self.h) / 2;
 
@@ -15,7 +15,7 @@ function pie(selector, data) {
 
 	self.pie = d3.layout.pie()
 		.sort(null)
-		.value(function(d) { return d.points; });
+		.value(function(d) { return d.pTS; });
 
 	self.svg = d3.select(self.selector).append("svg")
 		.attr("width", self.w)
@@ -30,7 +30,7 @@ function pie(selector, data) {
 
 	self.g.append("path")
 		.attr("d", self.arc)
-		.style("fill", function(d) { return self.color(d.data.points); });
+		.style("fill", function(d) { return self.color(d.data.pTS); });
 
 	self.g.append("text")
 		.attr("transform", function(d) { return "translate(" + self.arc.centroid(d) + ")"; })
@@ -38,7 +38,7 @@ function pie(selector, data) {
 		.style("text-anchor", "middle")
 		.style("font-size", "10px")
 		.style("z-index", "100")
-		.text(function(d) { return d.data.player + " - " + d.data.points; });
+		.text(function(d) { return d.data.playerName + " - " + d.data.pTS; });
 
 	return self;
 }
