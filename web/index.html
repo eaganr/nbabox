@@ -58,8 +58,20 @@
 					}
 					console.log(homePlayers);
 					console.log(awayPlayers);
-					homeTeam.scoring = new pie("#homescoring",homePlayers,"pTS","playerName",function(d) { return d.data["playerName"]+" - "+d.data["pTS"];});
-					awayTeam.scoring = new pie("#awayscoring",awayPlayers,"pTS","playerName",function(d) { return d.data["playerName"]+" - "+d.data["pTS"];});
+
+					homeTeam.scoring = new pie("#homescoring")
+						.value("pTS")
+						.data(homePlayers)
+						.diff("playerName")
+						.label(function(d) { return d.data["playerName"]+" - "+d.data["pTS"];})
+						.draw();	
+
+					awayTeam.scoring = new pie("#awayscoring")
+						.value("pTS")
+						.data(awayPlayers)
+						.diff("playerName")
+						.label(function(d) { return d.data["playerName"]+" - "+d.data["pTS"];})
+						.draw();
 
 					//boxscore
 					homeTeam.box = new boxscore("homebox",homePlayers);
@@ -74,9 +86,19 @@
 						{abbrev:data.teamStats[1].teamAbbreviation, reb:data.teamStats[1].oREB}
 					];
 
+					homeTeam.rebounds = new pie("#homerebounding")
+						.value("reb")
+						.data(homeRebs)
+						.diff("abbrev")
+						.label(function(d) { return d.data.abbrev+"-"+d.data.reb;})
+						.draw();
 
-					homeTeam.rebounds = new pie("#homerebounding",homeRebs,"reb","abbrev",function(d) { return d.data.abbrev+"-"+d.data.reb;});
-					awayTeam.rebounds = new pie("#awayrebounding",awayRebs,"reb","abbrev",function(d) { return d.data.abbrev+"-"+d.data.reb;});
+					awayTeam.rebounds = new pie("#awayrebounding")
+						.value("reb")
+						.data(awayRebs)
+						.diff("abbrev")
+						.label(function(d) { return d.data.abbrev+"-"+d.data.reb;})
+						.draw();
 
 				}
 		  });
