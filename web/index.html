@@ -7,15 +7,30 @@
 	<script src="boxscore.js"></script>
 
 	<style>
-		.teambox {
+		.team {
 			display:inline-block;
-			width:400px;
+			width:600px;
 		}	
+		table {
+			border:solid;
+			display:block;
+			margin:auto;
+		}
+		tr {
+		}
+		.scoring-title {
+			width:100px;
+			margin:auto;
+		}
+		svg {
+			display:block;
+			margin:auto;
+		}
 	</style>
 
 	<script>
-		var cavs = {};
-		var warriors = {};
+		var homeTeam = {};
+		var awayTeam = {};
 		$.ajax({
 		    type : 'POST',
 		    url : 'http://eaganr.com:3000',           
@@ -24,26 +39,45 @@
 				},
 		    success:function (data) {
 					console.log(data);
+				
+					homeTeam.id=data.gameSummary[0].homeTeamId;
+					homeTeam.abbrev=data.teamStats[1].teamAbbreviation;
+					awayTeam.id=data.gameSummary[0].visitorTeamId;
+					awayTeam.abbrev=data.teamStats[0].teamAbbreviation;
 
-					var cavsPlayers = [];
-					var warPlayers = [];
+					var homePlayers = [];
+					var awayPlayers = [];
 					for(var i=0;i<data.playerStats.length;i++) {
 						var player = data.playerStats[i];
-						if(player.teamAbbreviation == "GSW" && player.pTS > 0) {
-							warPlayers.push(player);
+						if(player.teamId === homeTeam.id) {
+							homePlayers.push(player);
 						}
-						if(player.teamAbbreviation == "CLE"  && player.pTS > 0) {
-							cavsPlayers.push(player);
+						if(player.teamId === awayTeam.id) {
+							awayPlayers.push(player);
 						}
 					}
-					console.log(cavsPlayers);
-					console.log(warPlayers);
-					cavs.pie = new pie("#cavs",cavsPlayers);
-					warriors.pie = new pie("#warriors",warPlayers);	
+					console.log(homePlayers);
+					console.log(awayPlayers);
+					homeTeam.scoring = new pie("#homescoring",homePlayers,"pTS","playerName",function(d) { return d.data["playerName"]+" - "+d.data["pTS"];});
+					awayTeam.scoring = new pie("#awayscoring",awayPlayers,"pTS","playerName",function(d) { return d.data["playerName"]+" - "+d.data["pTS"];});
 
 					//boxscore
-					cavs.box = new boxscore("cavsbox",cavsPlayers);
-					warriors.box = new boxscore("warriorsbox",warPlayers);
+					homeTeam.box = new boxscore("homebox",homePlayers);
+					awayTeam.box = new boxscore("awaybox",awayPlayers);
+
+					var homeRebs = [
+						{abbrev:data.teamStats[1].teamAbbreviation, reb:data.teamStats[1].dREB},
+						{abbrev:data.teamStats[0].teamAbbreviation, reb:data.teamStats[0].oREB}
+					];
+					var awayRebs = [
+						{abbrev:data.teamStats[0].teamAbbreviation, reb:data.teamStats[0].dREB},
+						{abbrev:data.teamStats[1].teamAbbreviation, reb:data.teamStats[1].oREB}
+					];
+
+
+					homeTeam.rebounds = new pie("#homerebounding",homeRebs,"reb","abbrev",function(d) { return d.data.abbrev+"-"+d.data.reb;});
+					awayTeam.rebounds = new pie("#awayrebounding",awayRebs,"reb","abbrev",function(d) { return d.data.abbrev+"-"+d.data.reb;});
+
 				}
 		  });
 
@@ -54,13 +88,15 @@
 
 <body>
 	
-	<div class="teambox">
-		<div class="scoring" id="cavs"></div>
-		<div class="boxscore" id="cavsbox"></div>
+	<div class="team">
+		<div class="scoring" id="homescoring"></div>
+		<div class="rebounding" id="homerebounding"></div>
+		<div class="boxscore" id="homebox"></div>
 	</div>
-	<div class="teambox">
-		<div class="scoring" id="warriors"></div>
-		<div class="boxscore" id="warriorsbox"></div>
+	<div class="team">
+		<div class="scoring" id="awayscoring"></div>
+		<div class="rebounding" id="awayrebounding"></div>
+		<div class="boxscore" id="awaybox"></div>
 	</div>
 
 </body>

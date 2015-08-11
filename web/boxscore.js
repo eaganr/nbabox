@@ -4,7 +4,19 @@ function boxscore(id, data) {
 	self.id=id;
 
 	var table = document.createElement("table");
-	var stats = {playerName:"Player", mIN:"Min", pTS:"Pts", rEB:"Reb", aST:"Ast"};
+	var stats = {playerName:"Player",
+							 mIN:"Min",
+							 fGM:"FGM-A",
+							 fG3M:"3PM-A",
+							 pTS:"Pts",
+							 rEB:"Reb",
+							 aST:"Ast",
+							 sTL:"Stl",
+							 bLK:"Blk",
+							 tO:"TO",
+							 pF:"PF",
+							 plusMinus:"+/-"
+							};
 	var header = document.createElement("tr");
 	var th;
 	for(var k in stats) {
@@ -20,6 +32,10 @@ function boxscore(id, data) {
 		var player = data[i];
 		tr = document.createElement("tr");
 		for(var k in stats) {
+			//modify and format			
+			if(k === "fGM") player[k] = (player[k]? player[k] : 0)+"-"+(player["fGA"]? player["fGA"] : 0);
+			if(k === "fG3M") player[k] = (player[k]? player[k] : 0)+"-"+(player["fG3A"]? player["fG3A"] : 0);
+
 			td = document.createElement("td");
 			td.innerHTML = player[k]!==null ? player[k] : 0;
 			tr.appendChild(td);
