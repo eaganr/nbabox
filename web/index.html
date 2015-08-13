@@ -7,10 +7,20 @@
 	<script src="boxscore.js"></script>
 
 	<style>
+		.content {
+			width:1250px;
+			margin:auto;
+		}
 		.team {
 			display:inline-block;
 			width:600px;
 		}	
+		.team h1 {
+			width:200px;
+			margin:auto;
+			margin-bottom:20px;
+			text-align:center;
+		}
 		table {
 			border:solid;
 			display:block;
@@ -24,6 +34,15 @@
 		}
 		svg {
 			display:block;
+			margin:auto;
+		}
+		.charts {
+			width:525px;
+			margin:auto;
+		}
+		.pie {
+			display:inline-block;
+			width:260px;
 			margin:auto;
 		}
 	</style>
@@ -46,6 +65,9 @@
 					awayTeam.id=data.gameSummary[0].visitorTeamId;
 					awayTeam.abbrev=data.teamStats[0].teamAbbreviation;
 
+					document.getElementById("hometeam").getElementsByTagName("h1")[0].innerHTML=homeTeam.abbrev;
+					document.getElementById("awayteam").getElementsByTagName("h1")[0].innerHTML=awayTeam.abbrev;
+
 					var homePlayers = [];
 					var awayPlayers = [];
 					for(var i=0;i<data.playerStats.length;i++) {
@@ -61,6 +83,7 @@
 					console.log(awayPlayers);
 
 					homeTeam.scoring = new pie("#homescoring")
+						.w(250).h(250)
 						.value("pTS")
 						.data(homePlayers)
 						.diff("playerName")
@@ -69,6 +92,7 @@
 						.draw();	
 
 					awayTeam.scoring = new pie("#awayscoring")
+						.w(250).h(250)
 						.value("pTS")
 						.data(awayPlayers)
 						.diff("playerName")
@@ -90,6 +114,7 @@
 					];
 
 					homeTeam.rebounds = new pie("#homerebounding")
+						.w(250).h(250)
 						.value("reb")
 						.data(homeRebs)
 						.diff("abbrev")
@@ -98,6 +123,7 @@
 						.draw();
 
 					awayTeam.rebounds = new pie("#awayrebounding")
+						.w(250).h(250)
 						.value("reb")
 						.data(awayRebs)
 						.diff("abbrev")
@@ -114,18 +140,24 @@
 </head>
 
 <body>
-	
-	<div class="team">
-		<div class="scoring" id="homescoring"></div>
-		<div class="rebounding" id="homerebounding"></div>
-		<div class="boxscore" id="homebox"></div>
+	<div class="content">	
+		<div class="team" id="hometeam">
+			<h1></h1>
+			<div class="charts">
+				<div class="pie" id="homescoring"></div>
+				<div class="pie" id="homerebounding"></div>
+			</div>
+			<div class="boxscore" id="homebox"></div>
+		</div>
+		<div class="team" id="awayteam">
+			<h1></h1>
+			<div class="charts">
+				<div class="pie" id="awayscoring"></div>
+				<div class="pie" id="awayrebounding"></div>
+			</div>
+			<div class="boxscore" id="awaybox"></div>
+		</div>
 	</div>
-	<div class="team">
-		<div class="scoring" id="awayscoring"></div>
-		<div class="rebounding" id="awayrebounding"></div>
-		<div class="boxscore" id="awaybox"></div>
-	</div>
-
 </body>
 
 </html
