@@ -106,11 +106,11 @@ function getFile(period, gameID) {
 		console.log("We have started our server on port 3000");
 	});
 
-        app.post('/',function(req,res){
+  app.post('/',function(req,res){
 		console.log(req.body);
 		var gameID = req.body.gameID;
 		res.header("Access-Control-Allow-Origin", "*");
-		var box = getBoxScore(res,1,"0041400406");
+		var box = getBoxScore(res,3,gameID);
 	});
 }).call(this);
 

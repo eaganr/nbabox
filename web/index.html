@@ -35,6 +35,7 @@
 		    type : 'POST',
 		    url : 'http://eaganr.com:3000',           
 		    data: {
+					//gameID : "0021400962"
 					gameID : "0041400406"
 				},
 		    success:function (data) {
@@ -64,6 +65,7 @@
 						.data(homePlayers)
 						.diff("playerName")
 						.label(function(d) { return d.data["playerName"]+" - "+d.data["pTS"];})
+						.title(homeTeam.abbrev + " Scoring")
 						.draw();	
 
 					awayTeam.scoring = new pie("#awayscoring")
@@ -71,6 +73,7 @@
 						.data(awayPlayers)
 						.diff("playerName")
 						.label(function(d) { return d.data["playerName"]+" - "+d.data["pTS"];})
+						.title(awayTeam.abbrev + " Scoring")
 						.draw();
 
 					//boxscore
@@ -91,6 +94,7 @@
 						.data(homeRebs)
 						.diff("abbrev")
 						.label(function(d) { return d.data.abbrev+"-"+d.data.reb;})
+						.title(homeTeam.abbrev + " Basket Rebounds")
 						.draw();
 
 					awayTeam.rebounds = new pie("#awayrebounding")
@@ -98,6 +102,7 @@
 						.data(awayRebs)
 						.diff("abbrev")
 						.label(function(d) { return d.data.abbrev+"-"+d.data.reb;})
+						.title(awayTeam.abbrev + " Basket Rebounds")
 						.draw();
 
 				}

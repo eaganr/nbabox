@@ -18,9 +18,11 @@ function pie(selector) {
 
 	self.data=function(d) {
 		if(d) {
+			self.total=0;
 			self.data.val=[];
 			for(var i=0;i<d.length;i++) {
 				if(d[i][self.value()] >0) self.data.val.push(d[i]);
+				self.total+=d[i][self.value()];
 			}
 			return self;
 		}
@@ -41,7 +43,7 @@ function pie(selector) {
 			self.w.val=w;
 			return self;
 		}
-		return self.w.val? self.w.val : 400;
+		return self.w.val? self.w.val : 320;
 	};
 
 	self.h=function(h) {
@@ -49,7 +51,7 @@ function pie(selector) {
 			self.h.val=h;
 			return self;
 		}
-		return self.h.val? self.h.val : 300;
+		return self.h.val? self.h.val : 320;
 	};
 
 	self.radius=function() {
@@ -64,6 +66,14 @@ function pie(selector) {
 		return self.label.val ? self.label.val : function(d) { return d.data[self.value()]; };
 	};
 
+	self.title=function(t) {
+		if(t) {
+			self.title.val=t;
+			return self;
+		}
+		return self.title.val ? self.title.val : self.value();
+	}
+
 	self.color=function(c,reset) {
 		if(reset) {
 			self.color.val=c;
@@ -75,7 +85,7 @@ function pie(selector) {
 
 	self.arc=function() {
 		var arc=d3.svg.arc()
-			.outerRadius(self.radius() -10)
+			.outerRadius(self.radius() -20)
 			.innerRadius(0)
 		return arc;
 	};
@@ -89,10 +99,18 @@ function pie(selector) {
 
 	self.draw=function() {
 		self.svg = d3.select(self.selector()).append("svg")
-			.attr("width", self.w())
-			.attr("height", self.h())
+			.attr("width", self.w()*1.2)
+			.attr("height", self.h()*1.2)
 			.append("g")
 			.attr("transform", "translate(" + self.w() /2 + "," + self.h() / 2 + ")");
+
+		self.title = self.svg.append("text")
+			.attr("transform", "translate(" + 0 + "," + (self.h()/-2+5) + ")")
+			.attr("dy", ".35em")
+			.style("text-anchor", "middle")
+			.style("font-size", "15px")
+			.style("z-index", "100")
+			.text(self.title());
 
 		self.g = self.svg.selectAll(".arc")
 			.data(self.pie(self.data()))
@@ -101,11 +119,27 @@ function pie(selector) {
 
 		self.g.append("path")
 			.attr("d", self.arc())
-			.style("fill", function(d) { return self.color(d.data[self.diff()]); });
-
-		self.g.append("text")
+			.style("fill", function(d) { return self.color(d.data[self.diff()]); })
+			.on("mouseover",function(d) {
+				self.svg.select(".label[diff=\""+d.data[self.diff()]+"\"]")
+					.attr("opacity",100);
+			})
+			.on("mouseout",function(d) {
+				self.svg.select(".label[diff=\""+d.data[self.diff()]+"\"]")
+					.attr("opacity",self.data().length < 5 || d.data[self.value()] > self.total / 7? 100 : 0);
+			});
+	
+		self.svg.selectAll(".label")
+			.data(self.pie(self.data()))
+			.enter().append("text")
 			.attr("transform", function(d) { return "translate(" + self.arc().centroid(d) + ")"; })
+			.attr("diff",function(d) { return d.data[self.diff()]})
 			.attr("dy", ".35em")
+			.attr("class", "label")
+			.attr("opacity",function(d) { 
+				if(self.data().length < 5 || d.data[self.value()] > self.total / 7) return 100;
+				else return 0;
+			})
 			.style("text-anchor", "middle")
 			.style("font-size", "10px")
 			.style("z-index", "100")
