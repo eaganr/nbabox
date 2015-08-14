@@ -62,11 +62,13 @@
 				
 					homeTeam.id=data.gameSummary[0].homeTeamId;
 					homeTeam.abbrev=data.teamStats[1].teamAbbreviation;
+					homeTeam.score=data.teamStats[1].pTS;
 					awayTeam.id=data.gameSummary[0].visitorTeamId;
 					awayTeam.abbrev=data.teamStats[0].teamAbbreviation;
+					awayTeam.score=data.teamStats[0].pTS;
 
-					document.getElementById("hometeam").getElementsByTagName("h1")[0].innerHTML=homeTeam.abbrev;
-					document.getElementById("awayteam").getElementsByTagName("h1")[0].innerHTML=awayTeam.abbrev;
+					document.getElementById("hometeam").getElementsByTagName("h1")[0].innerHTML=homeTeam.abbrev+" - "+homeTeam.score;
+					document.getElementById("awayteam").getElementsByTagName("h1")[0].innerHTML=awayTeam.score+" - "+awayTeam.abbrev;
 
 					var homePlayers = [];
 					var awayPlayers = [];
