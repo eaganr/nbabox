@@ -4,6 +4,7 @@ function boxscore(id, data) {
 	self.id=id;
 
 	var table = document.createElement("table");
+	table.setAttribute("cellspacing",0);
 	var stats = {playerName:"Player",
 							 mIN:"Min",
 							 fGM:"FGM-A",
