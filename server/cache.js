@@ -69,28 +69,55 @@ function requestBoxScore(res, gameID) {
 //period = 1 - minute, 2 - hour, 3 - day
 function getBoxScore(res, period, gameID) {
 	var j = [];
-	if(period > 0) j = getFile("minute", gameID);
-	if(j.length === 0 && period > 1) j = getFile("hour", gameID);
-	if(j.length === 0 && period > 2) j = getFile("day", gameID);
+	if(period > 0) j = getFile("minute", "boxscore", gameID);
+	if(j.length === 0 && period > 1) j = getFile("hour", "boxscore", gameID);
+	if(j.length === 0 && period > 2) j = getFile("day", "boxscore", gameID);
 
 	if(j.length === 0) requestBoxScore(res, gameID);
 	else res.jsonp(j);
 }
 
 //period = minute,hour,day
-function getFile(period, gameID) {
+function getFile(period, filetype, gameID) {
 	var fs = require('fs');
 	var j = [];
 	var files = fs.readdirSync(folder+"cache/"+period);
 	for(var i=0;i<files.length;i++) {
 		var f = files[i];
-		if(f.indexOf(gameID+"boxscore") > -1) {
+		if(f.indexOf(gameID+filetype) > -1) {
 			j = require(folder+"cache/"+period+"/"+f);
 			break;
 		}
 	}
 	return j;
 }
+
+
+//play by play
+function requestPlayByPlay(res, gameID) {
+	var nba = require('nba');
+	var fs = require('fs');
+	nba.api.playByPlay({gameId: gameID}, function (err, response) {
+		if(err) console.log(err);
+		fs.writeFile(folder+"cache/minute/"+gameID+"playbyplay"+getTime()+".json", JSON.stringify(response), function(err2) {
+			if(err2) console.log(err2);
+			console.log("saved");
+			res.jsonp(response);
+		});
+	});
+}
+
+//period = 1 - minute, 2 - hour, 3 - day
+function getPlayByPlay(res, period, gameID) {
+	var j = [];
+	if(period > 0) j = getFile("minute", "playbyplay", gameID);
+	if(j.length === 0 && period > 1) j = getFile("hour", "playbyplay", gameID);
+	if(j.length === 0 && period > 2) j = getFile("day", "playbyplay", gameID);
+
+	if(j.length === 0) requestPlayByPlay(res, gameID);
+	else res.jsonp(j);
+}
+
 
 //requestBoxScore("0041400406");
 //console.log(getFile("minute","0041400406"));
@@ -110,7 +137,8 @@ function getFile(period, gameID) {
 		console.log(req.body);
 		var gameID = req.body.gameID;
 		res.header("Access-Control-Allow-Origin", "*");
-		var box = getBoxScore(res,3,gameID);
+		if(req.body.func === "getBoxScore") getBoxScore(res,3,gameID);
+		if(req.body.func === "getPlayByPlay") getPlayByPlay(res,3,gameID);
 	});
 }).call(this);
 

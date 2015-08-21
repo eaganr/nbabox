@@ -5,6 +5,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
 	<script src="pie.js"></script>
 	<script src="boxscore.js"></script>
+	<script src="playbyplay.js"></script>
 
 	<style>
 		.content {
@@ -29,6 +30,9 @@
 		tr:hover {
 			background-color:#FFFFCC;
 		}
+		td {
+			text-align:center;
+		}
 		.scoring-title {
 			width:100px;
 			margin:auto;
@@ -49,14 +53,17 @@
 	</style>
 
 	<script>
+
 		var homeTeam = {};
 		var awayTeam = {};
 		$.ajax({
 		    type : 'POST',
 		    url : 'http://eaganr.com:3000',           
 		    data: {
-					//gameID : "0021400962"
+					//gameID : "0021400962",
+					func: "getBoxScore",
 					gameID : "0041400406"
+					//gameID : "0011400053"
 				},
 		    success:function (data) {
 					console.log(data);
@@ -71,24 +78,24 @@
 					document.getElementById("hometeam").getElementsByTagName("h1")[0].innerHTML=homeTeam.abbrev+" - "+homeTeam.score;
 					document.getElementById("awayteam").getElementsByTagName("h1")[0].innerHTML=awayTeam.score+" - "+awayTeam.abbrev;
 
-					var homePlayers = [];
-					var awayPlayers = [];
+					homeTeam.players = [];
+					awayTeam.players = [];
 					for(var i=0;i<data.playerStats.length;i++) {
 						var player = data.playerStats[i];
 						if(player.teamId === homeTeam.id) {
-							homePlayers.push(player);
+							homeTeam.players.push(player);
 						}
 						if(player.teamId === awayTeam.id) {
-							awayPlayers.push(player);
+							awayTeam.players.push(player);
 						}
 					}
-					console.log(homePlayers);
-					console.log(awayPlayers);
+					console.log(homeTeam.players);
+					console.log(awayTeam.players);
 
 					homeTeam.scoring = new pie("#homescoring")
 						.w(250).h(250)
 						.value("pTS")
-						.data(homePlayers)
+						.data(homeTeam.players)
 						.diff("playerName")
 						.label(function(d) { return d.data["playerName"]+" - "+d.data["pTS"];})
 						.title(homeTeam.abbrev + " Scoring")
@@ -97,15 +104,15 @@
 					awayTeam.scoring = new pie("#awayscoring")
 						.w(250).h(250)
 						.value("pTS")
-						.data(awayPlayers)
+						.data(awayTeam.players)
 						.diff("playerName")
 						.label(function(d) { return d.data["playerName"]+" - "+d.data["pTS"];})
 						.title(awayTeam.abbrev + " Scoring")
 						.draw();
 
 					//boxscore
-					homeTeam.box = new boxscore("homebox",homePlayers);
-					awayTeam.box = new boxscore("awaybox",awayPlayers);
+					homeTeam.box = new boxscore("homebox",homeTeam.players);
+					awayTeam.box = new boxscore("awaybox",awayTeam.players);
 
 					var homeRebs = [
 						{abbrev:data.teamStats[1].teamAbbreviation, reb:data.teamStats[1].dREB},
@@ -137,6 +144,27 @@
 				}
 		  });
 
+
+		var pbp = {};
+		$.ajax({
+		    type : 'POST',
+		    url : 'http://eaganr.com:3000',           
+		    data: {
+					//gameID : "0021400962",
+					func: "getPlayByPlay",
+					gameID : "0041400406"
+					//gameID : "0011400053"
+				},
+		    success:function (data) {
+					pbp.data = data.playByPlay;
+					console.log(pbp.data);
+					var homeplayers = homeTeam.players.map(function(d) { return d.playerName.split(" ")[d.playerName.split(" ").length -1]; });
+					var awayplayers = awayTeam.players.map(function(d) { return d.playerName.split(" ")[d.playerName.split(" ").length -1]; });
+					pbp.pbp = new playbyplay("pbp",pbp.data,homeplayers,awayplayers);
+				}
+		});
+
+
 	</script>
 
 
@@ -160,6 +188,9 @@
 			</div>
 			<div class="boxscore" id="awaybox"></div>
 		</div>
+		<br />
+		<br />
+		<div class="playbyplay" id="pbp"></div>
 	</div>
 </body>
 
