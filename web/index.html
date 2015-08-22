@@ -1,56 +1,12 @@
 <html>
 
 <head>
+	<link rel="stylesheet" type="text/css" href="boxscore.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
 	<script src="pie.js"></script>
 	<script src="boxscore.js"></script>
 	<script src="playbyplay.js"></script>
-
-	<style>
-		.content {
-			width:1250px;
-			margin:auto;
-		}
-		.team {
-			display:inline-block;
-			width:600px;
-		}	
-		.team h1 {
-			width:200px;
-			margin:auto;
-			margin-bottom:20px;
-			text-align:center;
-		}
-		table {
-			border:solid;
-			display:block;
-			margin:auto;
-		}
-		tr:hover {
-			background-color:#FFFFCC;
-		}
-		td {
-			text-align:center;
-		}
-		.scoring-title {
-			width:100px;
-			margin:auto;
-		}
-		svg {
-			display:block;
-			margin:auto;
-		}
-		.charts {
-			width:525px;
-			margin:auto;
-		}
-		.pie {
-			display:inline-block;
-			width:260px;
-			margin:auto;
-		}
-	</style>
 
 	<script>
 
@@ -97,7 +53,7 @@
 						.value("pTS")
 						.data(homeTeam.players)
 						.diff("playerName")
-						.label(function(d) { return d.data["playerName"]+" - "+d.data["pTS"];})
+						.label(function(d) { return d.data["playerName"].split(" ")[1]+" - "+d.data["pTS"];})
 						.title(homeTeam.abbrev + " Scoring")
 						.draw();	
 
@@ -106,7 +62,7 @@
 						.value("pTS")
 						.data(awayTeam.players)
 						.diff("playerName")
-						.label(function(d) { return d.data["playerName"]+" - "+d.data["pTS"];})
+						.label(function(d) { return d.data["playerName"].split(" ")[1]+" - "+d.data["pTS"];})
 						.title(awayTeam.abbrev + " Scoring")
 						.draw();
 
@@ -128,7 +84,7 @@
 						.value("reb")
 						.data(homeRebs)
 						.diff("abbrev")
-						.label(function(d) { return d.data.abbrev+"-"+d.data.reb;})
+						.label(function(d) { return d.data.abbrev+" - "+d.data.reb;})
 						.title(homeTeam.abbrev + " Basket Rebounds")
 						.draw();
 
@@ -137,7 +93,7 @@
 						.value("reb")
 						.data(awayRebs)
 						.diff("abbrev")
-						.label(function(d) { return d.data.abbrev+"-"+d.data.reb;})
+						.label(function(d) { return d.data.abbrev+" - "+d.data.reb;})
 						.title(awayTeam.abbrev + " Basket Rebounds")
 						.draw();
 
@@ -145,7 +101,7 @@
 		  });
 
 
-		var pbp = {};
+		var pbp = new playbyplay();
 		$.ajax({
 		    type : 'POST',
 		    url : 'http://eaganr.com:3000',           
@@ -156,15 +112,19 @@
 					//gameID : "0011400053"
 				},
 		    success:function (data) {
-					pbp.data = data.playByPlay;
-					console.log(pbp.data);
 					var homeplayers = homeTeam.players.map(function(d) { return d.playerName.split(" ")[d.playerName.split(" ").length -1]; });
 					var awayplayers = awayTeam.players.map(function(d) { return d.playerName.split(" ")[d.playerName.split(" ").length -1]; });
-					pbp.pbp = new playbyplay("pbp",pbp.data,homeplayers,awayplayers);
-				}
+
+					pbp.homeplayers(homeplayers)
+						.awayplayers(awayplayers)
+						.selector("#chart")
+						.data(data.playByPlay)
+						.parse()
+						.draw();
+
+
+			}
 		});
-
-
 	</script>
 
 
@@ -190,6 +150,7 @@
 		</div>
 		<br />
 		<br />
+		<svg id="chart" width="1000" height="500"></svg>
 		<div class="playbyplay" id="pbp"></div>
 	</div>
 </body>

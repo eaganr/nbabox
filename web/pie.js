@@ -109,6 +109,9 @@ function pie(selector) {
 			.attr("dy", ".35em")
 			.style("text-anchor", "middle")
 			.style("font-size", "15px")
+			.attr("dy", ".35em")
+      .style("text-anchor", "middle")
+      .style("font-size", "15px")
 			.style("z-index", "100")
 			.text(self.title());
 
