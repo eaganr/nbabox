@@ -1,0 +1,42 @@
+.content {
+	width:1250px;
+	margin:auto;
+}
+.team {
+	display:inline-block;
+	width:600px;
+}	
+.team h1 {
+	width:200px;
+	margin:auto;
+	margin-bottom:20px;
+	text-align:center;
+}
+table {
+	border:solid;
+	display:block;
+	margin:auto;
+}
+tr:hover {
+	background-color:#FFFFCC;
+}
+td {
+	text-align:center;
+}
+.scoring-title {
+	width:100px;
+	margin:auto;
+}
+svg {
+	display:block;
+	margin:auto;
+}
+.charts {
+	width:525px;
+	margin:auto;
+}
+.pie {
+	display:inline-block;
+	width:260px;
+	margin:auto;
+}
