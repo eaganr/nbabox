@@ -147,13 +147,76 @@ function playbyplay() {
 		return (p-1)*720 + (12-m)*60-sec;
 	}
 
+	var menuwidth=300;
+	var menuheight=50;
+
+	updatemenu=function(seconds) {
+		//set time and period text
+		var x = self.xScale(seconds);
+		if(x > self.margins().left && x <= self.w() - self.margins().right) {
+			var timelabel = "";
+			if(seconds === 2880) timelabel = "4 - 0:00";
+			else {
+				var period = Math.floor(seconds/720);
+				var m = 12-Math.floor((seconds-720*period)/60);
+				var s = 60-Math.floor(seconds-720*period-60*(12-m));
+				m-=1;
+				if(s < 10) s = "0"+s;
+				timelabel = period+1 + " - " + m+":"+s; 
+			}
+
+			//set plays in menu
+			var currentscore = "";
+			for(var i=0;i<self.data().length;i++) {
+				var pt = self.data()[i];
+				if(pt.sCORE !== null) currentscore = pt.sCORE;
+				if(self.timetoseconds(pt.pERIOD, pt.pCTIMESTRING) >= seconds) {
+					var txt = pt.hOMEDESCRIPTION ? pt.hOMEDESCRIPTION : pt.vISITORDESCRIPTION;
+					if(txt != null) {
+						txt = txt.split("(")[0];
+						self.vis.select(".play-text").text(txt);
+					}
+					else self.vis.select(".play-text").text("");
+					break;
+				}
+			}
+			self.vis.select(".hover-line").attr("x1",x).attr("x2",x);
+			timelabel = timelabel + " / " + currentscore;
+			self.vis.select(".time-text")
+				.text(timelabel);
+
+			if(x > self.w()-self.margins().right-menuwidth) x = self.w()-self.margins().right-menuwidth;
+			self.vis.select(".hover-menu").attr("transform", "translate("+x+", 0)")
+				.attr("opacity",100);
+		}
+	}
+
+
 	self.draw=function() {
- 		var vis = d3.select(self.selector());
-		var xScale = d3.scale.linear().range([self.margins().left, self.w() - self.margins().right]).domain([0, 2880]);
-		var yScale = d3.scale.linear().range([self.h() - self.margins().top, self.margins().bottom]).domain([-30, 30]);
-		console.log(self.h());
+		self.vis=d3.select(self.selector());
+		self.xScale = d3.scale.linear().range([self.margins().left, self.w() - self.margins().right]).domain([0, 2880]);
+
+		//get limits
+		var max = 0;
+		var min = 0;
+		for(var i=0;i<self.scoringmargins.length;i++) {
+			var m = self.scoringmargins[i].margin;
+			if(m === "TIE") m = 0;
+			else m = parseInt(m);
+
+			if(m > max) max = m;
+			if(m < min) min = m;
+		}
+
+		if(Math.abs(min) > max) max = -1*min;
+		else min = -1*max;
+
+		max += 5;
+		min -= 5;
+
+		self.yScale = d3.scale.linear().range([self.h() - self.margins().top, self.margins().bottom]).domain([min, max]);
 		var	xAxis = d3.svg.axis()
-			.scale(xScale)
+			.scale(self.xScale)
 			.tickValues([0,720,1440,2160,2880])
 			.tickFormat(function(d) { 
 				if(d === 2880) return "0:00";
@@ -164,48 +227,49 @@ function playbyplay() {
 				return period+1 + " - " + m+":"+s; 
 				});
 		var yAxis = d3.svg.axis()
-			.scale(yScale)
+			.scale(self.yScale)
 			.orient("left");
 		
-		vis.append("svg:g")
-			.attr("class", "x axis")
-			.attr("transform", "translate(0," + yScale(0) + ")")
+		self.vis.append("svg:g")
+			.attr("class", "xaxis")
+			.attr("transform", "translate(0," + self.yScale(0) + ")")
 			.call(xAxis);
 
-		vis.append("svg:g")
+		self.vis.select(".domain").style("stroke-dasharray", ("3, 3"));
+
+		self.vis.append("svg:g")
 			.attr("class", "y axis")
 			.attr("transform", "translate(" + (self.margins().left) + ",0)")
 			.call(yAxis);
 
 		var lineGen = d3.svg.line()
 			.x(function(d) {
-					return xScale(self.timetoseconds(d.period, d.time));
+					return self.xScale(self.timetoseconds(d.period, d.time));
 			})
 			.y(function(d) {
 					var margin = 0;
 					if(!isNaN(d.margin)) margin = parseInt(d.margin);
-					return yScale(margin);
+					return self.yScale(margin);
 			})
 			.interpolate("basis");
 
-		vis.append('svg:path')
+		self.vis.append('svg:path')
 			.attr('d', lineGen(self.scoringmargins))
 			.attr('stroke', 'green')
 			.attr('stroke-width', 2)
 			.attr('fill', 'none');
 
-		vis.append('svg:line')
+		var latest = self.data()[self.data().length-1];
+		var t = self.timetoseconds(latest.pERIOD, latest.pCTIMESTRING);
+
+		self.vis.append('svg:line')
 			.attr("class", "hover-line")
-			.attr("opacity",0)
-			.attr("x1",200).attr("x2",200)
+			.attr("x1",self.xScale(t)).attr("x2",self.xScale(t))
 			.attr("y1",0).attr("y2",self.h() - self.margins().top)
 			.attr("stroke","black")
 			.attr("stroke-width", 2);
 
-		var menuwidth=300;
-		var menuheight=50;
-
-		var menu = vis.append('svg:g')
+		var menu = self.vis.append('svg:g')
 			.attr("class", "hover-menu")
 			.attr("transform", "translate(0,0)")
 			.attr("width", menuwidth)
@@ -231,52 +295,23 @@ function playbyplay() {
 			.attr("dy", ".35em")
       .style("font-size", "15px")
 			.text("Line 1");
+
+		updatemenu(t);
 			
-		vis.append("svg:rect")
+		self.vis.append("svg:rect")
 			.attr("fill","blue")
 			.attr("opacity",0)
 			.attr("width",1000)
 			.attr("height",500)
 			.on("mousemove",function(d,i) {
 				var x = d3.mouse(this)[0];
-				if(x > self.margins().left && x < self.w() - self.margins().right) {
-					vis.select(".hover-line").attr("x1",x).attr("x2",x)
-						.attr("opacity",100);
-
-					//set time and period text
-					var timelabel = "";
-					var seconds = xScale.invert(x);
-					if(seconds === 2880) timelabel = "0:00";
-					console.log(x);
-					var period = Math.floor(seconds/720);
-					var m = 12-Math.floor((seconds-720*period)/60);
-					var s = 60-Math.floor(seconds-720*period-60*(12-m));
-					m-=1;
-					if(s < 10) s = "0"+s;
-					timelabel = period+1 + " - " + m+":"+s; 
-					vis.select(".time-text")
-						.text(timelabel);
-
-					//set plays in menu
-					for(var i=0;i<self.data().length;i++) {
-						var pt = self.data()[i];
-						if(self.timetoseconds(pt.pERIOD, pt.pCTIMESTRING) > seconds) {
-							var txt = pt.hOMEDESCRIPTION ? pt.hOMEDESCRIPTION : pt.vISITORDESCRIPTION;
-							txt = txt.split("(")[0];
-							vis.select(".play-text").text(txt);
-							break;
-						}
-					}
-
-
-					if(x > self.w()-self.margins().right-menuwidth) x = self.w()-self.margins().right-menuwidth;
-					vis.select(".hover-menu").attr("transform", "translate("+x+", 0)")
-						.attr("opacity",100);
-				}
+				var seconds = self.xScale.invert(x);
+				updatemenu(seconds);
 			})
 			.on("mouseout",function(d,i) {
-				vis.select(".hover-line").attr("opacity",0);
-				vis.select(".hover-menu").attr("opacity",0);
+				var latest = self.data()[self.data().length-1];
+				var t = self.timetoseconds(latest.pERIOD, latest.pCTIMESTRING);
+				updatemenu(t);
 			});
 
 		return self;

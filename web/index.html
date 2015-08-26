@@ -9,7 +9,8 @@
 	<script src="playbyplay.js"></script>
 
 	<script>
-
+		var gameID = "0041400406";
+		//var gameID = "0021400962";
 		var homeTeam = {};
 		var awayTeam = {};
 		$.ajax({
@@ -18,7 +19,7 @@
 		    data: {
 					//gameID : "0021400962",
 					func: "getBoxScore",
-					gameID : "0041400406"
+					gameID : gameID
 					//gameID : "0011400053"
 				},
 		    success:function (data) {
@@ -106,10 +107,8 @@
 		    type : 'POST',
 		    url : 'http://eaganr.com:3000',           
 		    data: {
-					//gameID : "0021400962",
 					func: "getPlayByPlay",
-					gameID : "0041400406"
-					//gameID : "0011400053"
+					gameID : gameID
 				},
 		    success:function (data) {
 					var homeplayers = homeTeam.players.map(function(d) { return d.playerName.split(" ")[d.playerName.split(" ").length -1]; });
