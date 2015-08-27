@@ -58,6 +58,11 @@ function playbyplay() {
 								players[j].pts.push(pt);
 								pt.desc = desc;
 								self.scoringmargins.push(pt);
+
+								//starters minutes may be missed if subbed out at end of first quarter
+								if(players[j].mins.length === 0) {
+									players[j].mins.push({intime:"12:00", inperiod:1, outtime:null, outperiod:null});
+								}
 							}
 							if(assisted) {
 								if(sections[2].indexOf(players[j].playerName) > -1) {
@@ -113,6 +118,19 @@ function playbyplay() {
 			}
 			return a.period > b.period? 1 : -1;
 		});
+
+		for(var i=0;i<self.homeplayers().length;i++) {
+			if(self.homeplayers()[i].mins.length === 0) {
+				self.homeplayers.val.splice(i,1);
+				i--;
+			}
+		}
+		for(var i=0;i<self.awayplayers().length;i++) {
+			if(self.awayplayers()[i].mins.length === 0) {
+				self.awayplayers.val.splice(i,1);
+				i--;
+			}
+		}
 
 		return self;
 	};
@@ -217,7 +235,7 @@ function playbyplay() {
 		self.yScale = d3.scale.linear().range([self.h() - self.margins().top, self.margins().bottom]).domain([min, max]);
 		var	xAxis = d3.svg.axis()
 			.scale(self.xScale)
-			.tickValues([0,720,1440,2160,2880])
+			.tickValues([720,1440,2160,2880])
 			.tickFormat(function(d) { 
 				if(d === 2880) return "0:00";
 				var period = Math.floor(d/720);
@@ -255,9 +273,54 @@ function playbyplay() {
 
 		self.vis.append('svg:path')
 			.attr('d', lineGen(self.scoringmargins))
-			.attr('stroke', 'green')
+			.attr('stroke', 'steelblue')
 			.attr('stroke-width', 2)
 			.attr('fill', 'none');
+
+
+		//player minutes
+		var playergroups = [self.homeplayers(),self.awayplayers()];
+		for(var n=0;n<playergroups.length;n++) {
+			var players = playergroups[n];
+			for(var j=0;j<players.length;j++) {
+				var player = players[j]
+				var y = 240/players.length*(j+1)+250*n;
+				console.log(y);
+				self.vis.append("svg:text")
+					.attr("class","player-name")
+					.attr("transform","translate(50,"+(y-5)+")")
+					.attr("dy", ".35em")
+					.style("font-size", "10px")
+					.text(player.playerName);
+
+				for(var i=0;i<player.mins.length;i++) {
+					var min = player.mins[i];
+					if(min.outperiod === null) {
+						min.outperiod = 4;
+						min.outtime = "0:00";
+					}
+					self.vis.append("svg:line")	
+						.attr("class", "min-line")
+						.attr("x1",self.xScale(self.timetoseconds(min.inperiod,min.intime)))
+						.attr("x2",self.xScale(self.timetoseconds(min.outperiod,min.outtime)))
+						.attr("y1",y).attr("y2",y)
+						.attr("stroke","black")
+						.attr("stroke-width", 1);
+				}
+				
+				for(var i=0;i<player.pts.length;i++) {
+					var pt = player.pts[i];
+					self.vis.append("svg:circle")
+						.attr("fill","orange")
+						.attr("r",3)
+						.attr("cx",self.xScale(self.timetoseconds(pt.period,pt.time)))
+						.attr("cy",y);
+				}
+
+
+			}
+		}
+
 
 		var latest = self.data()[self.data().length-1];
 		var t = self.timetoseconds(latest.pERIOD, latest.pCTIMESTRING);
@@ -269,11 +332,13 @@ function playbyplay() {
 			.attr("stroke","black")
 			.attr("stroke-width", 2);
 
+		//hover menu, follows mouse
 		var menu = self.vis.append('svg:g')
 			.attr("class", "hover-menu")
 			.attr("transform", "translate(0,0)")
 			.attr("width", menuwidth)
-			.attr("height", menuheight);
+			.attr("height", menuheight)
+			.style("z-index",50);
 
 		menu.append("svg:rect")
 			.attr("stroke","black")
@@ -298,6 +363,7 @@ function playbyplay() {
 
 		updatemenu(t);
 			
+
 		self.vis.append("svg:rect")
 			.attr("fill","blue")
 			.attr("opacity",0)
