@@ -59,10 +59,23 @@ function playbyplay() {
 								pt.desc = desc;
 								self.scoringmargins.push(pt);
 
-								//starters minutes may be missed if subbed out at end of first quarter
-								if(players[j].mins.length === 0) {
-									players[j].mins.push({intime:"12:00", inperiod:1, outtime:null, outperiod:null});
+								//fixes missing minutes from starts of quarters
+								var recent = players[j].mins[players[j].mins.length-1];
+								if(players[j].mins.length === 0 || (recent.outtime !== null && recent.outperiod < pt.period)) {
+									players[j].mins.push({intime:"12:00", inperiod:pt.period, outtime:null, outperiod:null});
+									recent = players[j].mins[players[j].mins.length-1];
 								}
+								//if play an entire quarter, no substitution
+
+								if(pt.time === "10:38") {
+									console.log("yo");
+								}
+								if(recent.outtime === null && recent.inperiod < pt.period) {
+									recent.outtime = "0:00";
+									recent.outperiod = recent.inperiod;
+									players[j].mins.push({intime:"12:00", inperiod:pt.period, outtime:null, outperiod:null});
+								}
+
 							}
 							if(assisted) {
 								if(sections[2].indexOf(players[j].playerName) > -1) {
@@ -285,7 +298,6 @@ function playbyplay() {
 			for(var j=0;j<players.length;j++) {
 				var player = players[j]
 				var y = 240/players.length*(j+1)+250*n;
-				console.log(y);
 				self.vis.append("svg:text")
 					.attr("class","player-name")
 					.attr("transform","translate(50,"+(y-5)+")")
@@ -308,6 +320,22 @@ function playbyplay() {
 						.attr("stroke-width", 1);
 				}
 				
+				for(var i=0;i<player.rebs.length;i++) {
+					var reb = player.rebs[i];
+					self.vis.append("svg:circle")
+						.attr("fill","blue")
+						.attr("r",3)
+						.attr("cx",self.xScale(self.timetoseconds(reb.period,reb.time)))
+						.attr("cy",y);
+				}
+				for(var i=0;i<player.ast.length;i++) {
+					var ast = player.ast[i];
+					self.vis.append("svg:circle")
+						.attr("fill","green")
+						.attr("r",3)
+						.attr("cx",self.xScale(self.timetoseconds(ast.period,ast.time)))
+						.attr("cy",y);
+				}
 				for(var i=0;i<player.pts.length;i++) {
 					var pt = player.pts[i];
 					self.vis.append("svg:circle")
