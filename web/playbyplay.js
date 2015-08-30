@@ -79,6 +79,12 @@ function playbyplay() {
 								players[j].pts.push(pt);
 								pt.desc = desc;
 								self.scoringmargins.push(pt);
+
+			if(evt.pERIOD === 2 && evt.pCTIMESTRING === "0:02") {
+				console.log(evt.hOMEDESCRIPTION);
+			}
+
+
 								mincorrect(evt, players[j]);
 							}
 							if(assisted) {
@@ -280,7 +286,8 @@ function playbyplay() {
 			.tickValues([720,1440,2160,2880].concat(extraticks))
 			.tickFormat(function(seconds) { 
 				var period,m,s;
-				if(seconds <= 2880) {
+				if(seconds === 2880) return extraticks.length ? "5 - 5:00" : "4 - 0:00";
+				if(seconds < 2880) {
 					period = Math.floor(seconds/720);
 					m = 12-Math.floor((seconds-720*period)/60);
 					s = 60-Math.floor(seconds-720*period-60*(12-m));
@@ -349,7 +356,7 @@ function playbyplay() {
 				var y = self.yScale(self.yScale.domain()[n]*(j+1)/(players.length+1));
 				self.vis.append("svg:text")
 					.attr("class","player-name")
-					.attr("transform","translate(50,"+(y-5)+")")
+					.attr("transform","translate(52,"+(y-5)+")")
 					.attr("dy", ".35em")
 					.style("font-size", "10px")
 					.text(player.playerName);
@@ -357,7 +364,7 @@ function playbyplay() {
 				for(var i=0;i<player.mins.length;i++) {
 					var min = player.mins[i];
 					if(min.outperiod === null) {
-						min.outperiod = 4;
+						min.outperiod = self.data()[self.data().length-1].pERIOD;
 						min.outtime = "0:00";
 					}
 					self.vis.append("svg:line")	
