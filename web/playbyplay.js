@@ -11,7 +11,7 @@ function playbyplay() {
 	
 	self.homeplayers=function(h) {
 		if(h) {
-			self.homeplayers.val=h.map(function(d,i) { return {playerName:d, pts:[], ast:[], rebs:[], mins:i<5 ? [{inperiod:1, intime:"12:00", outperiod:null, outtime:null}] : []}; });
+			self.homeplayers.val=h.map(function(d,i) { return {playerName:d, pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:i<5 ? [{inperiod:1, intime:"12:00", outperiod:null, outtime:null}] : []}; });
 			return self;
 		}
 		return self.homeplayers.val ? self.homeplayers.val : [];
@@ -19,7 +19,7 @@ function playbyplay() {
 
 	self.awayplayers=function(a) {
 		if(a) {
-			self.awayplayers.val=a.map(function(d) { return {playerName:d, pts:[], ast:[], rebs:[], mins:[]}; });
+			self.awayplayers.val=a.map(function(d,i) { return {playerName:d, pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:i<5 ? [{inperiod:1, intime:"12:00", outperiod:null, outtime:null}] : []}; });
 			return self;
 		}
 		return self.awayplayers.val ? self.awayplayers.val : [];
@@ -79,12 +79,6 @@ function playbyplay() {
 								players[j].pts.push(pt);
 								pt.desc = desc;
 								self.scoringmargins.push(pt);
-
-			if(evt.pERIOD === 2 && evt.pCTIMESTRING === "0:02") {
-				console.log(evt.hOMEDESCRIPTION);
-			}
-
-
 								mincorrect(evt, players[j]);
 							}
 							if(assisted) {
@@ -99,6 +93,42 @@ function playbyplay() {
 						for(var j=0;j<players.length;j++) {
 							if(desc.indexOf(players[j].playerName) > -1) {
 									players[j].rebs.push({time:evt.pCTIMESTRING, period:evt.pERIOD});
+									mincorrect(evt, players[j]);
+									break;
+							}
+						}
+					}
+					if(desc.indexOf("STEAL") > -1) {
+						for(var j=0;j<players.length;j++) {
+							if(desc.indexOf(players[j].playerName) > -1) {
+									players[j].stls.push({time:evt.pCTIMESTRING, period:evt.pERIOD});
+									mincorrect(evt, players[j]);
+									break;
+							}
+						}
+					}
+					if(desc.indexOf("Turnover") > -1) {
+						for(var j=0;j<players.length;j++) {
+							if(desc.indexOf(players[j].playerName) > -1) {
+									players[j].tos.push({time:evt.pCTIMESTRING, period:evt.pERIOD});
+									mincorrect(evt, players[j]);
+									break;
+							}
+						}
+					}
+					if(desc.indexOf("BLOCK") > -1) {
+						for(var j=0;j<players.length;j++) {
+							if(desc.indexOf(players[j].playerName) > -1) {
+									players[j].blks.push({time:evt.pCTIMESTRING, period:evt.pERIOD});
+									mincorrect(evt, players[j]);
+									break;
+							}
+						}
+					}
+					if(desc.indexOf("FOUL") > -1 || desc.indexOf(".Foul") > -1) {
+						for(var j=0;j<players.length;j++) {
+							if(desc.indexOf(players[j].playerName) > -1) {
+									players[j].fls.push({time:evt.pCTIMESTRING, period:evt.pERIOD});
 									mincorrect(evt, players[j]);
 									break;
 							}
@@ -375,7 +405,48 @@ function playbyplay() {
 						.attr("stroke","black")
 						.attr("stroke-width", 1);
 				}
-				
+
+
+				for(var i=0;i<player.fls.length;i++) {
+					var fl = player.fls[i];
+					self.vis.append("svg:circle")
+						.attr("class","fl-dot")
+						.attr("fill","#FF00CC")
+						.attr("opacity",0)
+						.attr("r",3)
+						.attr("cx",self.xScale(self.timetoseconds(fl.period,fl.time)))
+						.attr("cy",y);
+				}
+				for(var i=0;i<player.blks.length;i++) {
+					var blk = player.blks[i];
+					self.vis.append("svg:circle")
+						.attr("class","blk-dot")
+						.attr("fill","#33FFCC")
+						.attr("opacity",0)
+						.attr("r",3)
+						.attr("cx",self.xScale(self.timetoseconds(blk.period,blk.time)))
+						.attr("cy",y);
+				}
+				for(var i=0;i<player.tos.length;i++) {
+					var to = player.tos[i];
+					self.vis.append("svg:circle")
+						.attr("class","to-dot")
+						.attr("fill","red")
+						.attr("opacity",0)
+						.attr("r",3)
+						.attr("cx",self.xScale(self.timetoseconds(to.period,to.time)))
+						.attr("cy",y);
+				}
+				for(var i=0;i<player.stls.length;i++) {
+					var stl = player.stls[i];
+					self.vis.append("svg:circle")
+						.attr("class","stl-dot")
+						.attr("fill","purple")
+						.attr("opacity",0)
+						.attr("r",3)
+						.attr("cx",self.xScale(self.timetoseconds(stl.period,stl.time)))
+						.attr("cy",y);
+				}
 				for(var i=0;i<player.rebs.length;i++) {
 					var reb = player.rebs[i];
 					self.vis.append("svg:circle")
@@ -461,7 +532,6 @@ function playbyplay() {
 			.attr("width",15)
 			.attr("height",15)
 			.attr("text","Points");
-	
 		self.vis.append("svg:text")
 			.attr("class","legend-text")
 			.attr("transform","translate(120,"+(self.h()+16)+")")
@@ -476,7 +546,6 @@ function playbyplay() {
 			.attr("width",15)
 			.attr("height",15)
 			.attr("text","Assists");
-	
 		self.vis.append("svg:text")
 			.attr("class","legend-text")
 			.attr("transform","translate(187,"+(self.h()+16)+")")
@@ -492,13 +561,72 @@ function playbyplay() {
 			.attr("width",15)
 			.attr("height",15)
 			.attr("text","Rebounds");
-	
 		self.vis.append("svg:text")
 			.attr("class","legend-text")
 			.attr("transform","translate(260,"+(self.h()+16)+")")
 			.attr("dy", ".35em")
       .style("font-size", "15px")
 			.text("Rebounds");
+
+		self.vis.append("svg:rect")
+			.attr("class","legend-rect")
+			.attr("fill","purple")
+			.attr("opacity", 0.3)
+			.attr("transform","translate(325,"+(self.h()+10)+")")
+			.attr("width",15)
+			.attr("height",15)
+			.attr("text","Steals");
+		self.vis.append("svg:text")
+			.attr("class","legend-text")
+			.attr("transform","translate(345,"+(self.h()+16)+")")
+			.attr("dy", ".35em")
+      .style("font-size", "15px")
+			.text("Steals");
+
+		self.vis.append("svg:rect")
+			.attr("class","legend-rect")
+			.attr("fill","red")
+			.attr("opacity", 0.3)
+			.attr("transform","translate(385,"+(self.h()+10)+")")
+			.attr("width",15)
+			.attr("height",15)
+			.attr("text","TOs");
+		self.vis.append("svg:text")
+			.attr("class","legend-text")
+			.attr("transform","translate(405,"+(self.h()+16)+")")
+			.attr("dy", ".35em")
+      .style("font-size", "15px")
+			.text("TOs");
+
+		self.vis.append("svg:rect")
+			.attr("class","legend-rect")
+			.attr("fill","#33FFCC")
+			.attr("opacity", 0.3)
+			.attr("transform","translate(435,"+(self.h()+10)+")")
+			.attr("width",15)
+			.attr("height",15)
+			.attr("text","Blocks");
+		self.vis.append("svg:text")
+			.attr("class","legend-text")
+			.attr("transform","translate(455,"+(self.h()+16)+")")
+			.attr("dy", ".35em")
+      .style("font-size", "15px")
+			.text("Blocks");
+
+		self.vis.append("svg:rect")
+			.attr("class","legend-rect")
+			.attr("fill","#FF00CC")
+			.attr("opacity", 0.3)
+			.attr("transform","translate(500,"+(self.h()+10)+")")
+			.attr("width",15)
+			.attr("height",15)
+			.attr("text","Fouls");
+		self.vis.append("svg:text")
+			.attr("class","legend-text")
+			.attr("transform","translate(520,"+(self.h()+16)+")")
+			.attr("dy", ".35em")
+      .style("font-size", "15px")
+			.text("Fouls");
 
 		self.vis.selectAll(".legend-text, .legend-rect")
 			.on("click", function(d) {
@@ -508,6 +636,10 @@ function playbyplay() {
 				if(txt === "Points") selector = ".point-dot";
 				if(txt === "Assists") selector = ".assist-dot";
 				if(txt === "Rebounds") selector = ".reb-dot";
+				if(txt === "Steals") selector = ".stl-dot";
+				if(txt === "TOs") selector = ".to-dot";
+				if(txt === "Blocks") selector = ".blk-dot";
+				if(txt === "Fouls") selector = ".fl-dot";
 				op = Math.abs(self.vis.select(selector).attr("opacity")-1);
 				self.vis.selectAll(selector).attr("opacity",op);
 				self.vis.select(".legend-rect[text='"+txt+"']")
