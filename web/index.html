@@ -9,8 +9,9 @@
 	<script src="playbyplay.js"></script>
 
 	<script>
-		var gameID = "0041400406";
-		//var gameID = "0021400962";
+		//var gameID = "0041400406";
+		var gameID = "0021400962";
+		//var gameID = "0021400491";
 		var homeTeam = {};
 		var awayTeam = {};
 		$.ajax({
@@ -114,6 +115,21 @@
 					var homeplayers = homeTeam.players.map(function(d) { return d.playerName.split(" ")[d.playerName.split(" ").length -1]; });
 					var awayplayers = awayTeam.players.map(function(d) { return d.playerName.split(" ")[d.playerName.split(" ").length -1]; });
 
+					//same name players
+					for(var i=0;i<homeplayers.length;i++) {
+						var p1 = homeplayers[i];
+						for(var j=0;j<homeplayers.length;j++) {
+							if(i !== j) {
+								var p2 = homeplayers[j];
+								if(p1 === p2) {
+									homeplayers[i] = homeTeam.players[i].playerName.substring(0,1) + ". " + p1;
+									homeplayers[j] = homeTeam.players[j].playerName.substring(0,1) + ". " + p2;
+								}
+							}
+						}
+					}
+
+
 					pbp.homeplayers(homeplayers)
 						.awayplayers(awayplayers)
 						.selector("#chart")
@@ -149,8 +165,8 @@
 		</div>
 		<br />
 		<br />
-		<svg id="chart" width="1000" height="500"></svg>
-		<div class="playbyplay" id="pbp"></div>
+		<h1>Play By Play</h1>
+		<svg id="chart" width="1000" height="550"></svg>
 	</div>
 </body>
 

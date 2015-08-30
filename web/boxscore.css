@@ -12,6 +12,14 @@
 	margin-bottom:20px;
 	text-align:center;
 }
+
+h1 {
+	width:400px;
+	margin:auto;
+	margin-top:50px;
+	text-align:center;
+}
+
 table {
 	border:solid;
 	display:block;

@@ -62,7 +62,9 @@ function playbyplay() {
 								//fixes missing minutes from starts of quarters
 								var recent = players[j].mins[players[j].mins.length-1];
 								if(players[j].mins.length === 0 || (recent.outtime !== null && recent.outperiod < pt.period)) {
-									players[j].mins.push({intime:"12:00", inperiod:pt.period, outtime:null, outperiod:null});
+									var intime = "12:00";
+									if(pt.period > 4) intime = "5:00";
+									players[j].mins.push({intime:intime, inperiod:pt.period, outtime:null, outperiod:null});
 									recent = players[j].mins[players[j].mins.length-1];
 								}
 								//if play an entire quarter, no substitution
@@ -73,7 +75,10 @@ function playbyplay() {
 								if(recent.outtime === null && recent.inperiod < pt.period) {
 									recent.outtime = "0:00";
 									recent.outperiod = recent.inperiod;
-									players[j].mins.push({intime:"12:00", inperiod:pt.period, outtime:null, outperiod:null});
+				
+									var intime = "12:00";
+									if(pt.period > 4) intime = "5:00";
+									players[j].mins.push({intime:"5:00", inperiod:pt.period, outtime:null, outperiod:null});
 								}
 
 							}
@@ -112,7 +117,9 @@ function playbyplay() {
 									players[j].mins[len-1].outperiod = evt.pERIOD;
 								}
 								else {
-									players[j].mins.push({intime:"12:00", inperiod:evt.pERIOD, outtime:evt.pCTIMESTRING, outperiod:evt.pERIOD});
+									var intime = "12:00";
+									if(evt.pERIOD > 4) intime = "5:00";
+									players[j].mins.push({intime:"5:00", inperiod:evt.pERIOD, outtime:evt.pCTIMESTRING, outperiod:evt.pERIOD});
 								}
 							}
 						}
@@ -169,24 +176,26 @@ function playbyplay() {
 			self.margins.val=m;
 			return self;
 		}
-		return self.margins.val ? self.margins.val : {top:20,right:20,left:50,bottom:20};
+		return self.margins.val ? self.margins.val : {top:50,right:20,left:50,bottom:20};
 	}
 
 	self.timetoseconds=function(p,t) {
 		var m = parseInt(t.split(":")[0]);
 		var sec = parseInt(t.split(":")[1]);
-		return (p-1)*720 + (12-m)*60-sec;
+		if(p <= 4) return (p-1)*720 + (12-m)*60-sec;
+		return 2880 + (p-5)*300 + (5-m)*60-sec;
 	}
 
 	var menuwidth=300;
 	var menuheight=50;
+	var totalseconds=2880;
 
 	updatemenu=function(seconds) {
 		//set time and period text
 		var x = self.xScale(seconds);
 		if(x > self.margins().left && x <= self.w() - self.margins().right) {
 			var timelabel = "";
-			if(seconds === 2880) timelabel = "4 - 0:00";
+			if(seconds === totalseconds) timelabel = "4 - 0:00";
 			else {
 				var period = Math.floor(seconds/720);
 				var m = 12-Math.floor((seconds-720*period)/60);
@@ -217,15 +226,25 @@ function playbyplay() {
 				.text(timelabel);
 
 			if(x > self.w()-self.margins().right-menuwidth) x = self.w()-self.margins().right-menuwidth;
-			self.vis.select(".hover-menu").attr("transform", "translate("+x+", 0)")
+			self.vis.select(".hover-menu").attr("transform", "translate("+x+",0)")
 				.attr("opacity",100);
 		}
 	}
 
 
 	self.draw=function() {
+		var extraticks = [];
+		if(self.data()[self.data().length-1].pERIOD > 4) {
+			totalseconds = (self.data()[self.data().length-1].pERIOD-4) * 300 + 2880;
+			for(var i=4;i<self.data()[self.data().length-1].pERIOD;i++) {
+				extraticks.push(2880+300*(i-3));
+			}
+		}
+
 		self.vis=d3.select(self.selector());
-		self.xScale = d3.scale.linear().range([self.margins().left, self.w() - self.margins().right]).domain([0, 2880]);
+		self.xScale = d3.scale.linear().range([self.margins().left, self.w() - self.margins().right]).domain([0, totalseconds]);
+
+
 
 		//get limits
 		var max = 0;
@@ -245,12 +264,12 @@ function playbyplay() {
 		max += 5;
 		min -= 5;
 
-		self.yScale = d3.scale.linear().range([self.h() - self.margins().top, self.margins().bottom]).domain([min, max]);
+		self.yScale = d3.scale.linear().range([self.h(), self.margins().top]).domain([min, max]);
 		var	xAxis = d3.svg.axis()
 			.scale(self.xScale)
-			.tickValues([720,1440,2160,2880])
+			.tickValues([720,1440,2160,2880].concat(extraticks))
 			.tickFormat(function(d) { 
-				if(d === 2880) return "0:00";
+				if(d === 2880) return "4 - 0:00";
 				var period = Math.floor(d/720);
 				var m = 12-Math.floor((d-720*period)/60);
 				var s = d-720*period-60*(12-m);
@@ -292,12 +311,14 @@ function playbyplay() {
 
 
 		//player minutes
-		var playergroups = [self.homeplayers(),self.awayplayers()];
+		var homeplayers = self.homeplayers().reverse();
+		var playergroups = [self.awayplayers(),self.homeplayers()];
 		for(var n=0;n<playergroups.length;n++) {
 			var players = playergroups[n];
 			for(var j=0;j<players.length;j++) {
 				var player = players[j]
-				var y = 240/players.length*(j+1)+250*n;
+				var y = 240/players.length*(j+1)+250*n + self.margins().top;
+				var y = self.yScale(self.yScale.domain()[n]*(j+1)/(players.length+1));
 				self.vis.append("svg:text")
 					.attr("class","player-name")
 					.attr("transform","translate(50,"+(y-5)+")")
@@ -323,7 +344,9 @@ function playbyplay() {
 				for(var i=0;i<player.rebs.length;i++) {
 					var reb = player.rebs[i];
 					self.vis.append("svg:circle")
+						.attr("class","reb-dot")
 						.attr("fill","blue")
+						.attr("opacity",0)
 						.attr("r",3)
 						.attr("cx",self.xScale(self.timetoseconds(reb.period,reb.time)))
 						.attr("cy",y);
@@ -331,7 +354,9 @@ function playbyplay() {
 				for(var i=0;i<player.ast.length;i++) {
 					var ast = player.ast[i];
 					self.vis.append("svg:circle")
+						.attr("class","assist-dot")
 						.attr("fill","green")
+						.attr("opacity",1)
 						.attr("r",3)
 						.attr("cx",self.xScale(self.timetoseconds(ast.period,ast.time)))
 						.attr("cy",y);
@@ -339,7 +364,9 @@ function playbyplay() {
 				for(var i=0;i<player.pts.length;i++) {
 					var pt = player.pts[i];
 					self.vis.append("svg:circle")
+						.attr("class","point-dot")
 						.attr("fill","orange")
+						.attr("opacity",1)
 						.attr("r",3)
 						.attr("cx",self.xScale(self.timetoseconds(pt.period,pt.time)))
 						.attr("cy",y);
@@ -356,7 +383,7 @@ function playbyplay() {
 		self.vis.append('svg:line')
 			.attr("class", "hover-line")
 			.attr("x1",self.xScale(t)).attr("x2",self.xScale(t))
-			.attr("y1",0).attr("y2",self.h() - self.margins().top)
+			.attr("y1",0).attr("y2",self.h())
 			.attr("stroke","black")
 			.attr("stroke-width", 2);
 
@@ -391,6 +418,66 @@ function playbyplay() {
 
 		updatemenu(t);
 			
+		//legend
+		self.vis.append("svg:rect")
+			.attr("class","legend-rect")
+			.attr("fill","orange")
+			.attr("transform","translate(100,"+(self.h()+10)+")")
+			.attr("width",15)
+			.attr("height",15)
+			.attr("text","Points");
+	
+		self.vis.append("svg:text")
+			.attr("class","legend-text")
+			.attr("transform","translate(120,"+(self.h()+16)+")")
+			.attr("dy", ".35em")
+      .style("font-size", "15px")
+			.text("Points");
+
+		self.vis.append("svg:rect")
+			.attr("class","legend-rect")
+			.attr("fill","green")
+			.attr("transform","translate(167,"+(self.h()+10)+")")
+			.attr("width",15)
+			.attr("height",15)
+			.attr("text","Assists");
+	
+		self.vis.append("svg:text")
+			.attr("class","legend-text")
+			.attr("transform","translate(187,"+(self.h()+16)+")")
+			.attr("dy", ".35em")
+      .style("font-size", "15px")
+			.text("Assists");
+
+		self.vis.append("svg:rect")
+			.attr("class","legend-rect")
+			.attr("fill","blue")
+			.attr("opacity", 0.3)
+			.attr("transform","translate(240,"+(self.h()+10)+")")
+			.attr("width",15)
+			.attr("height",15)
+			.attr("text","Rebounds");
+	
+		self.vis.append("svg:text")
+			.attr("class","legend-text")
+			.attr("transform","translate(260,"+(self.h()+16)+")")
+			.attr("dy", ".35em")
+      .style("font-size", "15px")
+			.text("Rebounds");
+
+		self.vis.selectAll(".legend-text, .legend-rect")
+			.on("click", function(d) {
+				var txt = d3.select(this).text();
+				txt = txt ? txt : d3.select(this).attr("text");
+				var op, selector;
+				if(txt === "Points") selector = ".point-dot";
+				if(txt === "Assists") selector = ".assist-dot";
+				if(txt === "Rebounds") selector = ".reb-dot";
+				op = Math.abs(self.vis.select(selector).attr("opacity")-1);
+				self.vis.selectAll(selector).attr("opacity",op);
+				self.vis.select(".legend-rect[text='"+txt+"']")
+					.attr("opacity", op + 0.3);
+			});
 
 		self.vis.append("svg:rect")
 			.attr("fill","blue")
