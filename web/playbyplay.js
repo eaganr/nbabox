@@ -11,7 +11,7 @@ function playbyplay() {
 	
 	self.homeplayers=function(h) {
 		if(h) {
-			self.homeplayers.val=h.map(function(d) { return {playerName:d, pts:[], ast:[], rebs:[], mins:[]}; });
+			self.homeplayers.val=h.map(function(d,i) { return {playerName:d, pts:[], ast:[], rebs:[], mins:i<5 ? [{inperiod:1, intime:"12:00", outperiod:null, outtime:null}] : []}; });
 			return self;
 		}
 		return self.homeplayers.val ? self.homeplayers.val : [];
@@ -34,6 +34,27 @@ function playbyplay() {
 	}
 
 	self.scoringmargins = [{margin:0, time:"12:00", period:1}];
+
+	function mincorrect(evt, player) {
+		//fixes missing minutes from starts of quarters
+		var recent = player.mins[player.mins.length-1];
+		if(player.mins.length === 0 || (recent.outtime !== null && recent.outperiod < evt.pERIOD)) {
+			var intime = "12:00";
+			if(evt.pERIOD > 4) intime = "5:00";
+			player.mins.push({intime:intime, inperiod:evt.pERIOD, outtime:null, outperiod:null});
+			recent = player.mins[player.mins.length-1];
+		}
+		//if play an entire quarter, no substitution
+		if(recent.outtime === null && recent.inperiod < evt.pERIOD) {
+			recent.outtime = "0:00";
+			recent.outperiod = recent.inperiod;
+
+			var intime = "12:00";
+			if(evt.pERIOD > 4) intime = "5:00";
+			player.mins.push({intime:intime, inperiod:evt.pERIOD, outtime:null, outperiod:null});
+		}
+	}
+
 
 	self.parse=function() {
 		for(var i=0;i<self.data().length;i++) {
@@ -58,33 +79,12 @@ function playbyplay() {
 								players[j].pts.push(pt);
 								pt.desc = desc;
 								self.scoringmargins.push(pt);
-
-								//fixes missing minutes from starts of quarters
-								var recent = players[j].mins[players[j].mins.length-1];
-								if(players[j].mins.length === 0 || (recent.outtime !== null && recent.outperiod < pt.period)) {
-									var intime = "12:00";
-									if(pt.period > 4) intime = "5:00";
-									players[j].mins.push({intime:intime, inperiod:pt.period, outtime:null, outperiod:null});
-									recent = players[j].mins[players[j].mins.length-1];
-								}
-								//if play an entire quarter, no substitution
-
-								if(pt.time === "10:38") {
-									console.log("yo");
-								}
-								if(recent.outtime === null && recent.inperiod < pt.period) {
-									recent.outtime = "0:00";
-									recent.outperiod = recent.inperiod;
-				
-									var intime = "12:00";
-									if(pt.period > 4) intime = "5:00";
-									players[j].mins.push({intime:"5:00", inperiod:pt.period, outtime:null, outperiod:null});
-								}
-
+								mincorrect(evt, players[j]);
 							}
 							if(assisted) {
 								if(sections[2].indexOf(players[j].playerName) > -1) {
 									players[j].ast.push({time:evt.pCTIMESTRING, period:evt.pERIOD});
+									mincorrect(evt, players[j]);
 								}
 							}	
 						}
@@ -93,6 +93,7 @@ function playbyplay() {
 						for(var j=0;j<players.length;j++) {
 							if(desc.indexOf(players[j].playerName) > -1) {
 									players[j].rebs.push({time:evt.pCTIMESTRING, period:evt.pERIOD});
+									mincorrect(evt, players[j]);
 									break;
 							}
 						}
@@ -197,10 +198,19 @@ function playbyplay() {
 			var timelabel = "";
 			if(seconds === totalseconds) timelabel = "4 - 0:00";
 			else {
-				var period = Math.floor(seconds/720);
-				var m = 12-Math.floor((seconds-720*period)/60);
-				var s = 60-Math.floor(seconds-720*period-60*(12-m));
-				m-=1;
+				var period,m,s;
+				if(seconds <= 2880) {
+					period = Math.floor(seconds/720);
+					m = 12-Math.floor((seconds-720*period)/60);
+					s = 60-Math.floor(seconds-720*period-60*(12-m));
+					m--;
+				}
+				else {
+					period = Math.floor((seconds-2880)/300)+4;
+					m = 5-Math.floor((seconds-2880-300*(period-4))/60);
+					s = 60-Math.floor(seconds-2880-300*(period-4)-60*(5-m));
+					m--;
+				}
 				if(s < 10) s = "0"+s;
 				timelabel = period+1 + " - " + m+":"+s; 
 			}
@@ -268,14 +278,32 @@ function playbyplay() {
 		var	xAxis = d3.svg.axis()
 			.scale(self.xScale)
 			.tickValues([720,1440,2160,2880].concat(extraticks))
-			.tickFormat(function(d) { 
-				if(d === 2880) return "4 - 0:00";
-				var period = Math.floor(d/720);
-				var m = 12-Math.floor((d-720*period)/60);
-				var s = d-720*period-60*(12-m);
+			.tickFormat(function(seconds) { 
+				var period,m,s;
+				if(seconds <= 2880) {
+					period = Math.floor(seconds/720);
+					m = 12-Math.floor((seconds-720*period)/60);
+					s = 60-Math.floor(seconds-720*period-60*(12-m));
+					m--;
+					if(seconds%720 === 0) {
+						m = 12;
+						s = 0;
+					}
+				}
+				else {
+					period = Math.floor((seconds-2880)/300)+4;
+					m = 5-Math.floor((seconds-2880-300*(period-4))/60);
+					s = 60-Math.floor(seconds-2880-300*(period-4)-60*(5-m));
+					m--;
+					if((seconds-2880)%300 === 0) {
+						period--;
+						m = 0;
+						s = 0;
+					}
+				}
 				if(s < 10) s = "0"+s;
 				return period+1 + " - " + m+":"+s; 
-				});
+			});
 		var yAxis = d3.svg.axis()
 			.scale(self.yScale)
 			.orient("left");
