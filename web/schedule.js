@@ -13,17 +13,25 @@ function schedule() {
 		if(maindiv) maindiv.innerHTML = "";
 		var fullurl = url+date;
 		self.games = [];
-		$.getJSON(fullurl, function(data) {
-			data = data.resultSets[2].rowSet;
-			for(var i=0;i<data.length;i++) {
-				var hometeam, awayteam;
-				for(var j=0;j<teams.length;j++) {
-					if(teams[j].teamId === data[i][1]) hometeam = teams[j].abbreviation;
-					if(teams[j].teamId === data[i][2]) awayteam = teams[j].abbreviation;
+		$.ajax({
+				type : 'POST',
+				url : 'http://eaganr.com:3000',           
+				data: {
+					func: "getSchedule",
+					date : date
+				},
+				success:function (data) {
+					data = data.resultSets[2].rowSet;
+					for(var i=0;i<data.length;i++) {
+						var hometeam, awayteam;
+						for(var j=0;j<teams.length;j++) {
+							if(teams[j].teamId === data[i][1]) hometeam = teams[j].abbreviation;
+							if(teams[j].teamId === data[i][2]) awayteam = teams[j].abbreviation;
+						}
+						self.games.push({gameid:data[i][0], hometeam:hometeam, awayteam:awayteam});
+					}
+					self.draw();
 				}
-				self.games.push({gameid:data[i][0], hometeam:hometeam, awayteam:awayteam});
-			}
-			self.draw();
 		});
 		return self;
 	}

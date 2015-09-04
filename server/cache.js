@@ -78,13 +78,15 @@ function getBoxScore(res, period, gameID) {
 }
 
 //period = minute,hour,day
-function getFile(period, filetype, gameID) {
+function getFile(period, filetype, id) {
 	var fs = require('fs');
 	var j = [];
+	if(filetype === "schedule") id=id.replace("/","-");
+
 	var files = fs.readdirSync(folder+"cache/"+period);
 	for(var i=0;i<files.length;i++) {
 		var f = files[i];
-		if(f.indexOf(gameID+filetype) > -1) {
+		if(f.indexOf(id+filetype) > -1) {
 			j = require(folder+"cache/"+period+"/"+f);
 			break;
 		}
@@ -118,6 +120,34 @@ function getPlayByPlay(res, period, gameID) {
 	else res.jsonp(j);
 }
 
+//schedule
+function requestSchedule(res, date) {
+	var fs = require('fs');
+	var request = require('request');	
+	var url = "http://stats.nba.com/stats/scoreboard/?callback=?&LeagueID=00&DayOffset=0&GameDate="+date;
+	request(url, function (error, response, body) {
+		if(!error && response.statusCode == 200) {
+			body = body.substring(2,body.length-1);
+			var response = JSON.parse(body);
+			fs.writeFile(folder+"cache/minute/"+date.replace("/","-")+"schedule"+getTime()+".json", JSON.stringify(response), function(err2) {
+				if(err2) console.log(err2);
+				console.log("saved");
+				res.jsonp(response);
+			});
+		}
+	});
+}
+
+//period = 1 - minute, 2 - hour, 3 - day
+function getSchedule(res, period, date) {
+	var j = [];
+	if(period > 0) j = getFile("minute", "schedule", date);
+	if(j.length === 0 && period > 1) j = getFile("hour", "schedule", date);
+	if(j.length === 0 && period > 2) j = getFile("day", "schedule", date);
+
+	if(j.length === 0) requestSchedule(res, date);
+	else res.jsonp(j);
+}
 
 //requestBoxScore("0041400406");
 //console.log(getFile("minute","0041400406"));
@@ -135,10 +165,10 @@ function getPlayByPlay(res, period, gameID) {
 
   app.post('/',function(req,res){
 		console.log(req.body);
-		var gameID = req.body.gameID;
 		res.header("Access-Control-Allow-Origin", "*");
-		if(req.body.func === "getBoxScore") getBoxScore(res,3,gameID);
-		if(req.body.func === "getPlayByPlay") getPlayByPlay(res,3,gameID);
+		if(req.body.func === "getBoxScore") getBoxScore(res,3,req.body.gameID);
+		if(req.body.func === "getPlayByPlay") getPlayByPlay(res,3,req.body.gameID);
+		if(req.body.func === "getSchedule") getSchedule(res,3,req.body.date);
 	});
 }).call(this);
 
