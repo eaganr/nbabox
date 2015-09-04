@@ -48,3 +48,30 @@ svg {
 	width:260px;
 	margin:auto;
 }
+
+.schedule-game {
+	position:relative;
+	display:inline-block;
+	margin-left:20px;
+	height:45px;
+	width:100px;
+	background-color:white;
+	border-radius:5px;
+}
+.schedule-game:hover {
+	background-color:#99CCFF;
+}
+.schedule-game div {
+	position:absolute;
+	bottom:0px;
+	text-align:center;
+	width:100px;
+}
+.home-logo {
+	position:absolute;
+	right:0px;
+}
+.away-logo {
+	position:absolute;
+	left:0px;
+}

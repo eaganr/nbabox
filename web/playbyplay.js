@@ -57,6 +57,10 @@ function playbyplay() {
 
 
 	self.parse=function() {
+		self.homeplayers.val=self.homeplayers.val.map(function(d,i) { return {playerName:d.playerName, pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:i<5 ? [{inperiod:1, intime:"12:00", outperiod:null, outtime:null}] : []}; });
+		self.awayplayers.val=self.awayplayers.val.map(function(d,i) { return {playerName:d.playerName, pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:i<5 ? [{inperiod:1, intime:"12:00", outperiod:null, outtime:null}] : []}; });
+		self.scoringmargins=[];	
+
 		for(var i=0;i<self.data().length;i++) {
 			var evt = self.data()[i];
 			//create player stats
@@ -288,6 +292,7 @@ function playbyplay() {
 		}
 
 		self.vis=d3.select(self.selector());
+		$(self.selector()).html("");
 		self.xScale = d3.scale.linear().range([self.margins().left, self.w() - self.margins().right]).domain([0, totalseconds]);
 
 
@@ -376,8 +381,7 @@ function playbyplay() {
 
 
 		//player minutes
-		var homeplayers = self.homeplayers().reverse();
-		var playergroups = [self.awayplayers(),self.homeplayers()];
+		var playergroups = [self.awayplayers(),self.homeplayers().slice().reverse()];
 		for(var n=0;n<playergroups.length;n++) {
 			var players = playergroups[n];
 			for(var j=0;j<players.length;j++) {

@@ -9,6 +9,8 @@ function schedule() {
 	self.games=[];
 
 	self.getschedule=function() {
+		var maindiv = document.getElementById(self.id());
+		if(maindiv) maindiv.innerHTML = "";
 		var fullurl = url+date;
 		self.games = [];
 		$.getJSON(fullurl, function(data) {
@@ -40,7 +42,6 @@ function schedule() {
 		var datepicker = document.createElement("input");
 		datepicker.id = "datepicker";
 		maindiv.appendChild(datepicker);
-		maindiv.innerHTML+="<br />";
 		
 		$("#datepicker").datepicker();
 		$("#datepicker").change(function() {
@@ -51,9 +52,25 @@ function schedule() {
 		
 	
 		for(var i=0;i<self.games.length;i++) {
-			var game = document.createElement("a");	
-			game.href="?gameid="+self.games[i].gameid;
-			game.innerHTML = self.games[i].awayteam+" vs. "+self.games[i].hometeam;
+			var game = document.createElement("div");	
+			game.className = "schedule-game";
+			game.gameid=self.games[i].gameid;
+			game.onclick=function() { window.location="?gameid="+this.gameid;};
+
+			var img = document.createElement("img");
+			img.src="http://stats.nba.com/media/img/teams/logos/"+self.games[i].awayteam+"_logo.svg";
+			img.width=25;
+			img.height=25;
+			img.className="away-logo";
+			game.appendChild(img);
+			img = img.cloneNode(true);
+			img.className="home-logo";
+			img.src="http://stats.nba.com/media/img/teams/logos/"+self.games[i].hometeam+"_logo.svg";
+			game.appendChild(img);
+
+			var txt = document.createElement("div");
+			txt.innerHTML = self.games[i].awayteam+" vs. "+self.games[i].hometeam;
+			game.appendChild(txt);
 			document.getElementById(self.id()).appendChild(game);
 			game.innerHTML += "<br />";
 		}
