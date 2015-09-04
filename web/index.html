@@ -7,13 +7,32 @@
 	<script src="pie.js"></script>
 	<script src="boxscore.js"></script>
 	<script src="playbyplay.js"></script>
+	<script src="schedule.js"></script>
+	<script src="teams.js"></script>
+
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+  <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 
 	<script>
-		var gameID = "0041400406";
-		//var gameID = "0021400962";
+		//schedule
+		var sched = new schedule()
+			.id("schedule")
+			.getschedule();
+
+		var gameID = "0041400406";//finals agme 6
+		//var gameID = "0021400962"; //1OT
 		//var gameID = "0021400491";
+		//var gameID = "0041400123"; //2OT
+		var mainurl = window.location.href;
+		if(mainurl.indexOf("gameid") > -1) {
+			gameID = mainurl.substring(mainurl.indexOf("gameid")+7);
+			console.log(gameID);
+		}
+
 		var homeTeam = {};
 		var awayTeam = {};
+
+		var pbp = new playbyplay();
 		$.ajax({
 		    type : 'POST',
 		    url : 'http://eaganr.com:3000',           
@@ -97,47 +116,46 @@
 						.title(awayTeam.abbrev + " Basket Rebounds")
 						.draw();
 
+
+				$.ajax({
+						type : 'POST',
+						url : 'http://eaganr.com:3000',           
+						data: {
+							func: "getPlayByPlay",
+							gameID : gameID
+						},
+						success:function (data) {
+							var homeplayers = homeTeam.players.map(function(d) { return d.playerName.split(" ")[d.playerName.split(" ").length -1]; });
+							var awayplayers = awayTeam.players.map(function(d) { return d.playerName.split(" ")[d.playerName.split(" ").length -1]; });
+
+							//same name players
+							for(var i=0;i<homeplayers.length;i++) {
+								var p1 = homeplayers[i];
+								for(var j=0;j<homeplayers.length;j++) {
+									if(i !== j) {
+										var p2 = homeplayers[j];
+										if(p1 === p2) {
+											homeplayers[i] = homeTeam.players[i].playerName.substring(0,1) + ". " + p1;
+											homeplayers[j] = homeTeam.players[j].playerName.substring(0,1) + ". " + p2;
+										}
+									}
+								}
+							}
+
+
+							pbp.homeplayers(homeplayers)
+								.awayplayers(awayplayers)
+								.selector("#chart")
+								.data(data.playByPlay)
+								.parse()
+								.draw();
+
+					}
+				});
 				}
 		  });
 
 
-		var pbp = new playbyplay();
-		$.ajax({
-		    type : 'POST',
-		    url : 'http://eaganr.com:3000',           
-		    data: {
-					func: "getPlayByPlay",
-					gameID : gameID
-				},
-		    success:function (data) {
-					var homeplayers = homeTeam.players.map(function(d) { return d.playerName.split(" ")[d.playerName.split(" ").length -1]; });
-					var awayplayers = awayTeam.players.map(function(d) { return d.playerName.split(" ")[d.playerName.split(" ").length -1]; });
-
-					//same name players
-					for(var i=0;i<homeplayers.length;i++) {
-						var p1 = homeplayers[i];
-						for(var j=0;j<homeplayers.length;j++) {
-							if(i !== j) {
-								var p2 = homeplayers[j];
-								if(p1 === p2) {
-									homeplayers[i] = homeTeam.players[i].playerName.substring(0,1) + ". " + p1;
-									homeplayers[j] = homeTeam.players[j].playerName.substring(0,1) + ". " + p2;
-								}
-							}
-						}
-					}
-
-
-					pbp.homeplayers(homeplayers)
-						.awayplayers(awayplayers)
-						.selector("#chart")
-						.data(data.playByPlay)
-						.parse()
-						.draw();
-
-
-			}
-		});
 	</script>
 
 
@@ -145,6 +163,7 @@
 
 <body>
 	<div class="content">	
+		<div id="schedule"></div>
 		<div class="team" id="hometeam">
 			<h1></h1>
 			<div class="charts">
