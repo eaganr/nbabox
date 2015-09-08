@@ -59,7 +59,7 @@ function playbyplay() {
 	self.parse=function() {
 		self.homeplayers.val=self.homeplayers.val.map(function(d,i) { return {playerName:d.playerName, pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:i<5 ? [{inperiod:1, intime:"12:00", outperiod:null, outtime:null}] : []}; });
 		self.awayplayers.val=self.awayplayers.val.map(function(d,i) { return {playerName:d.playerName, pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:i<5 ? [{inperiod:1, intime:"12:00", outperiod:null, outtime:null}] : []}; });
-		self.scoringmargins=[];	
+		self.scoringmargins = [{margin:0, time:"12:00", period:1}];
 
 		for(var i=0;i<self.data().length;i++) {
 			var evt = self.data()[i];

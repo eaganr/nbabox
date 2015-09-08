@@ -58,7 +58,7 @@ function requestBoxScore(res, gameID) {
 	var fs = require('fs');
 	nba.api.boxScoreScoring({gameId: gameID}, function (err, response) {
 		if(err) console.log(err);
-		fs.writeFile(folder+"cache/minute/"+gameID+"boxscore"+getTime()+".json", JSON.stringify(response), function(err2) {
+		fs.writeFile(folder+"cache/minute/boxscore/"+gameID+"boxscore"+getTime()+".json", JSON.stringify(response), function(err2) {
 			if(err2) console.log(err2);
 			console.log("saved");
 			res.jsonp(response);
@@ -81,13 +81,13 @@ function getBoxScore(res, period, gameID) {
 function getFile(period, filetype, id) {
 	var fs = require('fs');
 	var j = [];
-	if(filetype === "schedule") id=id.replace("/","-");
+	if(filetype === "schedule") id=id.replace(new RegExp("/", 'g'), "-");
 
-	var files = fs.readdirSync(folder+"cache/"+period);
+	var files = fs.readdirSync(folder+"cache/"+period+"/"+filetype);
 	for(var i=0;i<files.length;i++) {
 		var f = files[i];
 		if(f.indexOf(id+filetype) > -1) {
-			j = require(folder+"cache/"+period+"/"+f);
+			j = require(folder+"cache/"+period+"/"+filetype+"/"+f);
 			break;
 		}
 	}
@@ -101,7 +101,7 @@ function requestPlayByPlay(res, gameID) {
 	var fs = require('fs');
 	nba.api.playByPlay({gameId: gameID}, function (err, response) {
 		if(err) console.log(err);
-		fs.writeFile(folder+"cache/minute/"+gameID+"playbyplay"+getTime()+".json", JSON.stringify(response), function(err2) {
+		fs.writeFile(folder+"cache/minute/playbyplay/"+gameID+"playbyplay"+getTime()+".json", JSON.stringify(response), function(err2) {
 			if(err2) console.log(err2);
 			console.log("saved");
 			res.jsonp(response);
@@ -129,7 +129,8 @@ function requestSchedule(res, date) {
 		if(!error && response.statusCode == 200) {
 			body = body.substring(2,body.length-1);
 			var response = JSON.parse(body);
-			fs.writeFile(folder+"cache/minute/"+date.replace("/","-")+"schedule"+getTime()+".json", JSON.stringify(response), function(err2) {
+			date=date.replace(new RegExp("/", 'g'), "-");
+			fs.writeFile(folder+"cache/minute/schedule/"+date+"schedule"+getTime()+".json", JSON.stringify(response), function(err2) {
 				if(err2) console.log(err2);
 				console.log("saved");
 				res.jsonp(response);
