@@ -5,7 +5,7 @@ var teams = [
     "teamName": "Atlanta Hawks",
     "simpleName": "Hawks",
     "location": "Atlanta",
-		"color": "E13A3E"
+    "color": "E13A3E"
   },
   {
     "teamId": 1610612738,
@@ -13,7 +13,7 @@ var teams = [
     "teamName": "Boston Celtics",
     "simpleName": "Celtics",
     "location": "Boston",
-		"color": "008348"
+    "color": "008348"
   },
   {
     "teamId": 1610612751,
@@ -21,7 +21,7 @@ var teams = [
     "teamName": "Brooklyn Nets",
     "simpleName": "Nets",
     "location": "Brooklyn",
-		"color": "061922"
+    "color": "061922"
   },
   {
     "teamId": 1610612766,
@@ -29,7 +29,7 @@ var teams = [
     "teamName": "Charlotte Bobcats",
     "simpleName": "Bobcats",
     "location": "Charlotte",
-		"color": "1D1160"
+    "color": "1D1160"
   },
   {
     "teamId": 1610612741,
@@ -37,7 +37,7 @@ var teams = [
     "teamName": "Chicago Bulls",
     "simpleName": "Bulls",
     "location": "Chicago",
-		"color": "CE1141"
+    "color": "CE1141"
   },
   {
     "teamId": 1610612739,
@@ -45,7 +45,7 @@ var teams = [
     "teamName": "Cleveland Cavaliers",
     "simpleName": "Cavaliers",
     "location": "Cleveland",
-		"color": "860038"
+    "color": "860038"
   },
   {
     "teamId": 1610612742,
@@ -53,7 +53,7 @@ var teams = [
     "teamName": "Dallas Mavericks",
     "simpleName": "Mavericks",
     "location": "Dallas",
-		"color": "007DC5"
+    "color": "007DC5"
   },
   {
     "teamId": 1610612743,
@@ -61,7 +61,7 @@ var teams = [
     "teamName": "Denver Nuggets",
     "simpleName": "Nuggets",
     "location": "Denver",
-		"color": "4D90CD"
+    "color": "4D90CD"
   },
   {
     "teamId": 1610612765,
@@ -69,7 +69,7 @@ var teams = [
     "teamName": "Detroit Pistons",
     "simpleName": "Pistons",
     "location": "Detroit",
-		"color": "ED174C"
+    "color": "ED174C"
   },
   {
     "teamId": 1610612744,
@@ -77,7 +77,7 @@ var teams = [
     "teamName": "Golden State Warriors",
     "simpleName": "Warriors",
     "location": "Golden State",
-		"color": "FDB927"
+    "color": "FDB927"
   },
   {
     "teamId": 1610612745,
@@ -85,7 +85,7 @@ var teams = [
     "teamName": "Houston Rockets",
     "simpleName": "Rockets",
     "location": "Houston",
-		"color": "CE1141"
+    "color": "CE1141"
   },
   {
     "teamId": 1610612754,
@@ -93,7 +93,7 @@ var teams = [
     "teamName": "Indiana Pacers",
     "simpleName": "Pacers",
     "location": "Indiana",
-		"color": "FFC633"
+    "color": "FFC633"
   },
   {
     "teamId": 1610612746,
@@ -101,7 +101,7 @@ var teams = [
     "teamName": "Los Angeles Clippers",
     "simpleName": "Clippers",
     "location": "Los Angeles",
-		"color": "ED174C"
+    "color": "ED174C"
   },
   {
     "teamId": 1610612747,
@@ -109,7 +109,7 @@ var teams = [
     "teamName": "Los Angeles Lakers",
     "simpleName": "Lakers",
     "location": "Los Angeles",
-		"color": "FDB927"
+    "color": "FDB927"
   },
   {
     "teamId": 1610612763,
@@ -117,7 +117,7 @@ var teams = [
     "teamName": "Memphis Grizzlies",
     "simpleName": "Grizzlies",
     "location": "Memphis",
-		"color": "0F586C"
+    "color": "0F586C"
   },
   {
     "teamId": 1610612748,
@@ -125,7 +125,7 @@ var teams = [
     "teamName": "Miami Heat",
     "simpleName": "Heat",
     "location": "Miami",
-		"color": "98002E"
+    "color": "98002E"
   },
   {
     "teamId": 1610612749,
@@ -133,7 +133,7 @@ var teams = [
     "teamName": "Milwaukee Bucks",
     "simpleName": "Bucks",
     "location": "Milwaukee",
-		"color": "00471B"
+    "color": "00471B"
   },
   {
     "teamId": 1610612750,
@@ -141,7 +141,7 @@ var teams = [
     "teamName": "Minnesota Timberwolves",
     "simpleName": "Timberwolves",
     "location": "Minnesota",
-		"color": "005083"
+    "color": "005083"
 
   },
   {
@@ -150,7 +150,7 @@ var teams = [
     "teamName": "New Orleans Pelicans",
     "simpleName": "Pelicans",
     "location": "New Orleans",
-		"color": "B4975A"
+    "color": "B4975A"
   },
   {
     "teamId": 1610612752,
@@ -158,7 +158,7 @@ var teams = [
     "teamName": "New York Knicks",
     "simpleName": "Knicks",
     "location": "New York",
-		"color": "F58426"
+    "color": "F58426"
   },
   {
     "teamId": 1610612760,
@@ -166,7 +166,7 @@ var teams = [
     "teamName": "Oklahoma City Thunder",
     "simpleName": "Thunder",
     "location": "Oklahoma City",
-		"color": "F05133"
+    "color": "F05133"
   },
   {
     "teamId": 1610612753,
@@ -174,7 +174,7 @@ var teams = [
     "teamName": "Orlando Magic",
     "simpleName": "Magic",
     "location": "Orlando",
-		"color": "007DC5"
+    "color": "007DC5"
   },
   {
     "teamId": 1610612755,
@@ -182,7 +182,7 @@ var teams = [
     "teamName": "Philadelphia 76ers",
     "simpleName": "76ers",
     "location": "Philadelphia",
-		"color": "006BB6"
+    "color": "006BB6"
   },
   {
     "teamId": 1610612756,
@@ -190,7 +190,7 @@ var teams = [
     "teamName": "Phoenix Suns",
     "simpleName": "Suns",
     "location": "Phoenix",
-		"color": "E56020"
+    "color": "E56020"
   },
   {
     "teamId": 1610612757,
@@ -198,7 +198,7 @@ var teams = [
     "teamName": "Portland Trail Blazers",
     "simpleName": "Trail Blazers",
     "location": "Portland",
-		"color": "E03A3E"
+    "color": "E03A3E"
   },
   {
     "teamId": 1610612758,
@@ -206,7 +206,7 @@ var teams = [
     "teamName": "Sacramento Kings",
     "simpleName": "Kings",
     "location": "Sacramento",
-		"color": "724C9F"
+    "color": "724C9F"
   },
   {
     "teamId": 1610612759,
@@ -214,7 +214,7 @@ var teams = [
     "teamName": "San Antonio Spurs",
     "simpleName": "Spurs",
     "location": "San Antonio",
-		"color": "BAC3C9"
+    "color": "BAC3C9"
   },
   {
     "teamId": 1610612761,
@@ -222,7 +222,7 @@ var teams = [
     "teamName": "Toronto Raptors",
     "simpleName": "Raptors",
     "location": "Toronto",
-		"color": "CE1141"
+    "color": "CE1141"
   },
   {
     "teamId": 1610612762,
@@ -230,7 +230,7 @@ var teams = [
     "teamName": "Utah Jazz",
     "simpleName": "Jazz",
     "location": "Utah",
-		"color": "002B5C"
+    "color": "002B5C"
   },
   {
     "teamId": 1610612764,
@@ -238,6 +238,6 @@ var teams = [
     "teamName": "Washington Wizards",
     "simpleName": "Wizards",
     "location": "Washington",
-		"color": "E31837"
+    "color": "E31837"
   }
 ];
