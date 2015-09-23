@@ -89,9 +89,10 @@
 					//boxscore
 
 
-					var teamcolors = function(val) {
+					var teamcolors = function(val, color2) {
+							var attr = color2 ? "color2" : "color";
 							for(var i=0;i<teams.length;i++) {
-								if(teams[i].abbreviation === val) return "#"+teams[i].color;
+								if(teams[i].abbreviation === val) return "#"+teams[i][attr];
 							}
 					};
 

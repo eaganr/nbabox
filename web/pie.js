@@ -11,6 +11,19 @@ function pie(selector) {
 	self.diff=function(d) {
 		if(d) {
 			self.diff.val=d;
+			//sort data according to diff
+			var dat = self.data();
+			var sorted = 0; 
+			for(var i=0;i<dat.length;i++) {
+				if(dat[i][self.diff()] < dat[sorted][self.diff()]) {
+					var temp = dat[sorted];
+					dat[sorted] = dat[i];
+					dat[i] = temp;
+					sorted = 0;
+					i = sorted+1;
+				}
+			}
+
 			return self;
 		}
 		return self.diff.val ? self.diff.val : self.value();
@@ -79,9 +92,41 @@ function pie(selector) {
 			self.color.val=c;
 			return self;
 		}
-		return self.color.val ? self.color.val(c) : d3.scale.category20()(c);
+		var val = self.color.val ? self.color.val(c) : d3.scale.category20()(c);
+		if(!self.color.color1) self.color.color1=val;
+		else {
+			var diff = hexColorDelta(self.color.color1.substring(1), val.substring(1));
+			console.log(diff);
+			if(diff > 0.8) {
+				 val = self.color.val(c, true);
+			}
+		}
+		return val;
 	};
 	self.color.val=d3.scale.category20();
+	self.color.color1="";
+
+	function hexColorDelta(hex1, hex2) {
+			// get red/green/blue int values of hex1
+			var r1 = parseInt(hex1.substring(0, 2), 16);
+			var g1 = parseInt(hex1.substring(2, 4), 16);
+			var b1 = parseInt(hex1.substring(4, 6), 16);
+			// get red/green/blue int values of hex2
+			var r2 = parseInt(hex2.substring(0, 2), 16);
+			var g2 = parseInt(hex2.substring(2, 4), 16);
+			var b2 = parseInt(hex2.substring(4, 6), 16);
+			// calculate differences between reds, greens and blues
+			var r = 255 - Math.abs(r1 - r2);
+			var g = 255 - Math.abs(g1 - g2);
+			var b = 255 - Math.abs(b1 - b2);
+			// limit differences between 0 and 1
+			r /= 255;
+			g /= 255;
+			b /= 255;
+			// 0 means opposit colors, 1 means same colors
+			return (r + g + b) / 3;
+	}
+
 
 	self.arc=function() {
 		var arc=d3.svg.arc()
@@ -140,8 +185,8 @@ function pie(selector) {
 			.attr("dy", ".35em")
 			.attr("class", "label")
 			.attr("fill", function(d) { 
-				var c = "0x"+self.color(d.data[self.diff()]).substring(1);
-				if(Math.abs(c - "0xffffff") < Math.abs(c - "0x000000")) return "#000000";
+				var c = self.color(d.data[self.diff()]).substring(1);
+				if(hexColorDelta("ffffff", c) > 0.5) return "#000000";
 				return "#ffffff";
 			})
 			.attr("opacity",function(d) { 
