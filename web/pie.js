@@ -139,6 +139,11 @@ function pie(selector) {
 			.attr("diff",function(d) { return d.data[self.diff()]})
 			.attr("dy", ".35em")
 			.attr("class", "label")
+			.attr("fill", function(d) { 
+				var c = "0x"+self.color(d.data[self.diff()]).substring(1);
+				if(Math.abs(c - "0xffffff") < Math.abs(c - "0x000000")) return "#000000";
+				return "#ffffff";
+			})
 			.attr("opacity",function(d) { 
 				if(self.data().length < 5 || d.data[self.value()] > self.total / 7) return 100;
 				else return 0;

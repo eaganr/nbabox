@@ -48,6 +48,10 @@ svg {
 	width:260px;
 	margin:auto;
 }
+.stats {
+	width:90%;
+	margin:0 auto;
+}
 
 .schedule-game {
 	position:relative;

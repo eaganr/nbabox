@@ -31,6 +31,7 @@
 
 		var homeTeam = {};
 		var awayTeam = {};
+		var neutral = {};
 
 		var pbp = new playbyplay();
 		$.ajax({
@@ -86,6 +87,14 @@
 						.draw();
 
 					//boxscore
+
+
+					var teamcolors = function(val) {
+							for(var i=0;i<teams.length;i++) {
+								if(teams[i].abbreviation === val) return "#"+teams[i].color;
+							}
+					};
+
 					homeTeam.box = new boxscore("homebox",homeTeam.players);
 					awayTeam.box = new boxscore("awaybox",awayTeam.players);
 
@@ -104,6 +113,7 @@
 						.data(homeRebs)
 						.diff("abbrev")
 						.label(function(d) { return d.data.abbrev+" - "+d.data.reb;})
+						.color(teamcolors, true)
 						.title(homeTeam.abbrev + " Basket Rebounds")
 						.draw();
 
@@ -113,9 +123,67 @@
 						.data(awayRebs)
 						.diff("abbrev")
 						.label(function(d) { return d.data.abbrev+" - "+d.data.reb;})
+						.color(teamcolors, true)
 						.title(awayTeam.abbrev + " Basket Rebounds")
 						.draw();
 
+					var threes = [
+						{abbrev:data.teamStats[1].teamAbbreviation, threes:data.teamStats[1].fG3M},
+						{abbrev:data.teamStats[0].teamAbbreviation, threes:data.teamStats[0].fG3M}
+					];
+					var fouls = [
+						{abbrev:data.teamStats[0].teamAbbreviation, fls:data.teamStats[0].pF},
+						{abbrev:data.teamStats[1].teamAbbreviation, fls:data.teamStats[1].pF}
+					];
+					var assists = [
+						{abbrev:data.teamStats[0].teamAbbreviation, assists:data.teamStats[0].aST},
+						{abbrev:data.teamStats[1].teamAbbreviation, assists:data.teamStats[1].aST}
+					];
+					var tos = [
+						{abbrev:data.teamStats[0].teamAbbreviation, to:data.teamStats[0].tO},
+						{abbrev:data.teamStats[1].teamAbbreviation, to:data.teamStats[1].tO}
+					];
+
+
+					neutral.threes = new pie("#threes")
+						.w(250).h(250)
+						.value("threes")
+						.data(threes)
+						.diff("abbrev")
+						.label(function(d) { return d.data.abbrev+" - "+d.data.threes;})
+						.color(teamcolors, true)
+						.title("3 Point FGM")
+						.draw();
+
+					neutral.fouls = new pie("#fouls")
+						.w(250).h(250)
+						.value("fls")
+						.data(fouls)
+						.diff("abbrev")
+						.label(function(d) { return d.data.abbrev+" - "+d.data.fls;})
+						.color(teamcolors, true)
+						.title("Fouls")
+						.draw();
+
+					neutral.tos = new pie("#tos")
+						.w(250).h(250)
+						.value("to")
+						.data(tos)
+						.diff("abbrev")
+						.label(function(d) { return d.data.abbrev+" - "+d.data.to;})
+						.color(teamcolors, true)
+						.title("TOs")
+						.draw();
+
+					neutral.assists = new pie("#assists")
+						.w(250).h(250)
+						.value("assists")
+						.data(assists)
+						.diff("abbrev")
+						.label(function(d) { return d.data.abbrev+" - "+d.data.assists;})
+						.color(teamcolors, true)
+						.title("Assists")
+						.draw();
 
 				$.ajax({
 						type : 'POST',
@@ -164,6 +232,18 @@
 <body>
 	<div class="content">	
 		<div id="schedule"></div>
+
+		<h1>Play By Play</h1>
+		<svg id="chart" width="1050" height="550"></svg>
+
+		<h1>Stats</h1>
+		<div class="stats">
+			<div class="pie" id="threes"></div>
+			<div class="pie" id="fouls"></div>
+			<div class="pie" id="assists"></div>
+			<div class="pie" id="tos"></div>
+		</div>
+
 		<div class="team" id="hometeam">
 			<h1></h1>
 			<div class="charts">
@@ -180,10 +260,6 @@
 			</div>
 			<div class="boxscore" id="awaybox"></div>
 		</div>
-		<br />
-		<br />
-		<h1>Play By Play</h1>
-		<svg id="chart" width="1050" height="550"></svg>
 	</div>
 </body>
 
