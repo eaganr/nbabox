@@ -1,267 +1,267 @@
 <html>
 
 <head>
-	<link rel="stylesheet" type="text/css" href="boxscore.css">
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-	<script src="pie.js"></script>
-	<script src="boxscore.js"></script>
-	<script src="playbyplay.js"></script>
-	<script src="schedule.js"></script>
-	<script src="teams.js"></script>
+  <link rel="stylesheet" type="text/css" href="boxscore.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+  <script src="pie.js"></script>
+  <script src="boxscore.js"></script>
+  <script src="playbyplay.js"></script>
+  <script src="schedule.js"></script>
+  <script src="teams.js"></script>
 
-	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
   <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 
-	<script>
-		//schedule
-		var sched = new schedule()
-			.id("schedule")
-			.getschedule();
+  <script>
+    //schedule
+    var sched = new schedule()
+      .id("schedule")
+      .getschedule();
 
-		var gameID = "0041400406";//finals agme 6
-		//var gameID = "0021400962"; //1OT
-		//var gameID = "0021400491";
-		//var gameID = "0041400123"; //2OT
-		var mainurl = window.location.href;
-		if(mainurl.indexOf("gameid") > -1) {
-			gameID = mainurl.substring(mainurl.indexOf("gameid")+7);
-			console.log(gameID);
-		}
+    var gameID = "0041400406";//finals agme 6
+    //var gameID = "0021400962"; //1OT
+    //var gameID = "0021400491";
+    //var gameID = "0041400123"; //2OT
+    var mainurl = window.location.href;
+    if(mainurl.indexOf("gameid") > -1) {
+      gameID = mainurl.substring(mainurl.indexOf("gameid")+7);
+      console.log(gameID);
+    }
 
-		var homeTeam = {};
-		var awayTeam = {};
-		var neutral = {};
+    var homeTeam = {};
+    var awayTeam = {};
+    var neutral = {};
 
-		var pbp = new playbyplay();
-		$.ajax({
-		    type : 'POST',
-		    url : 'http://eaganr.com:3000',           
-		    data: {
-					func: "getBoxScore",
-					gameID : gameID
-				},
-		    success:function (data) {
-					console.log(data);
-				
-					homeTeam.id=data.gameSummary[0].homeTeamId;
-					homeTeam.abbrev=data.teamStats[1].teamAbbreviation;
-					homeTeam.score=data.teamStats[1].pTS;
-					awayTeam.id=data.gameSummary[0].visitorTeamId;
-					awayTeam.abbrev=data.teamStats[0].teamAbbreviation;
-					awayTeam.score=data.teamStats[0].pTS;
+    var pbp = new playbyplay();
+    $.ajax({
+        type : 'POST',
+        url : 'http://eaganr.com:3000',           
+        data: {
+          func: "getBoxScore",
+          gameID : gameID
+        },
+        success:function (data) {
+          console.log(data);
+  
+          homeTeam.id=data.gameSummary[0].homeTeamId;
+          homeTeam.abbrev=data.teamStats[1].teamAbbreviation;
+          homeTeam.score=data.teamStats[1].pTS;
+          awayTeam.id=data.gameSummary[0].visitorTeamId;
+          awayTeam.abbrev=data.teamStats[0].teamAbbreviation;
+          awayTeam.score=data.teamStats[0].pTS;
 
-					document.getElementById("hometeam").getElementsByTagName("h1")[0].innerHTML=homeTeam.abbrev+" - "+homeTeam.score;
-					document.getElementById("awayteam").getElementsByTagName("h1")[0].innerHTML=awayTeam.score+" - "+awayTeam.abbrev;
+          document.getElementById("hometeam").getElementsByTagName("h1")[0].innerHTML=homeTeam.abbrev+" - "+homeTeam.score;
+          document.getElementById("awayteam").getElementsByTagName("h1")[0].innerHTML=awayTeam.score+" - "+awayTeam.abbrev;
 
-					homeTeam.players = [];
-					awayTeam.players = [];
-					for(var i=0;i<data.playerStats.length;i++) {
-						var player = data.playerStats[i];
-						if(player.teamId === homeTeam.id) {
-							homeTeam.players.push(player);
-						}
-						if(player.teamId === awayTeam.id) {
-							awayTeam.players.push(player);
-						}
-					}
-					console.log(homeTeam.players);
-					console.log(awayTeam.players);
+          homeTeam.players = [];
+          awayTeam.players = [];
+          for(var i=0;i<data.playerStats.length;i++) {
+            var player = data.playerStats[i];
+            if(player.teamId === homeTeam.id) {
+              homeTeam.players.push(player);
+            }
+            if(player.teamId === awayTeam.id) {
+              awayTeam.players.push(player);
+            }
+          }
+          console.log(homeTeam.players);
+          console.log(awayTeam.players);
 
-					homeTeam.scoring = new pie("#homescoring")
-						.w(250).h(250)
-						.value("pTS")
-						.data(homeTeam.players)
-						.diff("playerName")
-						.label(function(d) { return d.data["playerName"].split(" ")[1]+" - "+d.data["pTS"];})
-						.title(homeTeam.abbrev + " Scoring")
-						.draw();	
+          homeTeam.scoring = new pie("#homescoring")
+            .w(250).h(250)
+            .value("pTS")
+            .data(homeTeam.players)
+            .diff("playerName")
+            .label(function(d) { return d.data["playerName"].split(" ")[1]+" - "+d.data["pTS"];})
+            .title(homeTeam.abbrev + " Scoring")
+            .draw();  
 
-					awayTeam.scoring = new pie("#awayscoring")
-						.w(250).h(250)
-						.value("pTS")
-						.data(awayTeam.players)
-						.diff("playerName")
-						.label(function(d) { return d.data["playerName"].split(" ")[1]+" - "+d.data["pTS"];})
-						.title(awayTeam.abbrev + " Scoring")
-						.draw();
+          awayTeam.scoring = new pie("#awayscoring")
+            .w(250).h(250)
+            .value("pTS")
+            .data(awayTeam.players)
+            .diff("playerName")
+            .label(function(d) { return d.data["playerName"].split(" ")[1]+" - "+d.data["pTS"];})
+            .title(awayTeam.abbrev + " Scoring")
+            .draw();
 
-					//boxscore
-
-
-					var teamcolors = function(val, color2) {
-							var attr = color2 ? "color2" : "color";
-							for(var i=0;i<teams.length;i++) {
-								if(teams[i].abbreviation === val) return "#"+teams[i][attr];
-							}
-					};
-
-					homeTeam.box = new boxscore("homebox",homeTeam.players);
-					awayTeam.box = new boxscore("awaybox",awayTeam.players);
-
-					var homeRebs = [
-						{abbrev:data.teamStats[1].teamAbbreviation, reb:data.teamStats[1].dREB},
-						{abbrev:data.teamStats[0].teamAbbreviation, reb:data.teamStats[0].oREB}
-					];
-					var awayRebs = [
-						{abbrev:data.teamStats[0].teamAbbreviation, reb:data.teamStats[0].dREB},
-						{abbrev:data.teamStats[1].teamAbbreviation, reb:data.teamStats[1].oREB}
-					];
-
-					homeTeam.rebounds = new pie("#homerebounding")
-						.w(250).h(250)
-						.value("reb")
-						.data(homeRebs)
-						.diff("abbrev")
-						.label(function(d) { return d.data.abbrev+" - "+d.data.reb;})
-						.color(teamcolors, true)
-						.title(homeTeam.abbrev + " Basket Rebounds")
-						.draw();
-
-					awayTeam.rebounds = new pie("#awayrebounding")
-						.w(250).h(250)
-						.value("reb")
-						.data(awayRebs)
-						.diff("abbrev")
-						.label(function(d) { return d.data.abbrev+" - "+d.data.reb;})
-						.color(teamcolors, true)
-						.title(awayTeam.abbrev + " Basket Rebounds")
-						.draw();
-
-					var threes = [
-						{abbrev:data.teamStats[1].teamAbbreviation, threes:data.teamStats[1].fG3M},
-						{abbrev:data.teamStats[0].teamAbbreviation, threes:data.teamStats[0].fG3M}
-					];
-					var fouls = [
-						{abbrev:data.teamStats[0].teamAbbreviation, fls:data.teamStats[0].pF},
-						{abbrev:data.teamStats[1].teamAbbreviation, fls:data.teamStats[1].pF}
-					];
-					var assists = [
-						{abbrev:data.teamStats[0].teamAbbreviation, assists:data.teamStats[0].aST},
-						{abbrev:data.teamStats[1].teamAbbreviation, assists:data.teamStats[1].aST}
-					];
-					var tos = [
-						{abbrev:data.teamStats[0].teamAbbreviation, to:data.teamStats[0].tO},
-						{abbrev:data.teamStats[1].teamAbbreviation, to:data.teamStats[1].tO}
-					];
+          //boxscore
 
 
-					neutral.threes = new pie("#threes")
-						.w(250).h(250)
-						.value("threes")
-						.data(threes)
-						.diff("abbrev")
-						.label(function(d) { return d.data.abbrev+" - "+d.data.threes;})
-						.color(teamcolors, true)
-						.title("3 Point FGM")
-						.draw();
+          var teamcolors = function(val, color2) {
+              var attr = color2 ? "color2" : "color";
+              for(var i=0;i<teams.length;i++) {
+                if(teams[i].abbreviation === val) return "#"+teams[i][attr];
+              }
+          };
 
-					neutral.fouls = new pie("#fouls")
-						.w(250).h(250)
-						.value("fls")
-						.data(fouls)
-						.diff("abbrev")
-						.label(function(d) { return d.data.abbrev+" - "+d.data.fls;})
-						.color(teamcolors, true)
-						.title("Fouls")
-						.draw();
+          homeTeam.box = new boxscore("homebox",homeTeam.players);
+          awayTeam.box = new boxscore("awaybox",awayTeam.players);
 
-					neutral.tos = new pie("#tos")
-						.w(250).h(250)
-						.value("to")
-						.data(tos)
-						.diff("abbrev")
-						.label(function(d) { return d.data.abbrev+" - "+d.data.to;})
-						.color(teamcolors, true)
-						.title("TOs")
-						.draw();
+          var homeRebs = [
+            {abbrev:data.teamStats[1].teamAbbreviation, reb:data.teamStats[1].dREB},
+            {abbrev:data.teamStats[0].teamAbbreviation, reb:data.teamStats[0].oREB}
+          ];
+          var awayRebs = [
+            {abbrev:data.teamStats[0].teamAbbreviation, reb:data.teamStats[0].dREB},
+            {abbrev:data.teamStats[1].teamAbbreviation, reb:data.teamStats[1].oREB}
+          ];
 
-					neutral.assists = new pie("#assists")
-						.w(250).h(250)
-						.value("assists")
-						.data(assists)
-						.diff("abbrev")
-						.label(function(d) { return d.data.abbrev+" - "+d.data.assists;})
-						.color(teamcolors, true)
-						.title("Assists")
-						.draw();
+          homeTeam.rebounds = new pie("#homerebounding")
+            .w(250).h(250)
+            .value("reb")
+            .data(homeRebs)
+            .diff("abbrev")
+            .label(function(d) { return d.data.abbrev+" - "+d.data.reb;})
+            .color(teamcolors, true)
+            .title(homeTeam.abbrev + " Basket Rebounds")
+            .draw();
 
-				$.ajax({
-						type : 'POST',
-						url : 'http://eaganr.com:3000',           
-						data: {
-							func: "getPlayByPlay",
-							gameID : gameID
-						},
-						success:function (data) {
-							var homeplayers = homeTeam.players.map(function(d) { return d.playerName.split(" ")[d.playerName.split(" ").length -1]; });
-							var awayplayers = awayTeam.players.map(function(d) { return d.playerName.split(" ")[d.playerName.split(" ").length -1]; });
+          awayTeam.rebounds = new pie("#awayrebounding")
+            .w(250).h(250)
+            .value("reb")
+            .data(awayRebs)
+            .diff("abbrev")
+            .label(function(d) { return d.data.abbrev+" - "+d.data.reb;})
+            .color(teamcolors, true)
+            .title(awayTeam.abbrev + " Basket Rebounds")
+            .draw();
 
-							//same name players
-							for(var i=0;i<homeplayers.length;i++) {
-								var p1 = homeplayers[i];
-								for(var j=0;j<homeplayers.length;j++) {
-									if(i !== j) {
-										var p2 = homeplayers[j];
-										if(p1 === p2) {
-											homeplayers[i] = homeTeam.players[i].playerName.substring(0,1) + ". " + p1;
-											homeplayers[j] = homeTeam.players[j].playerName.substring(0,1) + ". " + p2;
-										}
-									}
-								}
-							}
+          var threes = [
+            {abbrev:data.teamStats[1].teamAbbreviation, threes:data.teamStats[1].fG3M},
+            {abbrev:data.teamStats[0].teamAbbreviation, threes:data.teamStats[0].fG3M}
+          ];
+          var fouls = [
+            {abbrev:data.teamStats[0].teamAbbreviation, fls:data.teamStats[0].pF},
+            {abbrev:data.teamStats[1].teamAbbreviation, fls:data.teamStats[1].pF}
+          ];
+          var assists = [
+            {abbrev:data.teamStats[0].teamAbbreviation, assists:data.teamStats[0].aST},
+            {abbrev:data.teamStats[1].teamAbbreviation, assists:data.teamStats[1].aST}
+          ];
+          var tos = [
+            {abbrev:data.teamStats[0].teamAbbreviation, to:data.teamStats[0].tO},
+            {abbrev:data.teamStats[1].teamAbbreviation, to:data.teamStats[1].tO}
+          ];
 
 
-							pbp.homeplayers(homeplayers)
-								.awayplayers(awayplayers)
-								.selector("#chart")
-								.data(data.playByPlay)
-								.parse()
-								.draw();
+          neutral.threes = new pie("#threes")
+            .w(250).h(250)
+            .value("threes")
+            .data(threes)
+            .diff("abbrev")
+            .label(function(d) { return d.data.abbrev+" - "+d.data.threes;})
+            .color(teamcolors, true)
+            .title("3 Point FGM")
+            .draw();
 
-					}
-				});
-				}
-		  });
+          neutral.fouls = new pie("#fouls")
+            .w(250).h(250)
+            .value("fls")
+            .data(fouls)
+            .diff("abbrev")
+            .label(function(d) { return d.data.abbrev+" - "+d.data.fls;})
+            .color(teamcolors, true)
+            .title("Fouls")
+            .draw();
+
+          neutral.tos = new pie("#tos")
+            .w(250).h(250)
+            .value("to")
+            .data(tos)
+            .diff("abbrev")
+            .label(function(d) { return d.data.abbrev+" - "+d.data.to;})
+            .color(teamcolors, true)
+            .title("TOs")
+            .draw();
+
+          neutral.assists = new pie("#assists")
+            .w(250).h(250)
+            .value("assists")
+            .data(assists)
+            .diff("abbrev")
+            .label(function(d) { return d.data.abbrev+" - "+d.data.assists;})
+            .color(teamcolors, true)
+            .title("Assists")
+            .draw();
+
+        $.ajax({
+            type : 'POST',
+            url : 'http://eaganr.com:3000',           
+            data: {
+              func: "getPlayByPlay",
+              gameID : gameID
+            },
+            success:function (data) {
+              var homeplayers = homeTeam.players.map(function(d) { return d.playerName.split(" ")[d.playerName.split(" ").length -1]; });
+              var awayplayers = awayTeam.players.map(function(d) { return d.playerName.split(" ")[d.playerName.split(" ").length -1]; });
+
+              //same name players
+              for(var i=0;i<homeplayers.length;i++) {
+                var p1 = homeplayers[i];
+                for(var j=0;j<homeplayers.length;j++) {
+                  if(i !== j) {
+                    var p2 = homeplayers[j];
+                    if(p1 === p2) {
+                      homeplayers[i] = homeTeam.players[i].playerName.substring(0,1) + ". " + p1;
+                      homeplayers[j] = homeTeam.players[j].playerName.substring(0,1) + ". " + p2;
+                    }
+                  }
+                }
+              }
 
 
-	</script>
+              pbp.homeplayers(homeplayers)
+                .awayplayers(awayplayers)
+                .selector("#chart")
+                .data(data.playByPlay)
+                .parse()
+                .draw();
+
+          }
+        });
+        }
+      });
+
+
+  </script>
 
 
 </head>
 
 <body>
-	<div class="content">	
-		<div id="schedule"></div>
+  <div class="content">  
+    <div id="schedule"></div>
 
-		<h1>Play By Play</h1>
-		<svg id="chart" width="1050" height="550"></svg>
+    <h1>Play By Play</h1>
+    <svg id="chart" width="1050" height="550"></svg>
 
-		<h1>Stats</h1>
-		<div class="stats">
-			<div class="pie" id="threes"></div>
-			<div class="pie" id="fouls"></div>
-			<div class="pie" id="assists"></div>
-			<div class="pie" id="tos"></div>
-		</div>
+    <h1>Stats</h1>
+    <div class="stats">
+      <div class="pie" id="threes"></div>
+      <div class="pie" id="fouls"></div>
+      <div class="pie" id="assists"></div>
+      <div class="pie" id="tos"></div>
+    </div>
 
-		<div class="team" id="hometeam">
-			<h1></h1>
-			<div class="charts">
-				<div class="pie" id="homescoring"></div>
-				<div class="pie" id="homerebounding"></div>
-			</div>
-			<div class="boxscore" id="homebox"></div>
-		</div>
-		<div class="team" id="awayteam">
-			<h1></h1>
-			<div class="charts">
-				<div class="pie" id="awayscoring"></div>
-				<div class="pie" id="awayrebounding"></div>
-			</div>
-			<div class="boxscore" id="awaybox"></div>
-		</div>
-	</div>
+    <div class="team" id="hometeam">
+      <h1></h1>
+      <div class="charts">
+        <div class="pie" id="homescoring"></div>
+        <div class="pie" id="homerebounding"></div>
+      </div>
+      <div class="boxscore" id="homebox"></div>
+    </div>
+    <div class="team" id="awayteam">
+      <h1></h1>
+      <div class="charts">
+        <div class="pie" id="awayscoring"></div>
+        <div class="pie" id="awayrebounding"></div>
+      </div>
+      <div class="boxscore" id="awaybox"></div>
+    </div>
+  </div>
 </body>
 
 </html

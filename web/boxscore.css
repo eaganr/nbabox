@@ -1,81 +1,81 @@
 .content {
-	width:1250px;
-	margin:auto;
+  width:1250px;
+  margin:auto;
 }
 .team {
-	display:inline-block;
-	width:600px;
-}	
+  display:inline-block;
+  width:600px;
+}  
 .team h1 {
-	width:200px;
-	margin:auto;
-	margin-bottom:20px;
-	text-align:center;
+  width:200px;
+  margin:auto;
+  margin-bottom:20px;
+  text-align:center;
 }
 
 h1 {
-	width:400px;
-	margin:auto;
-	margin-top:50px;
-	text-align:center;
+  width:400px;
+  margin:auto;
+  margin-top:50px;
+  text-align:center;
 }
 
 table {
-	border:solid;
-	display:block;
-	margin:auto;
+  border:solid;
+  display:block;
+  margin:auto;
 }
 tr:hover {
-	background-color:#FFFFCC;
+  background-color:#FFFFCC;
 }
 td {
-	text-align:center;
+  text-align:center;
 }
 .scoring-title {
-	width:100px;
-	margin:auto;
+  width:100px;
+  margin:auto;
 }
 svg {
-	display:block;
-	margin:auto;
+  display:block;
+  margin:auto;
 }
 .charts {
-	width:525px;
-	margin:auto;
+  width:525px;
+  margin:auto;
 }
 .pie {
-	display:inline-block;
-	width:260px;
-	margin:auto;
+  display:inline-block;
+  width:260px;
+  margin:auto;
 }
 .stats {
-	width:90%;
-	margin:0 auto;
+  width:90%;
+  margin:0 auto;
 }
 
 .schedule-game {
-	position:relative;
-	display:inline-block;
-	margin-left:20px;
-	height:45px;
-	width:100px;
-	background-color:white;
-	border-radius:5px;
+  position:relative;
+  display:inline-block;
+  margin-left:20px;
+  height:45px;
+  width:100px;
+  background-color:white;
+  border-radius:5px;
 }
 .schedule-game:hover {
-	background-color:#99CCFF;
+  background-color:#99CCFF;
 }
 .schedule-game div {
-	position:absolute;
-	bottom:0px;
-	text-align:center;
-	width:100px;
+  position:absolute;
+  bottom:0px;
+  text-align:center;
+  width:100px;
 }
 .home-logo {
-	position:absolute;
-	right:0px;
+  position:absolute;
+  right:0px;
 }
 .away-logo {
-	position:absolute;
-	left:0px;
+  position:absolute;
+  left:0px;
 }
