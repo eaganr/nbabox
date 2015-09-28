@@ -9,6 +9,7 @@
   <script src="playbyplay.js"></script>
   <script src="schedule.js"></script>
   <script src="teams.js"></script>
+  <script src="util.js"></script>
 
   <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
   <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
@@ -45,11 +46,18 @@
           console.log(data);
   
           homeTeam.id=data.gameSummary[0].homeTeamId;
-          homeTeam.abbrev=data.teamStats[1].teamAbbreviation;
-          homeTeam.score=data.teamStats[1].pTS;
           awayTeam.id=data.gameSummary[0].visitorTeamId;
-          awayTeam.abbrev=data.teamStats[0].teamAbbreviation;
-          awayTeam.score=data.teamStats[0].pTS;
+          for(var i=0;i<teams.length;i++) {
+            if(teams[i].teamId === homeTeam.id) homeTeam.abbrev = teams[i].abbreviation;
+            if(teams[i].teamId === awayTeam.id) awayTeam.abbrev = teams[i].abbreviation;
+          }
+          homeTeam.color=teamcolors(homeTeam.abbrev);
+          awayTeam.color=teamcolors(awayTeam.abbrev, homeTeam.color);
+          for(var i=0;i<2;i++) {
+            if(data.teamStats[i].teamId === homeTeam.id) homeTeam.score= data.teamStats[i].pTS;
+            if(data.teamStats[i].teamId === awayTeam.id) awayTeam.score= data.teamStats[i].pTS;
+          }
+
 
           document.getElementById("hometeam").getElementsByTagName("h1")[0].innerHTML=homeTeam.abbrev+" - "+homeTeam.score;
           document.getElementById("awayteam").getElementsByTagName("h1")[0].innerHTML=awayTeam.score+" - "+awayTeam.abbrev;
@@ -87,15 +95,6 @@
             .draw();
 
           //boxscore
-
-
-          var teamcolors = function(val, color2) {
-              var attr = color2 ? "color2" : "color";
-              for(var i=0;i<teams.length;i++) {
-                if(teams[i].abbreviation === val) return "#"+teams[i][attr];
-              }
-          };
-
           homeTeam.box = new boxscore("homebox",homeTeam.players);
           awayTeam.box = new boxscore("awaybox",awayTeam.players);
 
@@ -211,12 +210,27 @@
                 }
               }
 
+              for(var i=0;i<awayplayers.length;i++) {                                      
+                var p1 = awayplayers[i];
+                for(var j=0;j<awayplayers.length;j++) {                                    
+                  if(i !== j) {
+                    var p2 = awayplayers[j];                                               
+                    if(p1 === p2) {
+                      awayplayers[i] = awayTeam.players[i].playerName.substring(0,1) + ". " + p1;
+                      awayplayers[j] = awayTeam.players[j].playerName.substring(0,1) + ". " + p2;
+                    }                                                                      
+                  }                                                                        
+                }                                                                          
+              }     
+
 
               pbp.homeplayers(homeplayers)
                 .awayplayers(awayplayers)
                 .selector("#chart")
                 .data(data.playByPlay)
                 .parse()
+                .homecolor(homeTeam.color)
+                .awaycolor(awayTeam.color)
                 .draw();
 
           }

@@ -281,6 +281,21 @@ function playbyplay() {
     }
   }
 
+  self.homecolor = function(c) {
+    if(c) {
+      self.homecolor.val = c;
+      return self;
+    }
+    return self.homecolor.val;
+  }
+
+  self.awaycolor = function(c) {
+    if(c) {
+      self.awaycolor.val = c;
+      return self;
+    }
+    return self.awaycolor.val;
+  }
 
   self.draw=function() {
     var extraticks = [];
@@ -292,7 +307,13 @@ function playbyplay() {
     }
 
     self.vis=d3.select(self.selector());
-    $(self.selector()).html("");
+    $(self.selector()).html("<linearGradient id=\"score-gradient\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"560\"><stop offset=\"0%\" stop-color=\"#2ca02c\"></stop><stop offset=\"50%\" stop-color=\"#2ca02c\"></stop><stop offset=\"50%\" stop-color=\"#9467bd\"></stop><stop offset=\"100%\" stop-color=\"#9467bd\"></stop></linearGradient>");
+    $(self.selector() + " stop")[0].setAttribute("stop-color",self.homecolor());
+    $(self.selector() + " stop")[1].setAttribute("stop-color",self.homecolor());
+    $(self.selector() + " stop")[2].setAttribute("stop-color",self.awaycolor());
+    $(self.selector() + " stop")[3].setAttribute("stop-color",self.awaycolor());
+
+
     self.xScale = d3.scale.linear().range([self.margins().left, self.w() - self.margins().right]).domain([0, totalseconds]);
 
 
@@ -375,7 +396,7 @@ function playbyplay() {
 
     self.vis.append('svg:path')
       .attr('d', lineGen(self.scoringmargins))
-      .attr('stroke', 'steelblue')
+      .attr('stroke', 'url(#score-gradient)')
       .attr('stroke-width', 2)
       .attr('fill', 'none');
 
