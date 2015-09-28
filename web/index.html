@@ -27,7 +27,6 @@
     var mainurl = window.location.href;
     if(mainurl.indexOf("gameid") > -1) {
       gameID = mainurl.substring(mainurl.indexOf("gameid")+7);
-      console.log(gameID);
     }
 
     var homeTeam = {};
@@ -73,8 +72,6 @@
               awayTeam.players.push(player);
             }
           }
-          console.log(homeTeam.players);
-          console.log(awayTeam.players);
 
           homeTeam.scoring = new pie("#homescoring")
             .w(250).h(250)
@@ -193,35 +190,41 @@
               gameID : gameID
             },
             success:function (data) {
+              console.log(data);
               var homeplayers = homeTeam.players.map(function(d) { return d.playerName.split(" ")[d.playerName.split(" ").length -1]; });
               var awayplayers = awayTeam.players.map(function(d) { return d.playerName.split(" ")[d.playerName.split(" ").length -1]; });
 
               //same name players
-              for(var i=0;i<homeplayers.length;i++) {
-                var p1 = homeplayers[i];
-                for(var j=0;j<homeplayers.length;j++) {
-                  if(i !== j) {
-                    var p2 = homeplayers[j];
-                    if(p1 === p2) {
-                      homeplayers[i] = homeTeam.players[i].playerName.substring(0,1) + ". " + p1;
-                      homeplayers[j] = homeTeam.players[j].playerName.substring(0,1) + ". " + p2;
+              var allplayers = [homeplayers, awayplayers];
+              var allteams = [homeTeam, awayTeam];
+              for(var t=0;t<2;t++) {
+                var players = allplayers[t];
+                for(var i=0;i<players.length;i++) {                                      
+                  if(players[i] === "III") {                                             
+                    players[i] = "Lucas III";                                            
+                  }                                                                          
+                  for(var j=0;j<players.length;j++) {                                    
+                    if(i !== j) {                                                            
+                      var n=0;                                                               
+                      var p1 = "";                                                           
+                      var p2 = "";                                                           
+                      while(p1 + " " + players[i] === p2 + " " + players[j]) {       
+                        p1 = p1 + allteams[t].players[i].playerName.substring(n,n+1);           
+                        p2 = p2 + allteams[t].players[j].playerName.substring(n,n+1);           
+                        n++;                                                                 
+                      }                                                                      
+                      if(p1.length === 1) {                                                  
+                        players[i] = p1 + ". " + players[i];                         
+                        players[j] = p2 + ". " + players[j];                         
+                      }                                                                      
+                      if(p1.length > 1) {                                                    
+                        players[i] = p1 + " " + players[i];                          
+                        players[j] = p2 + " " + players[j];                          
+                      }                                                                      
                     }
-                  }
-                }
-              }
-
-              for(var i=0;i<awayplayers.length;i++) {                                      
-                var p1 = awayplayers[i];
-                for(var j=0;j<awayplayers.length;j++) {                                    
-                  if(i !== j) {
-                    var p2 = awayplayers[j];                                               
-                    if(p1 === p2) {
-                      awayplayers[i] = awayTeam.players[i].playerName.substring(0,1) + ". " + p1;
-                      awayplayers[j] = awayTeam.players[j].playerName.substring(0,1) + ". " + p2;
-                    }                                                                      
                   }                                                                        
                 }                                                                          
-              }     
+              }
 
 
               pbp.homeplayers(homeplayers)
