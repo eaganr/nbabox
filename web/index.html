@@ -11,7 +11,7 @@
   <script src="teams.js"></script>
   <script src="util.js"></script>
 
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/redmond/jquery-ui.css">
   <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 
   <script>
@@ -53,7 +53,11 @@
           homeTeam.color=teamcolors(homeTeam.abbrev);
           awayTeam.color=teamcolors(awayTeam.abbrev, homeTeam.color);
           for(var i=0;i<2;i++) {
-            if(data.teamStats[i].teamId === homeTeam.id) homeTeam.score= data.teamStats[i].pTS;
+            if(data.teamStats[i].teamId === homeTeam.id) {
+              homeTeam.score= data.teamStats[i].pTS;
+              homeTeam.teamstats = i;
+              awayTeam.teamstats = i === 1 ? 0 : 1;
+            }
             if(data.teamStats[i].teamId === awayTeam.id) awayTeam.score= data.teamStats[i].pTS;
           }
 
@@ -96,12 +100,12 @@
           awayTeam.box = new boxscore("awaybox",awayTeam.players);
 
           var homeRebs = [
-            {abbrev:data.teamStats[1].teamAbbreviation, reb:data.teamStats[1].dREB},
-            {abbrev:data.teamStats[0].teamAbbreviation, reb:data.teamStats[0].oREB}
+            {abbrev:data.teamStats[homeTeam.teamstats].teamAbbreviation, reb:data.teamStats[homeTeam.teamstats].dREB},
+            {abbrev:data.teamStats[awayTeam.teamstats].teamAbbreviation, reb:data.teamStats[awayTeam.teamstats].oREB}
           ];
           var awayRebs = [
-            {abbrev:data.teamStats[0].teamAbbreviation, reb:data.teamStats[0].dREB},
-            {abbrev:data.teamStats[1].teamAbbreviation, reb:data.teamStats[1].oREB}
+            {abbrev:data.teamStats[awayTeam.teamstats].teamAbbreviation, reb:data.teamStats[awayTeam.teamstats].dREB},
+            {abbrev:data.teamStats[homeTeam.teamstats].teamAbbreviation, reb:data.teamStats[homeTeam.teamstats].oREB}
           ];
 
           homeTeam.rebounds = new pie("#homerebounding")
