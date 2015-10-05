@@ -133,6 +133,7 @@ function requestSchedule(res, date) {
 			body = body.substring(2,body.length-1);
 			var response = JSON.parse(body);
 			date=date.replace(new RegExp("/", 'g'), "-");
+      if(date.length === 9) date = date.substring(0,3)+"0"+date.substring(3);
 			fs.writeFile(folder+"cache/minute/schedule/"+date+"schedule"+getTime()+".json", JSON.stringify(response), function(err2) {
 				if(err2) console.log(err2);
 				console.log("saved");

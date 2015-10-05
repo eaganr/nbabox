@@ -1,8 +1,8 @@
 var folder = "/root/nbabox/"
 
 
-function getTimeStamp(filename) {
-	var stamp = filename.substring(filename.length-17, filename.length-5);
+function getTimeStamp(filename, filetype) {
+	var stamp = filename.substring(10+filetype.length, filename.length-5);
 	return stamp;
 }
 
@@ -21,41 +21,44 @@ function updateCache() {
 	var fs = require('fs');
 
 	//minute check
-	var files = fs.readdirSync(folder+"cache/minute");
-	for(var i=0;i<files.length;i++) {
-		var filename = files[i];
-		var fileDate = toTime(getTimeStamp(filename));
-		var thisMin = new Date();
-		thisMin.setSeconds(0);
-		if(thisMin - fileDate > 60000) {
-			//move file to hour folder
-			fs.rename(folder+"cache/minute/"+filename,
-				      folder+"cache/hour/"+filename,
-				      function(err) {
-				      	if(err) console.log(err);
-				      }
-				     );
-		}
-	}
+  var types = ["playbyplay", "boxscore", "schedule"];
+  for(var n=0;n<types.length;n++) {
+	  var files = fs.readdirSync(folder+"cache/minute/"+types[n]);
+    for(var i=0;i<files.length;i++) {
+      var filename = files[i];
+      var fileDate = toTime(getTimeStamp(filename, types[n]));
+      var thisMin = new Date();
+      thisMin.setSeconds(0);
+      if(thisMin - fileDate > 60000) {
+        //move file to hour folder
+        fs.rename(folder+"cache/minute/"+types[n]+"/"+filename,
+                folder+"cache/hour/"+types[n]+"/"+filename,
+                function(err) {
+                  if(err) console.log(err);
+                }
+               );
+      }
+    }
 
-	//hour check
-	var files = fs.readdirSync(folder+"cache/hour");
-	for(var i=0;i<files.length;i++) {
-		var filename = files[i];
-		var fileDate = toTime(getTimeStamp(filename));
-		var thisHour = new Date();
-		thisHour.setMinutes(0);
-		if(thisHour - fileDate > 3600000) {
-			//move file to hour folder
-			fs.rename(folder+"cache/hour/"+filename,
-				      folder+"cache/day/"+filename,
-				      function(err) {
-				      	if(err) console.log(err);
-				      }
-				     );
-		}
-	}
-
+    //hour check
+    var files = fs.readdirSync(folder+"cache/hour/"+types[n]);
+    for(var i=0;i<files.length;i++) {
+      var filename = files[i];
+      var fileDate = toTime(getTimeStamp(filename, types[n]));
+      var thisHour = new Date();
+      thisHour.setMinutes(0);
+      if(thisHour - fileDate > 3600000) {
+        //move file to hour folder
+        fs.rename(folder+"cache/hour/"+types[n]+"/"+filename,
+                folder+"cache/day/"+types[n]+"/"+filename,
+                function(err) {
+                  if(err) console.log(err);
+                }
+               );
+      }
+    }
+  }
+	/*
 	//day check
 	var files = fs.readdirSync(folder+"cache/day");
 	for(var i=0;i<files.length;i++) {
@@ -72,6 +75,7 @@ function updateCache() {
 				     );
 		}
 	}
+	*/
 }
 
 
