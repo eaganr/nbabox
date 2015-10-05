@@ -4,8 +4,8 @@ function schedule() {
 	//private vars
 	var url = "http://stats.nba.com/stats/scoreboard/?callback=?&LeagueID=00&DayOffset=0&GameDate=";
 	var today = new Date();
-	//var date = today.getMonth()+1+"/"+today.getDate()+"/"+today.getFullYear();
-	var date = "03/10/2015";
+	var date = today.getMonth()+1+"/"+today.getDate()+"/"+today.getFullYear();
+	//var date = "03/10/2015";
 	self.games=[];
 
 	self.getschedule=function() {

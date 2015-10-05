@@ -54,15 +54,18 @@ function toTime(dateString) {
 
 //box score
 function requestBoxScore(res, gameID) {
-	var nba = require('nba');
 	var fs = require('fs');
-	nba.api.boxScoreScoring({gameId: gameID}, function (err, response) {
-		if(err) console.log(err);
-		fs.writeFile(folder+"cache/minute/boxscore/"+gameID+"boxscore"+getTime()+".json", JSON.stringify(response), function(err2) {
-			if(err2) console.log(err2);
-			console.log("saved");
-			res.jsonp(response);
-		});
+	var request = require('request');	
+	var url = "http://stats.nba.com/stats/boxscore?StartPeriod=0&EndPeriod=0&StartRange=0&EndRange=0&RangeType=0&GameID="+gameID;
+	request(url, function (error, response, body) {
+		if(!error && response.statusCode == 200) {
+			var response = JSON.parse(body);
+      fs.writeFile(folder+"cache/minute/boxscore/"+gameID+"boxscore"+getTime()+".json", JSON.stringify(response), function(err2) {
+        if(err2) console.log(err2);
+        console.log("saved");
+        res.jsonp(response);
+      });
+		}
 	});
 }
 
@@ -97,16 +100,16 @@ function getFile(period, filetype, id) {
 
 //play by play
 function requestPlayByPlay(res, gameID) {
-	var nba = require('nba');
-	var fs = require('fs');
-	nba.api.playByPlay({gameId: gameID}, function (err, response) {
-		if(err) console.log(err);
-		fs.writeFile(folder+"cache/minute/playbyplay/"+gameID+"playbyplay"+getTime()+".json", JSON.stringify(response), function(err2) {
-			if(err2) console.log(err2);
-			console.log("saved");
-			res.jsonp(response);
-		});
-	});
+  var nba = require('nba');
+    var fs = require('fs');
+    nba.api.playByPlay({gameId: gameID}, function (err, response) {
+      if(err) console.log(err);
+      fs.writeFile(folder+"cache/minute/playbyplay/"+gameID+"playbyplay"+getTime()+".json", JSON.stringify(response), function(err2) {
+        if(err2) console.log(err2);
+        console.log("saved");
+        res.jsonp(response);
+      });
+    });
 }
 
 //period = 1 - minute, 2 - hour, 3 - day

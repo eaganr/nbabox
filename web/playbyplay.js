@@ -307,7 +307,7 @@ function playbyplay() {
     }
 
     self.vis=d3.select(self.selector());
-    $(self.selector()).html("<linearGradient id=\"score-gradient\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"560\"><stop offset=\"0%\"></stop><stop offset=\"50%\"></stop><stop offset=\"50%\"></stop><stop offset=\"100%\"></stop></linearGradient>");
+    document.getElementById(self.selector().substring(1)).innerHTML="<linearGradient id=\"score-gradient\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"560\"><stop offset=\"0%\"></stop><stop offset=\"50%\"></stop><stop offset=\"50%\"></stop><stop offset=\"100%\"></stop></linearGradient>";
     $(self.selector() + " stop")[0].setAttribute("stop-color",self.homecolor());
     $(self.selector() + " stop")[1].setAttribute("stop-color",self.homecolor());
     $(self.selector() + " stop")[2].setAttribute("stop-color",self.awaycolor());
@@ -369,6 +369,7 @@ function playbyplay() {
       });
     var yAxis = d3.svg.axis()
       .scale(self.yScale)
+      .tickFormat(function(t) { return Math.abs(t); })
       .orient("left");
     
     self.vis.append("svg:g")

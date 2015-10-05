@@ -42,56 +42,48 @@
           gameID : gameID
         },
         success:function (data) {
+          data = data.resultSets;
           console.log(data);
-  
-          homeTeam.id=data.gameSummary[0].homeTeamId;
-          awayTeam.id=data.gameSummary[0].visitorTeamId;
-          for(var i=0;i<teams.length;i++) {
-            if(teams[i].teamId === homeTeam.id) homeTeam.abbrev = teams[i].abbreviation;
-            if(teams[i].teamId === awayTeam.id) awayTeam.abbrev = teams[i].abbreviation;
-          }
-          homeTeam.color=teamcolors(homeTeam.abbrev);
-          awayTeam.color=teamcolors(awayTeam.abbrev, homeTeam.color);
-          for(var i=0;i<2;i++) {
-            if(data.teamStats[i].teamId === homeTeam.id) {
-              homeTeam.score= data.teamStats[i].pTS;
-              homeTeam.teamstats = i;
-              awayTeam.teamstats = i === 1 ? 0 : 1;
-            }
-            if(data.teamStats[i].teamId === awayTeam.id) awayTeam.score= data.teamStats[i].pTS;
-          }
-
+           
+          homeTeam.id = data[1].rowSet[0][3];
+          awayTeam.id = data[1].rowSet[1][3];
+          homeTeam.abbrev = data[1].rowSet[0][4];
+          awayTeam.abbrev = data[1].rowSet[1][4];
+          homeTeam.color = teamcolors(homeTeam.abbrev);
+          awayTeam.color = teamcolors(awayTeam.abbrev, homeTeam.color);
+          homeTeam.score = data[5].rowSet[0][23];
+          awayTeam.score = data[5].rowSet[1][23];
 
           document.getElementById("hometeam").getElementsByTagName("h1")[0].innerHTML=homeTeam.abbrev+" - "+homeTeam.score;
           document.getElementById("awayteam").getElementsByTagName("h1")[0].innerHTML=awayTeam.score+" - "+awayTeam.abbrev;
 
           homeTeam.players = [];
           awayTeam.players = [];
-          for(var i=0;i<data.playerStats.length;i++) {
-            var player = data.playerStats[i];
-            if(player.teamId === homeTeam.id) {
+          for(var i=0;i<data[4].rowSet.length;i++) {
+            var player = data[4].rowSet[i];
+            if(player[1] === homeTeam.id) {
               homeTeam.players.push(player);
             }
-            if(player.teamId === awayTeam.id) {
+            if(player[1] === awayTeam.id) {
               awayTeam.players.push(player);
             }
           }
 
           homeTeam.scoring = new pie("#homescoring")
             .w(250).h(250)
-            .value("pTS")
+            .value("26")
             .data(homeTeam.players)
-            .diff("playerName")
-            .label(function(d) { return d.data["playerName"].split(" ")[1]+" - "+d.data["pTS"];})
+            .diff("4")
+            .label(function(d) { return d.data["5"].split(" ")[1]+" - "+d.data["26"];})
             .title(homeTeam.abbrev + " Scoring")
             .draw();  
 
           awayTeam.scoring = new pie("#awayscoring")
             .w(250).h(250)
-            .value("pTS")
+            .value("26")
             .data(awayTeam.players)
-            .diff("playerName")
-            .label(function(d) { return d.data["playerName"].split(" ")[1]+" - "+d.data["pTS"];})
+            .diff("4")
+            .label(function(d) { return d.data["5"].split(" ")[1]+" - "+d.data["26"];})
             .title(awayTeam.abbrev + " Scoring")
             .draw();
 
@@ -100,12 +92,12 @@
           awayTeam.box = new boxscore("awaybox",awayTeam.players);
 
           var homeRebs = [
-            {abbrev:data.teamStats[homeTeam.teamstats].teamAbbreviation, reb:data.teamStats[homeTeam.teamstats].dREB},
-            {abbrev:data.teamStats[awayTeam.teamstats].teamAbbreviation, reb:data.teamStats[awayTeam.teamstats].oREB}
+            {abbrev:homeTeam.abbrev, reb:data[5].rowSet[0][16]},
+            {abbrev:awayTeam.abbrev, reb:data[5].rowSet[1][15]}
           ];
           var awayRebs = [
-            {abbrev:data.teamStats[awayTeam.teamstats].teamAbbreviation, reb:data.teamStats[awayTeam.teamstats].dREB},
-            {abbrev:data.teamStats[homeTeam.teamstats].teamAbbreviation, reb:data.teamStats[homeTeam.teamstats].oREB}
+            {abbrev:awayTeam.abbrev, reb:data[5].rowSet[1][16]},
+            {abbrev:homeTeam.abbrev, reb:data[5].rowSet[0][15]}
           ];
 
           homeTeam.rebounds = new pie("#homerebounding")
@@ -129,20 +121,20 @@
             .draw();
 
           var threes = [
-            {abbrev:data.teamStats[1].teamAbbreviation, threes:data.teamStats[1].fG3M},
-            {abbrev:data.teamStats[0].teamAbbreviation, threes:data.teamStats[0].fG3M}
+            {abbrev:homeTeam.abbrev, threes:data[5].rowSet[0][9]},
+            {abbrev:awayTeam.abbrev, threes:data[5].rowSet[1][9]}
           ];
           var fouls = [
-            {abbrev:data.teamStats[0].teamAbbreviation, fls:data.teamStats[0].pF},
-            {abbrev:data.teamStats[1].teamAbbreviation, fls:data.teamStats[1].pF}
+            {abbrev:homeTeam.abbrev, fls:data[5].rowSet[0][22]},
+            {abbrev:awayTeam.abbrev, fls:data[5].rowSet[1][22]}
           ];
           var assists = [
-            {abbrev:data.teamStats[0].teamAbbreviation, assists:data.teamStats[0].aST},
-            {abbrev:data.teamStats[1].teamAbbreviation, assists:data.teamStats[1].aST}
+            {abbrev:homeTeam.abbrev, assists:data[5].rowSet[0][18]},
+            {abbrev:awayTeam.abbrev, assists:data[5].rowSet[1][18]}
           ];
           var tos = [
-            {abbrev:data.teamStats[0].teamAbbreviation, to:data.teamStats[0].tO},
-            {abbrev:data.teamStats[1].teamAbbreviation, to:data.teamStats[1].tO}
+            {abbrev:homeTeam.abbrev, to:data[5].rowSet[0][21]},
+            {abbrev:awayTeam.abbrev, to:data[5].rowSet[1][21]}
           ];
 
 
@@ -195,8 +187,8 @@
             },
             success:function (data) {
               console.log(data);
-              var homeplayers = homeTeam.players.map(function(d) { return d.playerName.split(" ")[d.playerName.split(" ").length -1]; });
-              var awayplayers = awayTeam.players.map(function(d) { return d.playerName.split(" ")[d.playerName.split(" ").length -1]; });
+              var homeplayers = homeTeam.players.map(function(d) { return d[5].split(" ")[d[5].split(" ").length -1]; });
+              var awayplayers = awayTeam.players.map(function(d) { return d[5].split(" ")[d[5].split(" ").length -1]; });
 
               //same name players
               var allplayers = [homeplayers, awayplayers];
@@ -213,8 +205,8 @@
                       var p1 = "";                                                           
                       var p2 = "";                                                           
                       while(p1 + " " + players[i] === p2 + " " + players[j]) {       
-                        p1 = p1 + allteams[t].players[i].playerName.substring(n,n+1);           
-                        p2 = p2 + allteams[t].players[j].playerName.substring(n,n+1);           
+                        p1 = p1 + allteams[t].players[i][5].substring(n,n+1);           
+                        p2 = p2 + allteams[t].players[j][5].substring(n,n+1);           
                         n++;                                                                 
                       }                                                                      
                       if(p1.length === 1) {                                                  
