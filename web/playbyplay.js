@@ -1,5 +1,7 @@
 function playbyplay() {  
   var self = this;
+
+  var totalperiods = 4;
   
   self.selector=function(s) {
     if(s) {
@@ -11,7 +13,10 @@ function playbyplay() {
   
   self.homeplayers=function(h) {
     if(h) {
-      self.homeplayers.val=h.map(function(d,i) { return {playerName:d, pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]}; });
+      for(var k in h) {
+        h[k] = {player_code:h[k]["player_code"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+      }
+      self.homeplayers.val=h;
       return self;
     }
     return self.homeplayers.val ? self.homeplayers.val : [];
@@ -19,7 +24,11 @@ function playbyplay() {
 
   self.awayplayers=function(a) {
     if(a) {
-      self.awayplayers.val=a.map(function(d,i) { return {playerName:d, pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]}; });
+      for(var k in a) {
+        a[k] = {player_code:a[k]["player_code"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+      }
+      self.awayplayers.val=a;
+
       return self;
     }
     return self.awayplayers.val ? self.awayplayers.val : [];
@@ -35,133 +44,138 @@ function playbyplay() {
 
   self.scoringmargins = [{margin:0, time:"12:00", period:1}];
 
-  function mincorrect(evt, player) {
+  function mincorrect(evt, player, period) {
     //fixes missing minutes from starts of quarters
     var recent = player.mins[player.mins.length-1];
-    if(player.mins.length === 0 || (recent.outtime !== null && recent.outperiod < evt.pERIOD)) {
+    if(player.mins.length === 0 || (recent.outtime !== null && recent.outperiod < period)) {
       var intime = "12:00";
-      if(evt.pERIOD > 4) intime = "5:00";
-      player.mins.push({intime:intime, inperiod:evt.pERIOD, outtime:null, outperiod:null});
+      if(period > 4) intime = "5:00";
+      player.mins.push({intime:intime, inperiod:period, outtime:null, outperiod:null});
       recent = player.mins[player.mins.length-1];
     }
     //if play an entire quarter, no substitution
-    if(recent.outtime === null && recent.inperiod < evt.pERIOD) {
+    if(recent.outtime === null && recent.inperiod < period) {
       recent.outtime = "0:00";
       recent.outperiod = recent.inperiod;
 
       var intime = "12:00";
-      if(evt.pERIOD > 4) intime = "5:00";
-      player.mins.push({intime:intime, inperiod:evt.pERIOD, outtime:null, outperiod:null});
+      if(period > 4) intime = "5:00";
+      player.mins.push({intime:intime, inperiod:period, outtime:null, outperiod:null});
     }
   }
 
 
   self.parse=function() {
-    self.homeplayers.val=self.homeplayers.val.map(function(d,i) { return {playerName:d.playerName, pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]}; });
-    self.awayplayers.val=self.awayplayers.val.map(function(d,i) { return {playerName:d.playerName, pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]}; });
-    self.scoringmargins = [{margin:0, time:"12:00", period:1}];
+    for(var k in self.homeplayers.val) {
+      self.homeplayers.val[k] = {player_code:self.homeplayers.val[k]["player_code"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+    }
+    for(var k in self.awayplayers.val) {
+      self.awayplayers.val[k] = {player_code:self.awayplayers.val[k]["player_code"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+    }
 
+    self.scoringmargins = [{margin:0, time:"12:00", period:1}];
+    var period = 0;
     for(var i=0;i<self.data().length;i++) {
       var evt = self.data()[i];
+      var desc = evt["description"];
+      if(desc.indexOf("Start Period") > -1) period++;
+      if(period > totalperiods) totalperiods = period;
+      evt["period"] = period;
       //create player stats
-      var descs = ["hOMEDESCRIPTION", "vISITORDESCRIPTION"];
       var teams = [self.homeplayers(), self.awayplayers()];
-      for(var n=0;n<descs.length;n++) {
-        var desc = evt[descs[n]];
+      for(var n=0;n<teams.length;n++) {
         var players = teams[n];
-        if(desc !== null) {
-          if(desc.indexOf("PTS)") > -1) {
-            var sections = desc.split("(");
-            var assisted = desc.indexOf("AST)") > -1;
-            var found = 0;
-            for(var j=0;j<players.length;j++) {
-              if(sections[0].indexOf(players[j].playerName) > -1) {
-                var pt = {time:evt.pCTIMESTRING,
-                          period:evt.pERIOD,
-                          pts:parseInt(sections[1].split("PTS)")[0]),
-                          margin:evt.sCOREMARGIN};
-                players[j].pts.push(pt);
-                pt.desc = desc;
-                self.scoringmargins.push(pt);
-                mincorrect(evt, players[j]);
+        if(desc.indexOf("PTS)") > -1) {
+          var sections = desc.split("(");
+          var assisted = desc.indexOf("AST)") > -1;
+          var found = 0;
+          for(var k in players) {
+            if(evt["player_code"] === players[k]["player_code"]) {
+              var pt = {time:evt.clock,
+                        period:period,
+                        pts:parseInt(sections[1].split(" PTS)")[0]),
+                        margin:parseInt(evt["home_score"]) - parseInt(evt["visitor_score"])};
+              players[k].pts.push(pt);
+              pt.desc = desc;
+              self.scoringmargins.push(pt);
+              mincorrect(evt, players[k], period);
+            }
+            if(assisted) {
+              if(sections[1].indexOf(k) > -1) {
+                players[k].ast.push({time:evt.clock, period:period});
+                mincorrect(evt, players[k], period);
               }
-              if(assisted) {
-                if(sections[2].indexOf(players[j].playerName) > -1) {
-                  players[j].ast.push({time:evt.pCTIMESTRING, period:evt.pERIOD});
-                  mincorrect(evt, players[j]);
-                }
-              }  
+            }  
+          }
+        }
+        if(desc.indexOf("Rebound") > -1) {
+          for(var k in players) {
+            if(evt["player_code"] === players[k]["player_code"]) {
+                players[k].rebs.push({time:evt.clock, period:period});
+                mincorrect(evt, players[k], period);
+                break;
             }
           }
-          if(desc.indexOf("REBOUND") > -1) {
-            for(var j=0;j<players.length;j++) {
-              if(desc.indexOf(players[j].playerName) > -1) {
-                  players[j].rebs.push({time:evt.pCTIMESTRING, period:evt.pERIOD});
-                  mincorrect(evt, players[j]);
-                  break;
-              }
+        }
+        if(desc.indexOf("Steal") > -1) {
+          for(var k in players) {
+            if(desc.split("TO)")[1].indexOf(k) > -1) {
+                players[k].stls.push({time:evt.clock, period:period});
+                mincorrect(evt, players[k], period);
+                break;
             }
           }
-          if(desc.indexOf("STEAL") > -1) {
-            for(var j=0;j<players.length;j++) {
-              if(desc.indexOf(players[j].playerName) > -1) {
-                  players[j].stls.push({time:evt.pCTIMESTRING, period:evt.pERIOD});
-                  mincorrect(evt, players[j]);
-                  break;
-              }
+        }
+        if(desc.indexOf("Turnover") > -1) {
+          for(var k in players) {
+            if(evt["player_code"] === players[k]["player_code"]) {
+                players[k].tos.push({time:evt.clock, period:period});
+                mincorrect(evt, players[k], period);
+                break;
             }
           }
-          if(desc.indexOf("Turnover") > -1) {
-            for(var j=0;j<players.length;j++) {
-              if(desc.indexOf(players[j].playerName) > -1) {
-                  players[j].tos.push({time:evt.pCTIMESTRING, period:evt.pERIOD});
-                  mincorrect(evt, players[j]);
-                  break;
-              }
+        }
+        if(desc.indexOf("Block") > -1) {
+          for(var k in players) {
+            if(evt["player_code"] === players[k]["player_code"]) {
+                players[k].blks.push({time:evt.clock, period:period});
+                mincorrect(evt, players[k], period);
+                break;
             }
           }
-          if(desc.indexOf("BLOCK") > -1) {
-            for(var j=0;j<players.length;j++) {
-              if(desc.indexOf(players[j].playerName) > -1) {
-                  players[j].blks.push({time:evt.pCTIMESTRING, period:evt.pERIOD});
-                  mincorrect(evt, players[j]);
-                  break;
-              }
+        }
+        if(desc.indexOf("Foul:") > -1 || desc.indexOf(".Foul") > -1) {
+          for(var k in players) {
+            if(evt["player_code"] === players[k]["player_code"]) {
+                players[k].fls.push({time:evt.clock, period:period});
+                mincorrect(evt, players[k], period);
+                break;
             }
           }
-          if(desc.indexOf("FOUL") > -1 || desc.indexOf(".Foul") > -1) {
-            for(var j=0;j<players.length;j++) {
-              if(desc.indexOf(players[j].playerName) > -1) {
-                  players[j].fls.push({time:evt.pCTIMESTRING, period:evt.pERIOD});
-                  mincorrect(evt, players[j]);
-                  break;
+        }
+        if(desc.indexOf("Substitution ") > -1) {
+          var subs = desc.split("replaced by")[1];
+          for(var j in players) {
+            //in
+            if(subs.indexOf(players[j].playerName) > -1) {
+              var len = players[j].mins.length;
+              if(len > 0 && players[j].mins[len-1].outtime === null) {
+                players[j].mins[len-1].outtime = "0:00";
+                players[j].mins[len-1].outperiod = players[j].mins[len-1].inperiod;
               }
+              players[j].mins.push({intime:evt.clock, inperiod:period, outtime:null, outperiod:null});
             }
-          }
-          if(desc.indexOf("SUB:") > -1) {
-            var subs = desc.split("SUB:")[1];
-            for(var j=0;j<players.length;j++) {
-              //in
-              if(subs.split("FOR")[0].indexOf(players[j].playerName) > -1) {
-                var len = players[j].mins.length;
-                if(len > 0 && players[j].mins[len-1].outtime === null) {
-                  players[j].mins[len-1].outtime = "0:00";
-                  players[j].mins[len-1].outperiod = players[j].mins[len-1].inperiod;
-                }
-                players[j].mins.push({intime:evt.pCTIMESTRING, inperiod:evt.pERIOD, outtime:null, outperiod:null});
+            //out
+            if(evt["player_code"] === players[j]["player_code"]) {
+              var len = players[j].mins.length;
+              if(len > 0) {
+                players[j].mins[len-1].outtime = evt.clock;
+                players[j].mins[len-1].outperiod = period;
               }
-              //out
-              if(subs.split("FOR")[1].indexOf(players[j].playerName) > -1) {
-                var len = players[j].mins.length;
-                if(len > 0) {
-                  players[j].mins[len-1].outtime = evt.pCTIMESTRING;
-                  players[j].mins[len-1].outperiod = evt.pERIOD;
-                }
-                else {
-                  var intime = "12:00";
-                  if(evt.pERIOD > 4) intime = "5:00";
-                  players[j].mins.push({intime:"5:00", inperiod:evt.pERIOD, outtime:evt.pCTIMESTRING, outperiod:evt.pERIOD});
-                }
+              else {
+                var intime = "12:00";
+                if(period > 4) intime = "5:00";
+                players[j].mins.push({intime:"5:00", inperiod:period, outtime:evt.clock, outperiod:period});
               }
             }
           }
@@ -260,8 +274,8 @@ function playbyplay() {
       for(var i=0;i<self.data().length;i++) {
         var pt = self.data()[i];
         if(pt.sCORE !== null) currentscore = pt.sCORE;
-        if(self.timetoseconds(pt.pERIOD, pt.pCTIMESTRING) >= seconds) {
-          var txt = pt.hOMEDESCRIPTION ? pt.hOMEDESCRIPTION : pt.vISITORDESCRIPTION;
+        if(self.timetoseconds(pt["period"], pt["clock"]) >= seconds) {
+          var txt = pt["description"].split("] ")[1];
           if(txt != null) {
             txt = txt.split("(")[0];
             self.vis.select(".play-text").text(txt);
@@ -271,7 +285,7 @@ function playbyplay() {
         }
       }
       self.vis.select(".hover-line").attr("x1",x).attr("x2",x);
-      timelabel = timelabel + " / " + currentscore;
+      timelabel = timelabel + " / " + pt["home_score"] + " - " + pt["visitor_score"];
       self.vis.select(".time-text")
         .text(timelabel);
 
@@ -299,9 +313,9 @@ function playbyplay() {
 
   self.draw=function() {
     var extraticks = [];
-    if(self.data()[self.data().length-1].pERIOD > 4) {
-      totalseconds = (self.data()[self.data().length-1].pERIOD-4) * 300 + 2880;
-      for(var i=4;i<self.data()[self.data().length-1].pERIOD;i++) {
+    if(self.data()[self.data().length-1].period > 4) {
+      totalseconds = (self.data()[self.data().length-1].period-4) * 300 + 2880;
+      for(var i=4;i<self.data()[self.data().length-1].period;i++) {
         extraticks.push(2880+300*(i-3));
       }
     }
@@ -403,26 +417,29 @@ function playbyplay() {
 
 
     //player minutes
-    var playergroups = [self.awayplayers(),self.homeplayers().slice().reverse()];
+    var playergroups = [self.awayplayers(),self.homeplayers()];
     for(var n=0;n<playergroups.length;n++) {
       var players = playergroups[n];
-      for(var j=0;j<players.length;j++) {
-        var player = players[j]
-        var y = 240/players.length*(j+1)+250*n + self.margins().top;
-        var y = self.yScale(self.yScale.domain()[n]*(j+1)/(players.length+1));
+      var j = -1;
+      for(var p in players) {
+        j++;
+        var player = players[p];
+        var y = 240/Object.keys(players).length*(j+1)+250*n + self.margins().top;
+        var y = self.yScale(self.yScale.domain()[n]*(j+1)/(Object.keys(players).length+1));
         self.vis.append("svg:text")
           .attr("class","player-name")
           .attr("transform","translate(52,"+(y-5)+")")
           .attr("dy", ".35em")
           .style("font-size", "10px")
-          .text(player.playerName);
+          .text(p);
 
         for(var i=0;i<player.mins.length;i++) {
           var min = player.mins[i];
           if(min.outperiod === null) {
-            min.outperiod = self.data()[self.data().length-1].pERIOD;
+            min.outperiod = totalperiods;
             min.outtime = "0:00";
           }
+
           self.vis.append("svg:line")  
             .attr("class", "min-line")
             .attr("x1",self.xScale(self.timetoseconds(min.inperiod,min.intime)))
@@ -510,7 +527,7 @@ function playbyplay() {
 
 
     var latest = self.data()[self.data().length-1];
-    var t = self.timetoseconds(latest.pERIOD, latest.pCTIMESTRING);
+    var t = self.timetoseconds(totalperiods, latest.clock);
 
     self.vis.append('svg:line')
       .attr("class", "hover-line")
@@ -684,7 +701,7 @@ function playbyplay() {
       })
       .on("mouseout",function(d,i) {
         var latest = self.data()[self.data().length-1];
-        var t = self.timetoseconds(latest.pERIOD, latest.pCTIMESTRING);
+        var t = self.timetoseconds(latest.period, latest.clock);
         updatemenu(t);
       });
 

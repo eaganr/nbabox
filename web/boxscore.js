@@ -5,18 +5,18 @@ function boxscore(id, data) {
 
   var table = document.createElement("table");
   table.setAttribute("cellspacing",0);
-  var stats = {5:"Player",
-               8:"Min",
-               9:"FGM-A",
-               12:"3PM-A",
-               26:"Pts",
-               20:"Reb",
-               21:"Ast",
-               22:"Stl",
-               23:"Blk",
-               24:"TO",
-               25:"PF",
-               27:"+/-"
+  var stats = {first_name:"Player",
+               minutes:"Min",
+               field_goals_made:"FGM-A",
+               three_pointers_made:"3PM-A",
+               points:"Pts",
+               rebounds_offensive:"Reb",
+               assists:"Ast",
+               steals:"Stl",
+               blocks:"Blk",
+               turnovers:"TO",
+               fouls:"PF",
+               plus_minus:"+/-"
               };
   var header = document.createElement("tr");
   var th;
@@ -34,9 +34,9 @@ function boxscore(id, data) {
     tr = document.createElement("tr");
     for(var k in stats) {
       //modify and format      
-      if(k === "9") player[k] = (player[k]? player[k] : 0)+"-"+(player[10]? player[10] : 0);
-      if(k === "12") player[k] = (player[k]? player[k] : 0)+"-"+(player[13]? player[13] : 0);
-
+      if(k === "first_name") player[k] = player[k] + " " + player["last_name"];
+      if(k === "field_goals_made") player[k] = player[k]+"-"+player["field_goals_attempted"];
+      if(k === "three_pointers_made") player[k] = player[k]+"-"+player["three_pointers_attempted"];
       td = document.createElement("td");
       td.innerHTML = player[k]!==null ? player[k] : 0;
       tr.appendChild(td);

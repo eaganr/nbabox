@@ -24,220 +24,237 @@
     //var gameID = "0021400962"; //1OT
     //var gameID = "0021400491";
     //var gameID = "0041400123"; //2OT
+    var gameDate = "20150616";
     var mainurl = window.location.href;
     if(mainurl.indexOf("gameid") > -1) {
-      gameID = mainurl.substring(mainurl.indexOf("gameid")+7);
+      var params = mainurl.substring(mainurl.indexOf("gameid")+7);
+      params = params.split("&date=");
+      gameID = params[0];
+      gameDate = params[1]; 
     }
 
     var homeTeam = {};
     var awayTeam = {};
     var neutral = {};
+    
+    var livegame = false;
+    var today = new Date();
+    if(gameDate.substring(0,4) == today.getYear() && gameDate.substring(4,6) == today.getMonth()+1 && gameDate.substring(6,8) == today.getDate()) {
+      livegame = true;
+    }
 
     var pbp = new playbyplay();
-    $.ajax({
-        type : 'POST',
-        url : 'http://eaganr.com:3000',           
-        data: {
-          func: "getBoxScore",
-          gameID : gameID
-        },
-        success:function (data) {
-          data = data.resultSets;
-          console.log(data);
-           
-          homeTeam.id = data[1].rowSet[0][3];
-          awayTeam.id = data[1].rowSet[1][3];
-          homeTeam.abbrev = data[1].rowSet[0][4];
-          awayTeam.abbrev = data[1].rowSet[1][4];
-          homeTeam.color = teamcolors(homeTeam.abbrev);
-          awayTeam.color = teamcolors(awayTeam.abbrev, homeTeam.color);
-          homeTeam.score = data[5].rowSet[0][23];
-          awayTeam.score = data[5].rowSet[1][23];
+    function getData() {
+      $.ajax({
+          type : 'POST',
+          url : 'http://eaganr.com:3000',           
+          data: {
+            func: "getBoxScore",
+            gameID : gameID,
+            date : gameDate,
+            accur : 1 
+          },
+          success:function (data) {
+            data = data["sports_content"]["game"];
+            console.log(data);
+            
+            homeTeam.id = data["home"]["id"];
+            awayTeam.id = data["visitor"]["id"];
+            homeTeam.abbrev = data["home"]["abbreviation"];
+            awayTeam.abbrev = data["visitor"]["abbreviation"];
+            homeTeam.color = teamcolors(homeTeam.abbrev);
+            awayTeam.color = teamcolors(awayTeam.abbrev, homeTeam.color);
+            homeTeam.score = data["home"]["stats"]["points"];
+            awayTeam.score = data["visitor"]["stats"]["points"];
 
-          document.getElementById("hometeam").getElementsByTagName("h1")[0].innerHTML=homeTeam.abbrev+" - "+homeTeam.score;
-          document.getElementById("awayteam").getElementsByTagName("h1")[0].innerHTML=awayTeam.score+" - "+awayTeam.abbrev;
+            document.getElementById("hometeam").getElementsByTagName("h1")[0].innerHTML=homeTeam.abbrev+" - "+homeTeam.score;
+            document.getElementById("awayteam").getElementsByTagName("h1")[0].innerHTML=awayTeam.score+" - "+awayTeam.abbrev;
 
-          homeTeam.players = [];
-          awayTeam.players = [];
-          for(var i=0;i<data[4].rowSet.length;i++) {
-            var player = data[4].rowSet[i];
-            if(player[1] === homeTeam.id) {
-              homeTeam.players.push(player);
-            }
-            if(player[1] === awayTeam.id) {
-              awayTeam.players.push(player);
-            }
-          }
+            homeTeam.players = data["home"]["players"]["player"];
+            awayTeam.players = data["visitor"]["players"]["player"];
 
-          homeTeam.scoring = new pie("#homescoring")
-            .w(250).h(250)
-            .value("26")
-            .data(homeTeam.players)
-            .diff("4")
-            .label(function(d) { return d.data["5"].split(" ")[1]+" - "+d.data["26"];})
-            .title(homeTeam.abbrev + " Scoring")
-            .draw();  
+            homeTeam.scoring = new pie("#homescoring")
+              .w(250).h(250)
+              .value("points")
+              .data(homeTeam.players)
+              .diff("player_code")
+              .label(function(d) { return d.data["last_name"]+" - "+d.data["points"];})
+              .title(homeTeam.abbrev + " Scoring")
+              .draw();  
 
-          awayTeam.scoring = new pie("#awayscoring")
-            .w(250).h(250)
-            .value("26")
-            .data(awayTeam.players)
-            .diff("4")
-            .label(function(d) { return d.data["5"].split(" ")[1]+" - "+d.data["26"];})
-            .title(awayTeam.abbrev + " Scoring")
-            .draw();
+            awayTeam.scoring = new pie("#awayscoring")
+              .w(250).h(250)
+              .value("points")
+              .data(awayTeam.players)
+              .diff("player_code")
+              .label(function(d) { return d.data["last_name"]+" - "+d.data["points"];})
+              .title(awayTeam.abbrev + " Scoring")
+              .draw();
 
-          //boxscore
-          homeTeam.box = new boxscore("homebox",homeTeam.players);
-          awayTeam.box = new boxscore("awaybox",awayTeam.players);
+            //boxscore
+            homeTeam.box = new boxscore("homebox",homeTeam.players);
+            awayTeam.box = new boxscore("awaybox",awayTeam.players);
 
-          var homeRebs = [
-            {abbrev:homeTeam.abbrev, reb:data[5].rowSet[0][16]},
-            {abbrev:awayTeam.abbrev, reb:data[5].rowSet[1][15]}
-          ];
-          var awayRebs = [
-            {abbrev:awayTeam.abbrev, reb:data[5].rowSet[1][16]},
-            {abbrev:homeTeam.abbrev, reb:data[5].rowSet[0][15]}
-          ];
+            var homeRebs = [
+              {abbrev:homeTeam.abbrev, reb:data["home"]["stats"]["rebounds_defensive"]},
+              {abbrev:awayTeam.abbrev, reb:data["visitor"]["stats"]["rebounds_offensive"]}
+            ];
+            var awayRebs = [
+              {abbrev:awayTeam.abbrev, reb:data["visitor"]["stats"]["rebounds_defensive"]},
+              {abbrev:homeTeam.abbrev, reb:data["home"]["stats"]["rebounds_offensive"]}
+            ];
 
-          homeTeam.rebounds = new pie("#homerebounding")
-            .w(250).h(250)
-            .value("reb")
-            .data(homeRebs)
-            .diff("abbrev")
-            .label(function(d) { return d.data.abbrev+" - "+d.data.reb;})
-            .color(teamcolors, true)
-            .title(homeTeam.abbrev + " Basket Rebounds")
-            .draw();
+            homeTeam.rebounds = new pie("#homerebounding")
+              .w(250).h(250)
+              .value("reb")
+              .data(homeRebs)
+              .diff("abbrev")
+              .label(function(d) { return d.data.abbrev+" - "+d.data.reb;})
+              .color(teamcolors, true)
+              .title(homeTeam.abbrev + " Basket Rebounds")
+              .draw();
 
-          awayTeam.rebounds = new pie("#awayrebounding")
-            .w(250).h(250)
-            .value("reb")
-            .data(awayRebs)
-            .diff("abbrev")
-            .label(function(d) { return d.data.abbrev+" - "+d.data.reb;})
-            .color(teamcolors, true)
-            .title(awayTeam.abbrev + " Basket Rebounds")
-            .draw();
+            awayTeam.rebounds = new pie("#awayrebounding")
+              .w(250).h(250)
+              .value("reb")
+              .data(awayRebs)
+              .diff("abbrev")
+              .label(function(d) { return d.data.abbrev+" - "+d.data.reb;})
+              .color(teamcolors, true)
+              .title(awayTeam.abbrev + " Basket Rebounds")
+              .draw();
 
-          var threes = [
-            {abbrev:homeTeam.abbrev, threes:data[5].rowSet[0][9]},
-            {abbrev:awayTeam.abbrev, threes:data[5].rowSet[1][9]}
-          ];
-          var fouls = [
-            {abbrev:homeTeam.abbrev, fls:data[5].rowSet[0][22]},
-            {abbrev:awayTeam.abbrev, fls:data[5].rowSet[1][22]}
-          ];
-          var assists = [
-            {abbrev:homeTeam.abbrev, assists:data[5].rowSet[0][18]},
-            {abbrev:awayTeam.abbrev, assists:data[5].rowSet[1][18]}
-          ];
-          var tos = [
-            {abbrev:homeTeam.abbrev, to:data[5].rowSet[0][21]},
-            {abbrev:awayTeam.abbrev, to:data[5].rowSet[1][21]}
-          ];
+            var threes = [
+              {abbrev:homeTeam.abbrev, threes:data["home"]["stats"]["three_pointers_made"]},
+              {abbrev:awayTeam.abbrev, threes:data["visitor"]["stats"]["three_pointers_made"]}
+            ];
+            var fouls = [
+              {abbrev:homeTeam.abbrev, fls:data["home"]["stats"]["fouls"]},
+              {abbrev:awayTeam.abbrev, fls:data["visitor"]["stats"]["fouls"]}
+            ];
+            var assists = [
+              {abbrev:homeTeam.abbrev, assists:data["home"]["stats"]["assists"]},
+              {abbrev:awayTeam.abbrev, assists:data["visitor"]["stats"]["assists"]}
+            ];
+            var tos = [
+              {abbrev:homeTeam.abbrev, to:data["home"]["stats"]["turnovers"]},
+              {abbrev:awayTeam.abbrev, to:data["visitor"]["stats"]["turnovers"]}
+            ];
 
 
-          neutral.threes = new pie("#threes")
-            .w(250).h(250)
-            .value("threes")
-            .data(threes)
-            .diff("abbrev")
-            .label(function(d) { return d.data.abbrev+" - "+d.data.threes;})
-            .color(teamcolors, true)
-            .title("3 Point FGM")
-            .draw();
+            neutral.threes = new pie("#threes")
+              .w(250).h(250)
+              .value("threes")
+              .data(threes)
+              .diff("abbrev")
+              .label(function(d) { return d.data.abbrev+" - "+d.data.threes;})
+              .color(teamcolors, true)
+              .title("3 Point FGM")
+              .draw();
 
-          neutral.fouls = new pie("#fouls")
-            .w(250).h(250)
-            .value("fls")
-            .data(fouls)
-            .diff("abbrev")
-            .label(function(d) { return d.data.abbrev+" - "+d.data.fls;})
-            .color(teamcolors, true)
-            .title("Fouls")
-            .draw();
+            neutral.fouls = new pie("#fouls")
+              .w(250).h(250)
+              .value("fls")
+              .data(fouls)
+              .diff("abbrev")
+              .label(function(d) { return d.data.abbrev+" - "+d.data.fls;})
+              .color(teamcolors, true)
+              .title("Fouls")
+              .draw();
 
-          neutral.tos = new pie("#tos")
-            .w(250).h(250)
-            .value("to")
-            .data(tos)
-            .diff("abbrev")
-            .label(function(d) { return d.data.abbrev+" - "+d.data.to;})
-            .color(teamcolors, true)
-            .title("TOs")
-            .draw();
+            neutral.tos = new pie("#tos")
+              .w(250).h(250)
+              .value("to")
+              .data(tos)
+              .diff("abbrev")
+              .label(function(d) { return d.data.abbrev+" - "+d.data.to;})
+              .color(teamcolors, true)
+              .title("TOs")
+              .draw();
 
-          neutral.assists = new pie("#assists")
-            .w(250).h(250)
-            .value("assists")
-            .data(assists)
-            .diff("abbrev")
-            .label(function(d) { return d.data.abbrev+" - "+d.data.assists;})
-            .color(teamcolors, true)
-            .title("Assists")
-            .draw();
+            neutral.assists = new pie("#assists")
+              .w(250).h(250)
+              .value("assists")
+              .data(assists)
+              .diff("abbrev")
+              .label(function(d) { return d.data.abbrev+" - "+d.data.assists;})
+              .color(teamcolors, true)
+              .title("Assists")
+              .draw();
 
-        $.ajax({
-            type : 'POST',
-            url : 'http://eaganr.com:3000',           
-            data: {
-              func: "getPlayByPlay",
-              gameID : gameID
-            },
-            success:function (data) {
-              console.log(data);
-              var homeplayers = homeTeam.players.map(function(d) { return d[5].split(" ")[d[5].split(" ").length -1]; });
-              var awayplayers = awayTeam.players.map(function(d) { return d[5].split(" ")[d[5].split(" ").length -1]; });
+          $.ajax({
+              type : 'POST',
+              url : 'http://eaganr.com:3000',           
+              data: {
+                func: "getPlayByPlay",
+                gameID : gameID,
+                date: gameDate,
+                accur: 1
+              },
+              success:function (data) {
+                console.log(data);
+                var homeplayers = homeTeam.players.map(function(d) { return d["last_name"]; });
+                var awayplayers = awayTeam.players.map(function(d) { return d["last_name"]; });
 
-              //same name players
-              var allplayers = [homeplayers, awayplayers];
-              var allteams = [homeTeam, awayTeam];
-              for(var t=0;t<2;t++) {
-                var players = allplayers[t];
-                for(var i=0;i<players.length;i++) {                                      
-                  if(players[i] === "III") {                                             
-                    players[i] = "Lucas III";                                            
+                //same name players
+                var allplayers = [homeplayers, awayplayers];
+                var allteams = [homeTeam, awayTeam];
+                for(var t=0;t<2;t++) {
+                  var players = allplayers[t];
+                  for(var i=0;i<players.length;i++) {                                      
+                    if(players[i] === "III") {                                             
+                      players[i] = "Lucas III";                                            
+                    }                                                                          
+                    for(var j=0;j<players.length;j++) {                                    
+                      if(i !== j) {                                                            
+                        var n=0;                                                               
+                        var p1 = "";                                                           
+                        var p2 = "";                                                           
+                        while(p1 + " " + players[i] === p2 + " " + players[j]) {       
+                          p1 = p1 + allteams[t].players[i]["first_name"].substring(n,n+1);           
+                          p2 = p2 + allteams[t].players[j]["first_name"].substring(n,n+1);           
+                          n++;                                                                 
+                        }                                                                      
+                        if(p1.length === 1) {                                                  
+                          players[i] = p1 + ". " + players[i];                         
+                          players[j] = p2 + ". " + players[j];                         
+                        }                                                                      
+                        if(p1.length > 1) {                                                    
+                          players[i] = p1 + " " + players[i];                          
+                          players[j] = p2 + " " + players[j];                          
+                        }                                                                      
+                      }
+                    }                                                                        
                   }                                                                          
-                  for(var j=0;j<players.length;j++) {                                    
-                    if(i !== j) {                                                            
-                      var n=0;                                                               
-                      var p1 = "";                                                           
-                      var p2 = "";                                                           
-                      while(p1 + " " + players[i] === p2 + " " + players[j]) {       
-                        p1 = p1 + allteams[t].players[i][5].substring(n,n+1);           
-                        p2 = p2 + allteams[t].players[j][5].substring(n,n+1);           
-                        n++;                                                                 
-                      }                                                                      
-                      if(p1.length === 1) {                                                  
-                        players[i] = p1 + ". " + players[i];                         
-                        players[j] = p2 + ". " + players[j];                         
-                      }                                                                      
-                      if(p1.length > 1) {                                                    
-                        players[i] = p1 + " " + players[i];                          
-                        players[j] = p2 + " " + players[j];                          
-                      }                                                                      
-                    }
-                  }                                                                        
-                }                                                                          
-              }
+                }
 
+                var temp = {};
+                for(var i=0;i<homeplayers.length;i++) {
+                  temp[homeplayers[i]] = {player_code:homeTeam.players[i]["player_code"]};
+                }
+                homeplayers = temp;
+                var temp2 = {};
+                for(var i=0;i<awayplayers.length;i++) {
+                  temp2[awayplayers[i]] = {player_code:awayTeam.players[i]["player_code"]};
+                }
+                awayplayers = temp2;
+  
+                pbp.homeplayers(homeplayers)
+                  .awayplayers(awayplayers)
+                  .selector("#chart")
+                  .data(data)
+                  .parse()
+                  .homecolor(homeTeam.color)
+                  .awaycolor(awayTeam.color)
+                  .draw();
 
-              pbp.homeplayers(homeplayers)
-                .awayplayers(awayplayers)
-                .selector("#chart")
-                .data(data.playByPlay)
-                .parse()
-                .homecolor(homeTeam.color)
-                .awaycolor(awayTeam.color)
-                .draw();
-
-          }
-        });
+            }
+          });
         }
       });
-
-
+    }
+    getData();
+    if(livegame) window.setTimeout(getData, 60000);
   </script>
 
 

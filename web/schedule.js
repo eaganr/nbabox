@@ -2,7 +2,6 @@ function schedule() {
   var self = this;
 
 	//private vars
-	var url = "http://stats.nba.com/stats/scoreboard/?callback=?&LeagueID=00&DayOffset=0&GameDate=";
 	var today = new Date();
 	var date = today.getMonth()+1+"/"+today.getDate()+"/"+today.getFullYear();
 	//var date = "03/10/2015";
@@ -11,24 +10,27 @@ function schedule() {
 	self.getschedule=function() {
 		var maindiv = document.getElementById(self.id());
 		if(maindiv) maindiv.innerHTML = "";
-		var fullurl = url+date;
 		self.games = [];
+    var accur = 3;
+    var d = new Date(date);
+    if(today.getDate() === d.getDate() && today.getFullYear() === d.getFullYear() && today.getMonth() === d.getMonth()) {
+      accur = 1;
+    } 
 		$.ajax({
 				type : 'POST',
 				url : 'http://eaganr.com:3000',           
 				data: {
 					func: "getSchedule",
-					date : date
+					date : date,
+          accur : accur
 				},
 				success:function (data) {
-					data = data.resultSets[2].rowSet;
+          data = data["sports_content"]["games"]["game"];
+          
 					for(var i=0;i<data.length;i++) {
-						var hometeam, awayteam;
-						for(var j=0;j<teams.length;j++) {
-							if(teams[j].teamId === data[i][1]) hometeam = teams[j].abbreviation;
-							if(teams[j].teamId === data[i][2]) awayteam = teams[j].abbreviation;
-						}
-						self.games.push({gameid:data[i][0], hometeam:hometeam, awayteam:awayteam});
+            var hometeam = data[i]["home"]["abbreviation"];
+            var awayteam = data[i]["visitor"]["abbreviation"];
+						self.games.push({gameid:data[i]["id"], hometeam:hometeam, awayteam:awayteam});
 					}
 					self.draw();
 				}
@@ -63,7 +65,12 @@ function schedule() {
 			var game = document.createElement("div");	
 			game.className = "schedule-game";
 			game.gameid=self.games[i].gameid;
-			game.onclick=function() { window.location="?gameid="+this.gameid;};
+			game.onclick=function() { 
+        d = date.replace(new RegExp("/", 'g'), "-");
+        if(d.length === 9) d = d.substring(0,3)+"0"+d.substring(3);
+        d = d.substring(6)+d.substring(0,2)+d.substring(3,5);
+        window.location="?gameid="+this.gameid+"&date="+d;
+      };
 
 			var img = document.createElement("img");
 			img.src="http://stats.nba.com/media/img/teams/logos/"+self.games[i].awayteam+"_logo.svg";

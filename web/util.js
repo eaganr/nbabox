@@ -1,4 +1,5 @@
 function hexColorDelta(hex1, hex2) {
+    if(hex1 === undefined || hex2 === undefined) return 0;
     hex1 = hex1.substring(1);
     hex2 = hex2.substring(1);
     // get red/green/blue int values of hex1

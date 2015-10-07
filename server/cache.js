@@ -53,13 +53,14 @@ function toTime(dateString) {
 }
 
 //box score
-function requestBoxScore(res, gameID) {
+function requestBoxScore(res, gameID, date) {
   var fs = require('fs');
   var request = require('request');  
-  var url = "http://stats.nba.com/stats/boxscore?StartPeriod=0&EndPeriod=0&StartRange=0&EndRange=0&RangeType=0&GameID="+gameID;
+  var url = "http://data.nba.com/10s/json/cms/noseason/game/"+date+"/"+gameID+"/boxscore.json";
   request(url, function (error, response, body) {
     if(!error && response.statusCode == 200) {
       var response = JSON.parse(body);
+      console.log(response);
       fs.writeFile(folder+"cache/minute/boxscore/"+gameID+"boxscore"+getTime()+".json", JSON.stringify(response), function(err2) {
         if(err2) console.log(err2);
         console.log("saved");
@@ -70,13 +71,13 @@ function requestBoxScore(res, gameID) {
 }
 
 //period = 1 - minute, 2 - hour, 3 - day
-function getBoxScore(res, period, gameID) {
+function getBoxScore(res, period, gameID, date) {
   var j = [];
   if(period > 0) j = getFile("minute", "boxscore", gameID);
   if(j.length === 0 && period > 1) j = getFile("hour", "boxscore", gameID);
   if(j.length === 0 && period > 2) j = getFile("day", "boxscore", gameID);
 
-  if(j.length === 0) requestBoxScore(res, gameID);
+  if(j.length === 0) requestBoxScore(res, gameID, date);
   else res.jsonp(j);
 }
 
@@ -99,27 +100,38 @@ function getFile(period, filetype, id) {
 
 
 //play by play
-function requestPlayByPlay(res, gameID) {
-  var nba = require('nba');
-    var fs = require('fs');
-    nba.api.playByPlay({gameId: gameID}, function (err, response) {
-      if(err) console.log(err);
-      fs.writeFile(folder+"cache/minute/playbyplay/"+gameID+"playbyplay"+getTime()+".json", JSON.stringify(response), function(err2) {
+function requestPlayByPlay(res, gameID, date, plays, q) {
+  var request = require('request');  
+  var url = "http://data.nba.com/10s/json/cms/noseason/game/"+date+"/"+gameID+"/pbp_"+q+".json";
+  console.log(url);
+  request(url, function (error, response, body) {
+    if(!error && response.statusCode == 200) {
+      var response = JSON.parse(body);
+      response = response["sports_content"]["game"]["play"];
+      plays = plays.concat(response);
+      q++;
+      requestPlayByPlay(res, gameID, date, plays, q);
+    } 
+    if(!body) {
+      var fs = require('fs');
+      fs.writeFile(folder+"cache/minute/playbyplay/"+gameID+"playbyplay"+getTime()+".json", JSON.stringify(plays), function(err2) {
         if(err2) console.log(err2);
         console.log("saved");
-        res.jsonp(response);
+        res.jsonp(plays);
       });
-    });
+    }
+  });
 }
 
+
 //period = 1 - minute, 2 - hour, 3 - day
-function getPlayByPlay(res, period, gameID) {
+function getPlayByPlay(res, period, gameID, date) {
   var j = [];
   if(period > 0) j = getFile("minute", "playbyplay", gameID);
   if(j.length === 0 && period > 1) j = getFile("hour", "playbyplay", gameID);
   if(j.length === 0 && period > 2) j = getFile("day", "playbyplay", gameID);
 
-  if(j.length === 0) requestPlayByPlay(res, gameID);
+  if(j.length === 0) requestPlayByPlay(res, gameID, date, [], 1);
   else res.jsonp(j);
 }
 
@@ -127,13 +139,13 @@ function getPlayByPlay(res, period, gameID) {
 function requestSchedule(res, date) {
   var fs = require('fs');
   var request = require('request');  
-  var url = "http://stats.nba.com/stats/scoreboard/?callback=?&LeagueID=00&DayOffset=0&GameDate="+date;
+  date = date.replace(new RegExp("/", 'g'), "-");
+  if(date.length === 9) date = date.substring(0,3)+"0"+date.substring(3);
+  date = date.substring(6)+date.substring(0,2)+date.substring(3,5);
+  var url = "http://data.nba.com/json/cms/noseason/scoreboard/"+date+"/games.json";
   request(url, function (error, response, body) {
     if(!error && response.statusCode == 200) {
-      body = body.substring(2,body.length-1);
       var response = JSON.parse(body);
-      date=date.replace(new RegExp("/", 'g'), "-");
-      if(date.length === 9) date = date.substring(0,3)+"0"+date.substring(3);
       fs.writeFile(folder+"cache/minute/schedule/"+date+"schedule"+getTime()+".json", JSON.stringify(response), function(err2) {
         if(err2) console.log(err2);
         console.log("saved");
@@ -171,9 +183,9 @@ function getSchedule(res, period, date) {
   app.post('/',function(req,res){
     console.log(req.body);
     res.header("Access-Control-Allow-Origin", "*");
-    if(req.body.func === "getBoxScore") getBoxScore(res,3,req.body.gameID);
-    if(req.body.func === "getPlayByPlay") getPlayByPlay(res,3,req.body.gameID);
-    if(req.body.func === "getSchedule") getSchedule(res,3,req.body.date);
+    if(req.body.func === "getBoxScore") getBoxScore(res,req.body.accur? req.body.accur : 3,req.body.gameID, req.body.date);
+    if(req.body.func === "getPlayByPlay") getPlayByPlay(res,req.body.accur? req.body.accur : 3,req.body.gameID, req.body.date);
+    if(req.body.func === "getSchedule") getSchedule(res,req.body.accur? req.body.accur : 3,req.body.date);
   });
 }).call(this);
 
