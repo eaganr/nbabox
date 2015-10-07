@@ -44,6 +44,7 @@
     }
 
     var pbp = new playbyplay();
+    var pdata;
     function getData() {
       $.ajax({
           type : 'POST',
@@ -192,8 +193,8 @@
                 accur: 1
               },
               success:function (data) {
-                console.log(data);
-                var homeplayers = homeTeam.players.map(function(d) { return d["last_name"]; });
+                pdata = data;
+                var homeplayers = homeTeam.players.map(function(d) { return d["last_name"]? d["last_name"] : d["first_name"]; });
                 var awayplayers = awayTeam.players.map(function(d) { return d["last_name"]; });
 
                 //same name players

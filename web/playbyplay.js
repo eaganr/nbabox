@@ -157,7 +157,7 @@ function playbyplay() {
           var subs = desc.split("replaced by")[1];
           for(var j in players) {
             //in
-            if(subs.indexOf(players[j].playerName) > -1) {
+            if(subs.indexOf(j) > -1) {
               var len = players[j].mins.length;
               if(len > 0 && players[j].mins[len-1].outtime === null) {
                 players[j].mins[len-1].outtime = "0:00";
@@ -420,11 +420,10 @@ function playbyplay() {
     var playergroups = [self.awayplayers(),self.homeplayers()];
     for(var n=0;n<playergroups.length;n++) {
       var players = playergroups[n];
-      var j = -1;
+      var j = n === 0? -1 : Object.keys(players).length;
       for(var p in players) {
-        j++;
+        j = n === 0? j+1 : j-1;
         var player = players[p];
-        var y = 240/Object.keys(players).length*(j+1)+250*n + self.margins().top;
         var y = self.yScale(self.yScale.domain()[n]*(j+1)/(Object.keys(players).length+1));
         self.vis.append("svg:text")
           .attr("class","player-name")
