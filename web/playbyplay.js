@@ -14,7 +14,7 @@ function playbyplay() {
   self.homeplayers=function(h) {
     if(h) {
       for(var k in h) {
-        h[k] = {player_code:h[k]["player_code"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+        h[k] = {player_code:h[k]["player_code"], on_court:h[k]["on_court"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
       }
       self.homeplayers.val=h;
       return self;
@@ -25,7 +25,7 @@ function playbyplay() {
   self.awayplayers=function(a) {
     if(a) {
       for(var k in a) {
-        a[k] = {player_code:a[k]["player_code"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+        a[k] = {player_code:a[k]["player_code"], on_court:a[k]["on_court"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
       }
       self.awayplayers.val=a;
 
@@ -67,10 +67,10 @@ function playbyplay() {
 
   self.parse=function() {
     for(var k in self.homeplayers.val) {
-      self.homeplayers.val[k] = {player_code:self.homeplayers.val[k]["player_code"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+      self.homeplayers.val[k] = {player_code:self.homeplayers.val[k]["player_code"], on_court:self.homeplayers.val[k]["on_court"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
     }
     for(var k in self.awayplayers.val) {
-      self.awayplayers.val[k] = {player_code:self.awayplayers.val[k]["player_code"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+      self.awayplayers.val[k] = {player_code:self.awayplayers.val[k]["player_code"], on_court:self.awayplayers.val[k]["on_court"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
     }
 
     self.scoringmargins = [{margin:0, time:"12:00", period:1}];
@@ -135,9 +135,9 @@ function playbyplay() {
             }
           }
         }
-        if(desc.indexOf("Block") > -1) {
+        if(desc.indexOf("Block: ") > -1) {
           for(var k in players) {
-            if(evt["player_code"] === players[k]["player_code"]) {
+            if(desc.split("Block: ")[1].indexOf(k) > -1) {
                 players[k].blks.push({time:evt.clock, period:period});
                 mincorrect(evt, players[k], period);
                 break;
@@ -265,6 +265,10 @@ function playbyplay() {
           s = 60-Math.floor(seconds-2880-300*(period-4)-60*(5-m));
           m--;
         }
+        if(s === 60) {
+          s = 0;
+          m += 1;
+        }
         if(s < 10) s = "0"+s;
         timelabel = period+1 + " - " + m+":"+s; 
       }
@@ -314,6 +318,7 @@ function playbyplay() {
   self.draw=function() {
     var extraticks = [];
     if(self.data()[self.data().length-1].period > 4) {
+      extraticks.push(2880);
       totalseconds = (self.data()[self.data().length-1].period-4) * 300 + 2880;
       for(var i=4;i<self.data()[self.data().length-1].period;i++) {
         extraticks.push(2880+300*(i-3));
@@ -321,7 +326,7 @@ function playbyplay() {
     }
 
     self.vis=d3.select(self.selector());
-    document.getElementById(self.selector().substring(1)).innerHTML="<linearGradient id=\"score-gradient\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"560\"><stop offset=\"0%\"></stop><stop offset=\"50%\"></stop><stop offset=\"50%\"></stop><stop offset=\"100%\"></stop></linearGradient>";
+    document.getElementById(self.selector().substring(1)).innerHTML="<linearGradient id=\"score-gradient\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"553\"><stop offset=\"0%\"></stop><stop offset=\"50%\"></stop><stop offset=\"50%\"></stop><stop offset=\"100%\"></stop></linearGradient>";
     $(self.selector() + " stop")[0].setAttribute("stop-color",self.homecolor());
     $(self.selector() + " stop")[1].setAttribute("stop-color",self.homecolor());
     $(self.selector() + " stop")[2].setAttribute("stop-color",self.awaycolor());
@@ -351,9 +356,9 @@ function playbyplay() {
     min -= 5;
 
     self.yScale = d3.scale.linear().range([self.h(), self.margins().top]).domain([min, max]);
-    var  xAxis = d3.svg.axis()
+    var xAxis = d3.svg.axis()
       .scale(self.xScale)
-      .tickValues([720,1440,2160,2880].concat(extraticks))
+      .tickValues([])
       .tickFormat(function(seconds) { 
         var period,m,s;
         if(seconds === 2880) return extraticks.length ? "5 - 5:00" : "4 - 0:00";
@@ -381,6 +386,33 @@ function playbyplay() {
         if(s < 10) s = "0"+s;
         return period+1 + " - " + m+":"+s; 
       });
+
+    //dashed line quarter markers
+    var ticks = [720,1440,2160].concat(extraticks);
+    for(var i=0;i<ticks.length;i++) {
+      self.vis.append("svg:line")  
+        .attr("class", "quarter-line")
+        .attr("x1",self.xScale(ticks[i]))
+        .attr("x2",self.xScale(ticks[i]))
+        .attr("y1",self.yScale(self.yScale.domain()[0])).attr("y2", self.yScale(self.yScale.domain()[1]))
+        .attr("stroke","grey")
+        .attr("stroke-dasharray", "10,10")
+      var q;
+      if(i === 0) q = "2nd Quarter";
+      if(i === 1) q = "3rd Quarter";
+      if(i === 2) q = "4th Quarter";
+      if(i === 3) q = "1st OT";
+      if(i === 4) q = "2nd OT";
+
+      self.vis.append("svg:text")
+        .attr("class", "quarter-label")
+        .attr("transform","translate("+self.xScale(ticks[i]+15)+",59)")
+        .style("font-size", "11px")
+        .attr("fill", "grey")
+        .text(q);
+    }
+
+
     var yAxis = d3.svg.axis()
       .scale(self.yScale)
       .tickFormat(function(t) { return Math.abs(t); })
@@ -391,16 +423,19 @@ function playbyplay() {
       .attr("transform", "translate(0," + self.yScale(0) + ")")
       .call(xAxis);
 
-    self.vis.select(".domain").style("stroke-dasharray", ("3, 3"));
-
     self.vis.append("svg:g")
-      .attr("class", "y axis")
+      .attr("class", "yaxis")
       .attr("transform", "translate(" + (self.margins().left) + ",0)")
       .call(yAxis);
 
+    self.vis.selectAll(".domain")
+      .attr("stroke", "black")
+      .attr("stroke-width", 2)
+      .attr("fill","none");
+
     var lineGen = d3.svg.line()
       .x(function(d) {
-          return self.xScale(self.timetoseconds(d.period, d.time));
+          return self.xScale(3+self.timetoseconds(d.period, d.time));
       })
       .y(function(d) {
           var margin = 0;
@@ -408,11 +443,13 @@ function playbyplay() {
           return self.yScale(margin);
       })
       .interpolate("basis");
+    var latest = self.data()[self.data().length-1];
+    self.scoringmargins.push({margin:self.scoringmargins[self.scoringmargins.length-1].margin, time:latest.clock, period:latest.period});
 
     self.vis.append('svg:path')
       .attr('d', lineGen(self.scoringmargins))
       .attr('stroke', 'url(#score-gradient)')
-      .attr('stroke-width', 2)
+      .attr('stroke-width', 4)
       .attr('fill', 'none');
 
 
@@ -424,7 +461,7 @@ function playbyplay() {
       for(var p in players) {
         j = n === 0? j+1 : j-1;
         var player = players[p];
-        var y = self.yScale(self.yScale.domain()[n]*(j+1)/(Object.keys(players).length+1));
+        var y = self.yScale(-0.5+self.yScale.domain()[n]*(j+1)/(Object.keys(players).length+1));
         self.vis.append("svg:text")
           .attr("class","player-name")
           .attr("transform","translate(52,"+(y-5)+")")
@@ -435,8 +472,14 @@ function playbyplay() {
         for(var i=0;i<player.mins.length;i++) {
           var min = player.mins[i];
           if(min.outperiod === null) {
-            min.outperiod = totalperiods;
-            min.outtime = "0:00";
+            if(player["on_court"] == 1) {
+              min.outperiod = self.data()[self.data().length-1]["period"];
+              min.outtime = self.data()[self.data().length-1]["clock"];
+            }
+            else {
+              min.outperiod = min.inperiod;
+              min.outtime = "0:00";
+            }
           }
 
           self.vis.append("svg:line")  
@@ -444,7 +487,8 @@ function playbyplay() {
             .attr("x1",self.xScale(self.timetoseconds(min.inperiod,min.intime)))
             .attr("x2",self.xScale(self.timetoseconds(min.outperiod,min.outtime)))
             .attr("y1",y).attr("y2",y)
-            .attr("stroke","black")
+            .attr("stroke","#3399FF")
+            .attr("stroke-linecap","round")
             .attr("stroke-width", 1);
         }
 
@@ -698,14 +742,18 @@ function playbyplay() {
         var seconds = self.xScale.invert(x);
         updatemenu(seconds);
       })
-      .on("mouseout",function(d,i) {
-        var latest = self.data()[self.data().length-1];
-        var t = self.timetoseconds(latest.period, latest.clock);
-        updatemenu(t);
-      });
+      .on("mouseout", mouseoff);
+
+    mouseoff();
 
     return self;
   };
+
+  function mouseoff() {
+    var latest = self.data()[self.data().length-1];
+    var t = self.timetoseconds(latest.period, latest.clock);
+    updatemenu(t);
+   }
 
 
   return self;

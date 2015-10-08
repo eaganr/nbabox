@@ -43,6 +43,7 @@ function boxscore(id, data) {
     }
     table.appendChild(tr);
   }
+  document.getElementById(self.id).innerHTML = "";
   document.getElementById(self.id).appendChild(table);
   return self;
 }

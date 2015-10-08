@@ -6,6 +6,7 @@ function schedule() {
 	var date = today.getMonth()+1+"/"+today.getDate()+"/"+today.getFullYear();
 	//var date = "03/10/2015";
 	self.games=[];
+  self.loaded = false;
 
 	self.getschedule=function() {
 		var maindiv = document.getElementById(self.id());
@@ -32,6 +33,7 @@ function schedule() {
             var awayteam = data[i]["visitor"]["abbreviation"];
 						self.games.push({gameid:data[i]["id"], hometeam:hometeam, awayteam:awayteam});
 					}
+          self.loaded = true;
 					self.draw();
 				}
 		});
@@ -45,6 +47,10 @@ function schedule() {
 		}
 		return self.id.val;
 	};
+  
+  self.date=function() {
+    return date;
+  }
 
 	self.draw=function() {
 		var maindiv = document.getElementById(self.id());

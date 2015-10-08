@@ -35,7 +35,7 @@ function pie(selector) {
       self.data.val=[];
       for(var i=0;i<d.length;i++) {
         if(d[i][self.value()] >0) self.data.val.push(d[i]);
-        self.total+=d[i][self.value()];
+        self.total+=parseInt(d[i][self.value()]);
       }
       return self;
     }
@@ -117,6 +117,7 @@ function pie(selector) {
   };
 
   self.draw=function() {
+    document.querySelector(self.selector()).innerHTML = "";
     self.svg = d3.select(self.selector()).append("svg")
       .attr("width", self.w()*1.2)
       .attr("height", self.h()*1.2)
