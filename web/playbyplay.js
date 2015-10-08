@@ -90,7 +90,7 @@ function playbyplay() {
           var assisted = desc.indexOf("AST)") > -1;
           var found = 0;
           for(var k in players) {
-            if(evt["player_code"] === players[k]["player_code"]) {
+            if(sections[0].indexOf(k) > -1) {
               var pt = {time:evt.clock,
                         period:period,
                         pts:parseInt(sections[1].split(" PTS)")[0]),
@@ -110,7 +110,7 @@ function playbyplay() {
         }
         if(desc.indexOf("Rebound") > -1) {
           for(var k in players) {
-            if(evt["player_code"] === players[k]["player_code"]) {
+            if(desc.split("Rebound")[0].indexOf(k) > -1) {
                 players[k].rebs.push({time:evt.clock, period:period});
                 mincorrect(evt, players[k], period);
                 break;
@@ -144,9 +144,9 @@ function playbyplay() {
             }
           }
         }
-        if(desc.indexOf("Foul:") > -1 || desc.indexOf(".Foul") > -1) {
+        if(desc.indexOf("Foul:") > -1) {
           for(var k in players) {
-            if(evt["player_code"] === players[k]["player_code"]) {
+            if(desc.split("Foul:")[0].indexOf(k) > -1) {
                 players[k].fls.push({time:evt.clock, period:period});
                 mincorrect(evt, players[k], period);
                 break;
@@ -320,7 +320,7 @@ function playbyplay() {
     if(self.data()[self.data().length-1].period > 4) {
       extraticks.push(2880);
       totalseconds = (self.data()[self.data().length-1].period-4) * 300 + 2880;
-      for(var i=4;i<self.data()[self.data().length-1].period;i++) {
+      for(var i=4;i<self.data()[self.data().length-1].period-1;i++) {
         extraticks.push(2880+300*(i-3));
       }
     }
@@ -358,34 +358,7 @@ function playbyplay() {
     self.yScale = d3.scale.linear().range([self.h(), self.margins().top]).domain([min, max]);
     var xAxis = d3.svg.axis()
       .scale(self.xScale)
-      .tickValues([])
-      .tickFormat(function(seconds) { 
-        var period,m,s;
-        if(seconds === 2880) return extraticks.length ? "5 - 5:00" : "4 - 0:00";
-        if(seconds < 2880) {
-          period = Math.floor(seconds/720);
-          m = 12-Math.floor((seconds-720*period)/60);
-          s = 60-Math.floor(seconds-720*period-60*(12-m));
-          m--;
-          if(seconds%720 === 0) {
-            m = 12;
-            s = 0;
-          }
-        }
-        else {
-          period = Math.floor((seconds-2880)/300)+4;
-          m = 5-Math.floor((seconds-2880-300*(period-4))/60);
-          s = 60-Math.floor(seconds-2880-300*(period-4)-60*(5-m));
-          m--;
-          if((seconds-2880)%300 === 0) {
-            period--;
-            m = 0;
-            s = 0;
-          }
-        }
-        if(s < 10) s = "0"+s;
-        return period+1 + " - " + m+":"+s; 
-      });
+      .tickValues([]);
 
     //dashed line quarter markers
     var ticks = [720,1440,2160].concat(extraticks);
@@ -426,7 +399,8 @@ function playbyplay() {
     self.vis.append("svg:g")
       .attr("class", "yaxis")
       .attr("transform", "translate(" + (self.margins().left) + ",0)")
-      .call(yAxis);
+      .call(yAxis)
+      .selectAll("text").attr("font-size", "11px");
 
     self.vis.selectAll(".domain")
       .attr("stroke", "black")
