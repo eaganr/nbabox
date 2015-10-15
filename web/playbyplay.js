@@ -154,10 +154,10 @@ function playbyplay() {
           }
         }
         if(desc.indexOf("Substitution ") > -1) {
-          var subs = desc.split("replaced by")[1];
+          var subs = desc.split("replaced by");
           for(var j in players) {
             //in
-            if(subs.indexOf(j) > -1) {
+            if(subs[1].indexOf(j) > -1) {
               var len = players[j].mins.length;
               if(len > 0 && players[j].mins[len-1].outtime === null) {
                 players[j].mins[len-1].outtime = "0:00";
@@ -166,7 +166,7 @@ function playbyplay() {
               players[j].mins.push({intime:evt.clock, inperiod:period, outtime:null, outperiod:null});
             }
             //out
-            if(evt["player_code"] === players[j]["player_code"]) {
+            if(subs[0].indexOf(j) > -1) {
               var len = players[j].mins.length;
               if(len > 0) {
                 players[j].mins[len-1].outtime = evt.clock;
@@ -409,7 +409,9 @@ function playbyplay() {
 
     var lineGen = d3.svg.line()
       .x(function(d) {
-          return self.xScale(3+self.timetoseconds(d.period, d.time));
+          var x = self.xScale(3+self.timetoseconds(d.period, d.time));
+          if(!x) console.log("yooo"+d.time);
+          return x;
       })
       .y(function(d) {
           var margin = 0;
@@ -419,6 +421,12 @@ function playbyplay() {
       .interpolate("basis");
     var latest = self.data()[self.data().length-1];
     self.scoringmargins.push({margin:self.scoringmargins[self.scoringmargins.length-1].margin, time:latest.clock, period:latest.period});
+    for(var i=0;i<self.scoringmargins.length;i++) {
+      if(!self.scoringmargins[i].time) {
+        self.scoringmargins.splice(i, 1);
+        i--;
+      }
+    }
 
     self.vis.append('svg:path')
       .attr('d', lineGen(self.scoringmargins))
@@ -428,6 +436,7 @@ function playbyplay() {
 
 
     //player minutes
+    var yplayers = {};
     var playergroups = [self.awayplayers(),self.homeplayers()];
     for(var n=0;n<playergroups.length;n++) {
       var players = playergroups[n];
@@ -436,8 +445,10 @@ function playbyplay() {
         j = n === 0? j+1 : j-1;
         var player = players[p];
         var y = self.yScale(-0.5+self.yScale.domain()[n]*(j+1)/(Object.keys(players).length+1));
+        yplayers[y] = p;
         self.vis.append("svg:text")
           .attr("class","player-name")
+          .attr("pline", p)
           .attr("transform","translate(52,"+(y-5)+")")
           .attr("dy", ".35em")
           .style("font-size", "10px")
@@ -463,7 +474,8 @@ function playbyplay() {
             .attr("y1",y).attr("y2",y)
             .attr("stroke","#3399FF")
             .attr("stroke-linecap","round")
-            .attr("stroke-width", 1);
+            .attr("stroke-width", 1)
+            .attr("pline", p);
         }
 
 
@@ -713,8 +725,25 @@ function playbyplay() {
       .attr("height",500)
       .on("mousemove",function(d,i) {
         var x = d3.mouse(this)[0];
+        var y = d3.mouse(this)[1];
         var seconds = self.xScale.invert(x);
         updatemenu(seconds);
+
+        //highlight player minutes
+        var close = 10000;
+        var yfound;
+        for(var yp in yplayers) {
+          if(Math.abs(y-yp) < close) {
+            close = Math.abs(y-yp);
+            yfound = yp;
+          }
+        }
+        self.vis.selectAll(".min-line")
+          .attr("stroke","#3399FF");
+        self.vis.selectAll(".player-name")
+          .attr("stroke", "");
+        self.vis.selectAll('[pline="'+yplayers[yfound]+'"]')
+          .attr("stroke","#CDCD4D");
       })
       .on("mouseout", mouseoff);
 
@@ -727,6 +756,11 @@ function playbyplay() {
     var latest = self.data()[self.data().length-1];
     var t = self.timetoseconds(latest.period, latest.clock);
     updatemenu(t);
+
+    self.vis.selectAll(".min-line")
+      .attr("stroke","#3399FF");
+    self.vis.selectAll(".player-name")
+      .attr("stroke","");
    }
 
 
