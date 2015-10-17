@@ -13,35 +13,83 @@
   text-align:center;
 }
 
+#scoreline {
+  width:480px;
+  margin:auto;
+}
+
+#scoreline img {
+    width:100px;
+    margin-left:30px;
+    margin-right:30px;
+}
+#scoreline div {
+  display:inline;
+  font-size:50px;
+  position:relative;
+  top:25px;
+}
+.team-name {
+  text-align:center;
+}
 h1 {
   width:400px;
   margin:auto;
-  margin-top:50px;
+  margin-top:100px;
   text-align:center;
 }
 
 table {
   border:solid;
+  border-width:1px;
+  border-radius:3px;
   display:block;
-  margin:auto;
+  margin-left:8%;
+}
+.box-table tr td:first-child {
+  width:140px;
+}
+
+h3 {
+  margin-left:8%;
 }
 tr:hover {
   background-color:#FFFFCC;
 }
-td {
+td, th {
   text-align:center;
 }
 .scoring-title {
   width:100px;
   margin:auto;
 }
-svg {
+#team-names {
+  float:left;
+  font-size:40px;
+  height:500px;
+}
+#home-name {
+  position:relative;
+  top:150px;
+}
+#away-name {
+  position:relative;
+  top:320px;
+}
+#playbyplay {
   display:block;
+  margin:auto;
+}
+#pbpchart {
+  display:inline-block;
   margin:auto;
 }
 .charts {
   width:525px;
+  float:right;
   margin:auto;
+  position:relative;
+  top:70px;
 }
 .pie {
   display:inline-block;
@@ -49,6 +97,7 @@ svg {
   margin:auto;
 }
 .stats {
+  display:block;
   width:90%;
   margin:0 auto;
 }
@@ -71,11 +120,21 @@ svg {
   text-align:center;
   width:100px;
 }
+#away-score {
+  float:left;
+}
+#home-score {
+  float:right;
+}
+#home-logo {
+  float:right; 
+}
+#away-logo {
+  float:left;
+}
 .home-logo {
-  position:absolute;
-  right:0px;
+  float:right; 
 }
 .away-logo {
-  position:absolute;
-  left:0px;
+  float:left;
 }

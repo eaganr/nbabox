@@ -90,7 +90,7 @@ function playbyplay() {
           var assisted = desc.indexOf("AST)") > -1;
           var found = 0;
           for(var k in players) {
-            if(sections[0].indexOf(k) > -1) {
+            if(sections[0].indexOf(k + " ") > -1 || sections[0].indexOf(k+",") > -1) {
               var pt = {time:evt.clock,
                         period:period,
                         pts:parseInt(sections[1].split(" PTS)")[0]),
@@ -101,7 +101,7 @@ function playbyplay() {
               mincorrect(evt, players[k], period);
             }
             if(assisted) {
-              if(sections[1].indexOf(k) > -1) {
+              if(sections[1].indexOf(k + " ") > -1) {
                 players[k].ast.push({time:evt.clock, period:period});
                 mincorrect(evt, players[k], period);
               }
@@ -110,7 +110,7 @@ function playbyplay() {
         }
         if(desc.indexOf("Rebound") > -1) {
           for(var k in players) {
-            if(desc.split("Rebound")[0].indexOf(k) > -1) {
+            if(desc.split("Rebound")[0].indexOf(k + " ") > -1) {
                 players[k].rebs.push({time:evt.clock, period:period});
                 mincorrect(evt, players[k], period);
                 break;
@@ -119,7 +119,7 @@ function playbyplay() {
         }
         if(desc.indexOf("Steal") > -1) {
           for(var k in players) {
-            if(desc.split("TO)")[1].indexOf(k) > -1) {
+            if(desc.split("TO)")[1].indexOf(k + " ") > -1) {
                 players[k].stls.push({time:evt.clock, period:period});
                 mincorrect(evt, players[k], period);
                 break;
@@ -128,7 +128,7 @@ function playbyplay() {
         }
         if(desc.indexOf("Turnover") > -1) {
           for(var k in players) {
-            if(evt["player_code"] === players[k]["player_code"]) {
+            if(desc.split("Turnover")[0].indexOf(k + " ") > -1) {
                 players[k].tos.push({time:evt.clock, period:period});
                 mincorrect(evt, players[k], period);
                 break;
@@ -137,7 +137,7 @@ function playbyplay() {
         }
         if(desc.indexOf("Block: ") > -1) {
           for(var k in players) {
-            if(desc.split("Block: ")[1].indexOf(k) > -1) {
+            if(desc.split("Block: ")[1].indexOf(k+" ") > -1) {
                 players[k].blks.push({time:evt.clock, period:period});
                 mincorrect(evt, players[k], period);
                 break;
@@ -146,7 +146,7 @@ function playbyplay() {
         }
         if(desc.indexOf("Foul:") > -1) {
           for(var k in players) {
-            if(desc.split("Foul:")[0].indexOf(k) > -1) {
+            if(desc.split("Foul:")[0].indexOf(k+" ") > -1) {
                 players[k].fls.push({time:evt.clock, period:period});
                 mincorrect(evt, players[k], period);
                 break;
@@ -410,7 +410,6 @@ function playbyplay() {
     var lineGen = d3.svg.line()
       .x(function(d) {
           var x = self.xScale(3+self.timetoseconds(d.period, d.time));
-          if(!x) console.log("yooo"+d.time);
           return x;
       })
       .y(function(d) {

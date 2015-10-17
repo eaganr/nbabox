@@ -1,3 +1,4 @@
+<!DOCTYPE>
 <html>
 
 <head>
@@ -70,8 +71,16 @@
               homeTeam.score = data["home"]["stats"]["points"];
               awayTeam.score = data["visitor"]["stats"]["points"];
 
-              document.getElementById("hometeam").getElementsByTagName("h1")[0].innerHTML=homeTeam.abbrev+" - "+homeTeam.score;
-              document.getElementById("awayteam").getElementsByTagName("h1")[0].innerHTML=awayTeam.score+" - "+awayTeam.abbrev;
+            
+              document.getElementById("away-score").innerHTML = awayTeam.score;
+              document.getElementById("home-score").innerHTML = homeTeam.score;
+              document.getElementById("away-logo").src = "http://stats.nba.com/media/img/teams/logos/"+awayTeam.abbrev+"_logo.svg";
+              document.getElementById("home-logo").src = "http://stats.nba.com/media/img/teams/logos/"+homeTeam.abbrev+"_logo.svg";
+              document.getElementById("home-name").innerHTML = homeTeam.abbrev;
+              document.getElementById("away-name").innerHTML = awayTeam.abbrev;
+              document.getElementById("box-home").innerHTML = homeTeam.abbrev;
+              document.getElementById("box-away").innerHTML = awayTeam.abbrev;
+              
 
               homeTeam.players = data["home"]["players"]["player"];
               awayTeam.players = data["visitor"]["players"]["player"];
@@ -219,11 +228,7 @@
                             p2 = p2 + allteams[t].players[j]["first_name"].substring(n,n+1);           
                             n++;                                                                 
                           }                                                                      
-                          if(p1.length === 1) {                                                  
-                            players[i] = p1 + ". " + players[i];                         
-                            players[j] = p2 + ". " + players[j];                         
-                          }                                                                      
-                          if(p1.length > 1) {                                                    
+                          if(p1.length >= 1) {                                                    
                             players[i] = p1 + " " + players[i];                          
                             players[j] = p2 + " " + players[j];                          
                           }                                                                      
@@ -257,7 +262,7 @@
               }
             });
           }
-          else document.getElementById("game-data").innerHTML = "<h1>This game has not yet started</h1>";
+          else document.getElementById("game-data").innerHTML = "<h1>This game has not started</h1>";
           d3.select("#game-data").style("display", "");
         }
       });
@@ -266,17 +271,62 @@
     if(livegame) setInterval(function() { getData(); }, 60000);
   </script>
 
-
 </head>
 
 <body>
   <div class="content">  
     <div id="schedule"></div>
     <div id="game-data" style="display:none">
-      <h1>Play By Play</h1>
-      <svg id="chart" width="1050" height="550"></svg>
+       <br /> 
+       <br /> 
+        <div id="scoreline">
+          <div id="away-score"></div>
+          <img id="away-logo" class="score-logo"></img>
+          <div id="home-score"></div>
+          <img id="home-logo" class="score-logo"></img>
+        </div>
 
-      <h1>Stats</h1>
+      <br />
+      <h1>Play By Play</h1>
+      <div id="playbyplay">
+        <div id="team-names">
+          <div class="team-name" id="home-name"></div>
+          <div class="team-name" id="away-name"></div>
+        </div>
+        <div id="pbpchart"><svg id="chart" width="1050" height="550"></svg></div>
+      </div>
+
+      <div id="boxscores">
+        <div>
+          <div style="float:left;width:700px;">
+            <h3 id="box-away"></h3>
+            <div class="boxscore" id="awaybox"></div>
+          </div>
+          <div class="charts">
+            <div class="pie" id="awayscoring"></div>
+            <div class="pie" id="awayrebounding"></div>
+          </div>
+        </div>
+        <div>
+          <div style="float:left;width:700px;">
+            <h3 id="box-home"></h3>
+            <div class="boxscore" id="homebox"></div>
+          </div>
+          <div class="charts">
+            <div class="pie" id="homescoring"></div>
+            <div class="pie" id="homerebounding"></div>
+          </div>
+        </div>
+      </div>
+      <br /><br />
+
+      <div class="team" id="awayteam">
+      </div>
+      <div class="team" id="hometeam">
+      </div>
+    
+      <h1>Comparison Stats</h1>
+      <br />
       <div class="stats">
         <div class="pie" id="threes"></div>
         <div class="pie" id="fouls"></div>
@@ -284,22 +334,7 @@
         <div class="pie" id="tos"></div>
       </div>
 
-      <div class="team" id="hometeam">
-        <h1></h1>
-        <div class="charts">
-          <div class="pie" id="homescoring"></div>
-          <div class="pie" id="homerebounding"></div>
-        </div>
-        <div class="boxscore" id="homebox"></div>
-      </div>
-      <div class="team" id="awayteam">
-        <h1></h1>
-        <div class="charts">
-          <div class="pie" id="awayscoring"></div>
-          <div class="pie" id="awayrebounding"></div>
-        </div>
-        <div class="boxscore" id="awaybox"></div>
-      </div>
+
     </div>
   </div>
 </body>
