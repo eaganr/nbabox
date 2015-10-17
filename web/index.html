@@ -85,6 +85,20 @@
               homeTeam.players = data["home"]["players"]["player"];
               awayTeam.players = data["visitor"]["players"]["player"];
 
+              //get rid of players with no minuts
+              for(var i=0;i<homeTeam.players.length;i++) {
+                if(parseInt(homeTeam.players[i]["minutes"]) + parseInt(homeTeam.players[i]["seconds"]) === 0) {
+                  homeTeam.players.splice(i,1);
+                  i--;
+                }
+              }
+              for(var i=0;i<awayTeam.players.length;i++) {
+                if(parseInt(awayTeam.players[i]["minutes"]) + parseInt(awayTeam.players[i]["seconds"]) === 0) {
+                  awayTeam.players.splice(i,1);
+                  i--;
+                }
+              }
+
               homeTeam.scoring = new pie("#homescoring")
                 .w(250).h(250)
                 .value("points")
@@ -218,18 +232,19 @@
                         players[i] = "Lucas III";                                            
                       }                                                                          
                       if(players[i] === "Nene ") players[i] = "Nene";
+                      var player1 = players[i];
                       for(var j=0;j<players.length;j++) {                                    
                         if(i !== j) {                                                            
-                          var n=0;                                                               
-                          var p1 = "";                                                           
+                          var n=0;
+                          var p1 = "";                                                  
                           var p2 = "";                                                           
-                          while(p1 + " " + players[i] === p2 + " " + players[j]) {       
-                            p1 = p1 + allteams[t].players[i]["first_name"].substring(n,n+1);           
-                            p2 = p2 + allteams[t].players[j]["first_name"].substring(n,n+1);           
-                            n++;                                                                 
-                          }                                                                      
-                          if(p1.length >= 1) {                                                    
-                            players[i] = p1 + " " + players[i];                          
+                          while(p1 + " " + player1 === p2 + " " + players[j]) {
+                            p1 = p1 + allteams[t].players[i]["first_name"].substring(n,n+1);
+                            p2 = p2 + allteams[t].players[j]["first_name"].substring(n,n+1);
+                            n++;
+                          }
+                          if(p1.length >= 1) {
+                            players[i] = p1 + " " + player1;                          
                             players[j] = p2 + " " + players[j];                          
                           }                                                                      
                         }
@@ -290,8 +305,8 @@
       <h1>Play By Play</h1>
       <div id="playbyplay">
         <div id="team-names">
-          <div class="team-name" id="home-name"></div>
           <div class="team-name" id="away-name"></div>
+          <div class="team-name" id="home-name"></div>
         </div>
         <div id="pbpchart"><svg id="chart" width="1050" height="550"></svg></div>
       </div>

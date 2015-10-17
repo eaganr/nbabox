@@ -3,6 +3,7 @@ function schedule() {
 
 	//private vars
 	var today = new Date();
+  if(today.getHours() < 15) today.setDate(today.getDate() - 1);
 	var date = today.getMonth()+1+"/"+today.getDate()+"/"+today.getFullYear();
 	//var date = "03/10/2015";
 	self.games=[];
@@ -51,13 +52,35 @@ function schedule() {
   self.date=function() {
     return date;
   }
+  
+  var movedate = function(dir) {
+    var d = new Date(date); 
+    d.setDate(d.getDate() + dir);
+    date = d.getMonth()+1+"/"+d.getDate()+"/"+d.getFullYear();
+    self.getschedule();
+  };
 
 	self.draw=function() {
 		var maindiv = document.getElementById(self.id());
 		maindiv.innerHTML = "";
+
+    var bbutton = document.createElement("button");
+    bbutton.innerHTML = "<";
+    bbutton.className = "move-btn";
+    bbutton.onclick = function() { movedate(-1); };
+    maindiv.appendChild(bbutton);
+
 		var datepicker = document.createElement("input");
 		datepicker.id = "datepicker";
+    datepicker.value = date;
 		maindiv.appendChild(datepicker);
+
+    var fbutton = document.createElement("button");
+    fbutton.innerHTML = ">";
+    fbutton.className = "move-btn";
+    fbutton.onclick = function() { movedate(1); };
+    maindiv.appendChild(fbutton);
+
 		
 		$("#datepicker").datepicker();
 		$("#datepicker").change(function() {

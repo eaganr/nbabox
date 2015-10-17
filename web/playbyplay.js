@@ -90,7 +90,7 @@ function playbyplay() {
           var assisted = desc.indexOf("AST)") > -1;
           var found = 0;
           for(var k in players) {
-            if(sections[0].indexOf(k + " ") > -1 || sections[0].indexOf(k+",") > -1) {
+            if(sections[0].indexOf(k + " ") > -1 || sections[0].indexOf(k+",") > -1 || evt["player_code"] === players[k]["player_code"]) {
               var pt = {time:evt.clock,
                         period:period,
                         pts:parseInt(sections[1].split(" PTS)")[0]),
@@ -110,7 +110,7 @@ function playbyplay() {
         }
         if(desc.indexOf("Rebound") > -1) {
           for(var k in players) {
-            if(desc.split("Rebound")[0].indexOf(k + " ") > -1) {
+            if(desc.split("Rebound")[0].indexOf(k + " ") > -1 || evt["player_code"] === players[k]["player_code"]) {
                 players[k].rebs.push({time:evt.clock, period:period});
                 mincorrect(evt, players[k], period);
                 break;
@@ -128,7 +128,7 @@ function playbyplay() {
         }
         if(desc.indexOf("Turnover") > -1) {
           for(var k in players) {
-            if(desc.split("Turnover")[0].indexOf(k + " ") > -1) {
+            if(desc.split("Turnover")[0].indexOf(k + " ") > -1 || evt["player_code"] === players[k]["player_code"]) {
                 players[k].tos.push({time:evt.clock, period:period});
                 mincorrect(evt, players[k], period);
                 break;
@@ -146,7 +146,7 @@ function playbyplay() {
         }
         if(desc.indexOf("Foul:") > -1) {
           for(var k in players) {
-            if(desc.split("Foul:")[0].indexOf(k+" ") > -1) {
+            if(desc.split("Foul:")[0].indexOf(k+" ") > -1 || evt["player_code"] === players[k]["player_code"]) {
                 players[k].fls.push({time:evt.clock, period:period});
                 mincorrect(evt, players[k], period);
                 break;
@@ -166,7 +166,7 @@ function playbyplay() {
               players[j].mins.push({intime:evt.clock, inperiod:period, outtime:null, outperiod:null});
             }
             //out
-            if(subs[0].indexOf(j) > -1) {
+            if(subs[0].indexOf(j) > -1 || evt["player_code"] === players[j]["player_code"]) {
               var len = players[j].mins.length;
               if(len > 0) {
                 players[j].mins[len-1].outtime = evt.clock;
@@ -327,10 +327,10 @@ function playbyplay() {
 
     self.vis=d3.select(self.selector());
     document.getElementById(self.selector().substring(1)).innerHTML="<linearGradient id=\"score-gradient\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"553\"><stop offset=\"0%\"></stop><stop offset=\"50%\"></stop><stop offset=\"50%\"></stop><stop offset=\"100%\"></stop></linearGradient>";
-    $(self.selector() + " stop")[0].setAttribute("stop-color",self.homecolor());
-    $(self.selector() + " stop")[1].setAttribute("stop-color",self.homecolor());
-    $(self.selector() + " stop")[2].setAttribute("stop-color",self.awaycolor());
-    $(self.selector() + " stop")[3].setAttribute("stop-color",self.awaycolor());
+    $(self.selector() + " stop")[0].setAttribute("stop-color",self.awaycolor());
+    $(self.selector() + " stop")[1].setAttribute("stop-color",self.awaycolor());
+    $(self.selector() + " stop")[2].setAttribute("stop-color",self.homecolor());
+    $(self.selector() + " stop")[3].setAttribute("stop-color",self.homecolor());
 
 
     self.xScale = d3.scale.linear().range([self.margins().left, self.w() - self.margins().right]).domain([0, totalseconds]);
@@ -344,6 +344,8 @@ function playbyplay() {
       var m = self.scoringmargins[i].margin;
       if(m === "TIE") m = 0;
       else m = parseInt(m);
+      m *= -1;
+      self.scoringmargins[i].margin = m;
 
       if(m > max) max = m;
       if(m < min) min = m;
@@ -436,7 +438,7 @@ function playbyplay() {
 
     //player minutes
     var yplayers = {};
-    var playergroups = [self.awayplayers(),self.homeplayers()];
+    var playergroups = [self.homeplayers(),self.awayplayers()];
     for(var n=0;n<playergroups.length;n++) {
       var players = playergroups[n];
       var j = n === 0? -1 : Object.keys(players).length;

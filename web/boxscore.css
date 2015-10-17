@@ -70,14 +70,15 @@ td, th {
 }
 #home-name {
   position:relative;
-  top:150px;
+  top:320px;
 }
 #away-name {
   position:relative;
-  top:320px;
+  top:150px;
 }
 #playbyplay {
   display:block;
+  width:95%;
   margin:auto;
 }
 #pbpchart {
@@ -101,7 +102,21 @@ td, th {
   width:90%;
   margin:0 auto;
 }
-
+#datepicker {
+  width:80px;
+  position:relative;
+  top:10px;
+  text-align:center;
+}
+.move-btn {
+  position:relative;
+  top:10px;
+  border:none;
+}
+#schedule {
+  width:1250px;
+  margin:auto;
+}
 .schedule-game {
   position:relative;
   display:inline-block;
