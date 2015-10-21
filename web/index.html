@@ -44,6 +44,11 @@
       livegame = true;
     }
 
+    function homeawaycolors(abbrev) {
+      if(abbrev === homeTeam.abbrev) return homeTeam.color;
+      return awayTeam.color;
+    } 
+
     var pbp = new playbyplay();
     var pdata;
     function getData() {
@@ -136,7 +141,7 @@
                 .data(homeRebs)
                 .diff("abbrev")
                 .label(function(d) { return d.data.abbrev+" - "+d.data.reb;})
-                .color(teamcolors, true)
+                .color(homeawaycolors, true)
                 .title(homeTeam.abbrev + " Basket Rebounds")
                 .draw();
 
@@ -146,7 +151,7 @@
                 .data(awayRebs)
                 .diff("abbrev")
                 .label(function(d) { return d.data.abbrev+" - "+d.data.reb;})
-                .color(teamcolors, true)
+                .color(homeawaycolors, true)
                 .title(awayTeam.abbrev + " Basket Rebounds")
                 .draw();
 
@@ -174,7 +179,7 @@
                 .data(threes)
                 .diff("abbrev")
                 .label(function(d) { return d.data.abbrev+" - "+d.data.threes;})
-                .color(teamcolors, true)
+                .color(homeawaycolors, true)
                 .title("3 Point FGM")
                 .draw();
 
@@ -184,7 +189,7 @@
                 .data(fouls)
                 .diff("abbrev")
                 .label(function(d) { return d.data.abbrev+" - "+d.data.fls;})
-                .color(teamcolors, true)
+                .color(homeawaycolors, true)
                 .title("Fouls")
                 .draw();
 
@@ -194,7 +199,7 @@
                 .data(tos)
                 .diff("abbrev")
                 .label(function(d) { return d.data.abbrev+" - "+d.data.to;})
-                .color(teamcolors, true)
+                .color(homeawaycolors, true)
                 .title("TOs")
                 .draw();
 
@@ -204,7 +209,7 @@
                 .data(assists)
                 .diff("abbrev")
                 .label(function(d) { return d.data.abbrev+" - "+d.data.assists;})
-                .color(teamcolors, true)
+                .color(homeawaycolors, true)
                 .title("Assists")
                 .draw();
 
@@ -255,13 +260,15 @@
                   var temp = {};
                   for(var i=0;i<homeplayers.length;i++) {
                     temp[homeplayers[i]] = {player_code:homeTeam.players[i]["player_code"],
-                                            on_court:homeTeam.players[i]["on_court"]};
+                                            on_court:homeTeam.players[i]["on_court"],
+                                            team:homeTeam.abbrev};
                   }
                   homeplayers = temp;
                   var temp2 = {};
                   for(var i=0;i<awayplayers.length;i++) {
                     temp2[awayplayers[i]] = {player_code:awayTeam.players[i]["player_code"],
-                                             on_court:awayTeam.players[i]["on_court"]};
+                                             on_court:awayTeam.players[i]["on_court"],
+                                             team:awayTeam.abbrev};
                   }
                   awayplayers = temp2;
     

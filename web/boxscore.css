@@ -86,8 +86,8 @@ td, th {
   margin:auto;
 }
 .charts {
+  display:inline-block;
   width:525px;
-  float:right;
   margin:auto;
   position:relative;
   top:70px;

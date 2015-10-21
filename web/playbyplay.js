@@ -14,7 +14,7 @@ function playbyplay() {
   self.homeplayers=function(h) {
     if(h) {
       for(var k in h) {
-        h[k] = {player_code:h[k]["player_code"], on_court:h[k]["on_court"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+        h[k] = {player_code:h[k]["player_code"], on_court:h[k]["on_court"], team:h[k]["team"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
       }
       self.homeplayers.val=h;
       return self;
@@ -25,7 +25,7 @@ function playbyplay() {
   self.awayplayers=function(a) {
     if(a) {
       for(var k in a) {
-        a[k] = {player_code:a[k]["player_code"], on_court:a[k]["on_court"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+        a[k] = {player_code:a[k]["player_code"], on_court:a[k]["on_court"], team:a[k]["team"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
       }
       self.awayplayers.val=a;
 
@@ -67,10 +67,10 @@ function playbyplay() {
 
   self.parse=function() {
     for(var k in self.homeplayers.val) {
-      self.homeplayers.val[k] = {player_code:self.homeplayers.val[k]["player_code"], on_court:self.homeplayers.val[k]["on_court"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+      self.homeplayers.val[k] = {player_code:self.homeplayers.val[k]["player_code"], on_court:self.homeplayers.val[k]["on_court"], team:self.homeplayers.val[k]["team"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
     }
     for(var k in self.awayplayers.val) {
-      self.awayplayers.val[k] = {player_code:self.awayplayers.val[k]["player_code"], on_court:self.awayplayers.val[k]["on_court"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+      self.awayplayers.val[k] = {player_code:self.awayplayers.val[k]["player_code"], on_court:self.awayplayers.val[k]["on_court"], team:self.awayplayers.val[k]["team"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
     }
 
     self.scoringmargins = [{margin:0, time:"12:00", period:1}];
@@ -90,7 +90,7 @@ function playbyplay() {
           var assisted = desc.indexOf("AST)") > -1;
           var found = 0;
           for(var k in players) {
-            if(sections[0].indexOf(k + " ") > -1 || sections[0].indexOf(k+",") > -1 || evt["player_code"] === players[k]["player_code"]) {
+            if((sections[0].indexOf(k + " ") > -1 || sections[0].indexOf(k+",") > -1 || evt["player_code"] === players[k]["player_code"]) && evt["team_abr"] === players[k]["team"]) {
               var pt = {time:evt.clock,
                         period:period,
                         pts:parseInt(sections[1].split(" PTS)")[0]),
@@ -101,7 +101,7 @@ function playbyplay() {
               mincorrect(evt, players[k], period);
             }
             if(assisted) {
-              if(sections[1].indexOf(k + " ") > -1) {
+              if(sections[1].indexOf(k + " ") > -1 && evt["team_abr"] === players[k]["team"]) {
                 players[k].ast.push({time:evt.clock, period:period});
                 mincorrect(evt, players[k], period);
               }
@@ -110,7 +110,7 @@ function playbyplay() {
         }
         if(desc.indexOf("Rebound") > -1) {
           for(var k in players) {
-            if(desc.split("Rebound")[0].indexOf(k + " ") > -1 || evt["player_code"] === players[k]["player_code"]) {
+            if((desc.split("Rebound")[0].indexOf(k + " ") > -1 || evt["player_code"] === players[k]["player_code"]) && evt["team_abr"] === players[k]["team"]) {
                 players[k].rebs.push({time:evt.clock, period:period});
                 mincorrect(evt, players[k], period);
                 break;
@@ -119,7 +119,7 @@ function playbyplay() {
         }
         if(desc.indexOf("Steal") > -1) {
           for(var k in players) {
-            if(desc.split("TO)")[1].indexOf(k + " ") > -1) {
+            if(desc.split("TO)")[1].indexOf(k + " ") > -1 && evt["team_abr"] !== players[k]["team"]) {
                 players[k].stls.push({time:evt.clock, period:period});
                 mincorrect(evt, players[k], period);
                 break;
@@ -128,7 +128,7 @@ function playbyplay() {
         }
         if(desc.indexOf("Turnover") > -1) {
           for(var k in players) {
-            if(desc.split("Turnover")[0].indexOf(k + " ") > -1 || evt["player_code"] === players[k]["player_code"]) {
+            if((desc.split("Turnover")[0].indexOf(k + " ") > -1 || evt["player_code"] === players[k]["player_code"]) && evt["team_abr"] === players[k]["team"]) {
                 players[k].tos.push({time:evt.clock, period:period});
                 mincorrect(evt, players[k], period);
                 break;
@@ -137,7 +137,7 @@ function playbyplay() {
         }
         if(desc.indexOf("Block: ") > -1) {
           for(var k in players) {
-            if(desc.split("Block: ")[1].indexOf(k+" ") > -1) {
+            if(desc.split("Block: ")[1].indexOf(k+" ") > -1 && evt["team_abr"] !== players[k]["team"]) {
                 players[k].blks.push({time:evt.clock, period:period});
                 mincorrect(evt, players[k], period);
                 break;
@@ -146,14 +146,14 @@ function playbyplay() {
         }
         if(desc.indexOf("Foul:") > -1) {
           for(var k in players) {
-            if(desc.split("Foul:")[0].indexOf(k+" ") > -1 || evt["player_code"] === players[k]["player_code"]) {
+            if((desc.split("Foul:")[0].indexOf(k+" ") > -1 || evt["player_code"] === players[k]["player_code"]) && evt["team_abr"] === players[k]["team"]) {
                 players[k].fls.push({time:evt.clock, period:period});
                 mincorrect(evt, players[k], period);
                 break;
             }
           }
         }
-        if(desc.indexOf("Substitution ") > -1) {
+        if(desc.indexOf("Substitution ") > -1  && evt["team_abr"] === players[Object.keys(players)[0]]["team"]) {
           var subs = desc.split("replaced by");
           for(var j in players) {
             //in
@@ -419,7 +419,7 @@ function playbyplay() {
           if(!isNaN(d.margin)) margin = parseInt(d.margin);
           return self.yScale(margin);
       })
-      .interpolate("basis");
+      .interpolate("monotone");
     var latest = self.data()[self.data().length-1];
     self.scoringmargins.push({margin:self.scoringmargins[self.scoringmargins.length-1].margin, time:latest.clock, period:latest.period});
     for(var i=0;i<self.scoringmargins.length;i++) {
@@ -449,7 +449,7 @@ function playbyplay() {
         yplayers[y] = p;
         self.vis.append("svg:text")
           .attr("class","player-name")
-          .attr("pline", p)
+          .attr("pline", y)
           .attr("transform","translate(52,"+(y-5)+")")
           .attr("dy", ".35em")
           .style("font-size", "10px")
@@ -476,7 +476,7 @@ function playbyplay() {
             .attr("stroke","#3399FF")
             .attr("stroke-linecap","round")
             .attr("stroke-width", 1)
-            .attr("pline", p);
+            .attr("pline", y);
         }
 
 
@@ -743,7 +743,7 @@ function playbyplay() {
           .attr("stroke","#3399FF");
         self.vis.selectAll(".player-name")
           .attr("stroke", "");
-        self.vis.selectAll('[pline="'+yplayers[yfound]+'"]')
+        self.vis.selectAll('[pline="'+yfound+'"]')
           .attr("stroke","#CDCD4D");
       })
       .on("mouseout", mouseoff);
