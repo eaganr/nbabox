@@ -16,12 +16,13 @@
 #scoreline {
   width:480px;
   margin:auto;
+  height:100px;
 }
 
 #scoreline img {
-    width:100px;
-    margin-left:30px;
-    margin-right:30px;
+  width:100px;
+  margin-left:30px;
+  margin-right:30px;
 }
 #scoreline div {
   display:inline;
@@ -32,10 +33,23 @@
 .team-name {
   text-align:center;
 }
+
+
+#video {
+  display:none;
+  position:relative;
+  width:604px;
+  margin:auto;
+}
+
+#close-video {
+  float:right;
+}
+
 h1 {
   width:400px;
   margin:auto;
-  margin-top:100px;
+  margin-top:30px;
   text-align:center;
 }
 

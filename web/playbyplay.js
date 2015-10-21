@@ -94,7 +94,8 @@ function playbyplay() {
               var pt = {time:evt.clock,
                         period:period,
                         pts:parseInt(sections[1].split(" PTS)")[0]),
-                        margin:parseInt(evt["home_score"]) - parseInt(evt["visitor_score"])};
+                        margin:parseInt(evt["home_score"]) - parseInt(evt["visitor_score"]),
+                        evt:i};
               players[k].pts.push(pt);
               pt.desc = desc;
               self.scoringmargins.push(pt);
@@ -102,7 +103,7 @@ function playbyplay() {
             }
             if(assisted) {
               if(sections[1].indexOf(k + " ") > -1 && evt["team_abr"] === players[k]["team"]) {
-                players[k].ast.push({time:evt.clock, period:period});
+                players[k].ast.push({time:evt.clock, period:period, evt:i});
                 mincorrect(evt, players[k], period);
               }
             }  
@@ -111,7 +112,7 @@ function playbyplay() {
         if(desc.indexOf("Rebound") > -1) {
           for(var k in players) {
             if((desc.split("Rebound")[0].indexOf(k + " ") > -1 || evt["player_code"] === players[k]["player_code"]) && evt["team_abr"] === players[k]["team"]) {
-                players[k].rebs.push({time:evt.clock, period:period});
+                players[k].rebs.push({time:evt.clock, period:period, evt:i});
                 mincorrect(evt, players[k], period);
                 break;
             }
@@ -120,7 +121,7 @@ function playbyplay() {
         if(desc.indexOf("Steal") > -1) {
           for(var k in players) {
             if(desc.split("TO)")[1].indexOf(k + " ") > -1 && evt["team_abr"] !== players[k]["team"]) {
-                players[k].stls.push({time:evt.clock, period:period});
+                players[k].stls.push({time:evt.clock, period:period, evt:i});
                 mincorrect(evt, players[k], period);
                 break;
             }
@@ -129,7 +130,7 @@ function playbyplay() {
         if(desc.indexOf("Turnover") > -1) {
           for(var k in players) {
             if((desc.split("Turnover")[0].indexOf(k + " ") > -1 || evt["player_code"] === players[k]["player_code"]) && evt["team_abr"] === players[k]["team"]) {
-                players[k].tos.push({time:evt.clock, period:period});
+                players[k].tos.push({time:evt.clock, period:period, evt:i});
                 mincorrect(evt, players[k], period);
                 break;
             }
@@ -138,7 +139,7 @@ function playbyplay() {
         if(desc.indexOf("Block: ") > -1) {
           for(var k in players) {
             if(desc.split("Block: ")[1].indexOf(k+" ") > -1 && evt["team_abr"] !== players[k]["team"]) {
-                players[k].blks.push({time:evt.clock, period:period});
+                players[k].blks.push({time:evt.clock, period:period, evt:i});
                 mincorrect(evt, players[k], period);
                 break;
             }
@@ -147,7 +148,7 @@ function playbyplay() {
         if(desc.indexOf("Foul:") > -1) {
           for(var k in players) {
             if((desc.split("Foul:")[0].indexOf(k+" ") > -1 || evt["player_code"] === players[k]["player_code"]) && evt["team_abr"] === players[k]["team"]) {
-                players[k].fls.push({time:evt.clock, period:period});
+                players[k].fls.push({time:evt.clock, period:period, evt:i});
                 mincorrect(evt, players[k], period);
                 break;
             }
@@ -486,6 +487,7 @@ function playbyplay() {
             .attr("class","fl-dot")
             .attr("fill","#FF00CC")
             .attr("opacity",0)
+            .attr("event", fl["evt"])
             .attr("r",3)
             .attr("cx",self.xScale(self.timetoseconds(fl.period,fl.time)))
             .attr("cy",y);
@@ -496,6 +498,7 @@ function playbyplay() {
             .attr("class","blk-dot")
             .attr("fill","#33FFCC")
             .attr("opacity",0)
+            .attr("event", blk["evt"])
             .attr("r",3)
             .attr("cx",self.xScale(self.timetoseconds(blk.period,blk.time)))
             .attr("cy",y);
@@ -506,6 +509,7 @@ function playbyplay() {
             .attr("class","to-dot")
             .attr("fill","red")
             .attr("opacity",0)
+            .attr("event", to["evt"])
             .attr("r",3)
             .attr("cx",self.xScale(self.timetoseconds(to.period,to.time)))
             .attr("cy",y);
@@ -516,6 +520,7 @@ function playbyplay() {
             .attr("class","stl-dot")
             .attr("fill","purple")
             .attr("opacity",0)
+            .attr("event", stl["evt"])
             .attr("r",3)
             .attr("cx",self.xScale(self.timetoseconds(stl.period,stl.time)))
             .attr("cy",y);
@@ -526,6 +531,7 @@ function playbyplay() {
             .attr("class","reb-dot")
             .attr("fill","blue")
             .attr("opacity",0)
+            .attr("event", reb["evt"])
             .attr("r",3)
             .attr("cx",self.xScale(self.timetoseconds(reb.period,reb.time)))
             .attr("cy",y);
@@ -536,6 +542,7 @@ function playbyplay() {
             .attr("class","assist-dot")
             .attr("fill","green")
             .attr("opacity",1)
+            .attr("event", ast["evt"])
             .attr("r",3)
             .attr("cx",self.xScale(self.timetoseconds(ast.period,ast.time)))
             .attr("cy",y);
@@ -546,6 +553,7 @@ function playbyplay() {
             .attr("class","point-dot")
             .attr("fill","orange")
             .attr("opacity",1)
+            .attr("event", pt["evt"])
             .attr("r",3)
             .attr("cx",self.xScale(self.timetoseconds(pt.period,pt.time)))
             .attr("cy",y);
@@ -555,6 +563,24 @@ function playbyplay() {
       }
     }
 
+    //click events for circles
+    if(neutral.period === "Final") {
+      self.vis.selectAll("circle")
+        .style("cursor", "pointer")
+        .on("click", function(d) {
+          console.log("yo");
+          var evt = d3.select(this).attr("event");
+          var url = "http://stats.nba.com/cvp.html?GameID="+gameID+"&GameEventID="+self.data()[evt]["event"]+"&mtype=&mtitle=";
+          document.getElementById("video-title").innerHTML = self.data()[evt]["description"];
+          d3.select("#video-frame")
+            .attr("src", url)
+            .attr("width", 604)
+            .attr("height", 350);
+          if(d3.select("#video").style("display") === "none") $("#video").slideToggle();
+        })
+        .on("mouseover", function() { d3.select(this).attr("r", 5); })
+        .on("mouseout", function() { d3.select(this).attr("r", 3); });
+    };
 
     var latest = self.data()[self.data().length-1];
     var t = self.timetoseconds(totalperiods, latest.clock);
@@ -564,7 +590,8 @@ function playbyplay() {
       .attr("x1",self.xScale(t)).attr("x2",self.xScale(t))
       .attr("y1",0).attr("y2",self.h())
       .attr("stroke","black")
-      .attr("stroke-width", 2);
+      .attr("stroke-width", 2)
+      .style("pointer-events", "none");
 
     //hover menu, follows mouse
     var menu = self.vis.append('svg:g')
@@ -719,12 +746,7 @@ function playbyplay() {
           .attr("opacity", op + 0.3);
       });
 
-    self.vis.append("svg:rect")
-      .attr("fill","blue")
-      .attr("opacity",0)
-      .attr("width",1000)
-      .attr("height",500)
-      .on("mousemove",function(d,i) {
+    self.vis.on("mousemove",function(d,i) {
         var x = d3.mouse(this)[0];
         var y = d3.mouse(this)[1];
         var seconds = self.xScale.invert(x);

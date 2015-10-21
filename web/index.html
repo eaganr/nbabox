@@ -50,7 +50,6 @@
     } 
 
     var pbp = new playbyplay();
-    var pdata;
     function getData() {
       $.ajax({
           type : 'POST',
@@ -64,6 +63,8 @@
           success:function (data) {
             data = data["sports_content"]["game"];
             console.log(data);
+
+            neutral.period = data["period_time"]["period_status"];
 
             //check if game has started
             if(data["period_time"]["period_status"].indexOf(" ET") === -1) {
@@ -223,7 +224,6 @@
                   accur: 1
                 },
                 success:function (data) {
-                  pdata = data;
                   var homeplayers = homeTeam.players.map(function(d) { return d["last_name"]? d["last_name"] : d["first_name"]; });
                   var awayplayers = awayTeam.players.map(function(d) { return d["last_name"]? d["last_name"] : d["first_name"]; });
 
@@ -291,6 +291,11 @@
     }
     getData();
     if(livegame) setInterval(function() { getData(); }, 60000);
+
+    function closeVideo() {
+      $("#video").slideToggle();
+      setTimeout(function() {document.getElementById("video-frame").setAttribute("src", "");}, 500);
+    }
   </script>
 
 </head>
@@ -308,7 +313,12 @@
           <img id="home-logo" class="score-logo"></img>
         </div>
 
-      <br />
+      <div id="video">
+        <button id="close-video" onclick="closeVideo()">Close</button>
+        <span id="video-title"></span>
+        <iframe id="video-frame" width="0" height="0" align="center" frameBorder="0" scrolling="no" ></iframe>
+      </div>
+
       <h1>Play By Play</h1>
       <div id="playbyplay">
         <div id="team-names">
