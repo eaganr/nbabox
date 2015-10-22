@@ -28,7 +28,6 @@ function schedule() {
 				},
 				success:function (data) {
           data = data["sports_content"]["games"]["game"];
-          console.log(data);
 					for(var i=0;i<data.length;i++) {
             var hometeam = data[i]["home"]["abbreviation"];
             var awayteam = data[i]["visitor"]["abbreviation"];
@@ -98,11 +97,13 @@ function schedule() {
 			var game = document.createElement("div");	
 			game.className = "schedule-game";
 			game.gameid=self.games[i].gameid;
-			game.onclick=function() { 
+			game.onclick=function(e) { 
         d = date.replace(new RegExp("/", 'g'), "-");
         if(d.length === 9) d = d.substring(0,3)+"0"+d.substring(3);
         d = d.substring(6)+d.substring(0,2)+d.substring(3,5);
-        window.location="?gameid="+this.gameid+"&date="+d;
+        //check for cmd-click
+        if(e.metaKey || e.ctrlKey) window.open("?gameid="+this.gameid+"&date="+d, "_blank");
+        else window.location="?gameid="+this.gameid+"&date="+d;
       };
 
 			var img = document.createElement("img");
@@ -134,7 +135,7 @@ function schedule() {
     
 
 			var txt = document.createElement("div");
-			txt.innerHTML = self.games[i].awayteam+" vs. "+self.games[i].hometeam;
+			txt.innerHTML = self.games[i].awayteam+" at "+self.games[i].hometeam;
 			game.appendChild(txt);
 			document.getElementById(self.id()).appendChild(game);
 			game.innerHTML += "<br />";

@@ -139,6 +139,7 @@ td, th {
   width:100px;
   background-color:white;
   border-radius:5px;
+  cursor:pointer;
 }
 .schedule-game:hover {
   background-color:#99CCFF;

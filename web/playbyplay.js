@@ -14,7 +14,7 @@ function playbyplay() {
   self.homeplayers=function(h) {
     if(h) {
       for(var k in h) {
-        h[k] = {player_code:h[k]["player_code"], on_court:h[k]["on_court"], team:h[k]["team"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+        h[k] = {player_code:h[k]["player_code"], on_court:h[k]["on_court"], team:h[k]["team"], pts:[], miss:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
       }
       self.homeplayers.val=h;
       return self;
@@ -25,7 +25,7 @@ function playbyplay() {
   self.awayplayers=function(a) {
     if(a) {
       for(var k in a) {
-        a[k] = {player_code:a[k]["player_code"], on_court:a[k]["on_court"], team:a[k]["team"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+        a[k] = {player_code:a[k]["player_code"], on_court:a[k]["on_court"], team:a[k]["team"], pts:[], miss:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
       }
       self.awayplayers.val=a;
 
@@ -67,20 +67,30 @@ function playbyplay() {
 
   self.parse=function() {
     for(var k in self.homeplayers.val) {
-      self.homeplayers.val[k] = {player_code:self.homeplayers.val[k]["player_code"], on_court:self.homeplayers.val[k]["on_court"], team:self.homeplayers.val[k]["team"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+      self.homeplayers.val[k] = {player_code:self.homeplayers.val[k]["player_code"], on_court:self.homeplayers.val[k]["on_court"], team:self.homeplayers.val[k]["team"], pts:[], miss:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
     }
     for(var k in self.awayplayers.val) {
-      self.awayplayers.val[k] = {player_code:self.awayplayers.val[k]["player_code"], on_court:self.awayplayers.val[k]["on_court"], team:self.awayplayers.val[k]["team"], pts:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+      self.awayplayers.val[k] = {player_code:self.awayplayers.val[k]["player_code"], on_court:self.awayplayers.val[k]["on_court"], team:self.awayplayers.val[k]["team"], pts:[], miss:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
     }
 
     self.scoringmargins = [{margin:0, time:"12:00", period:1}];
     var period = 0;
+    var subtract = false;
     for(var i=0;i<self.data().length;i++) {
       var evt = self.data()[i];
       var desc = evt["description"];
-      if(desc.indexOf("Start Period") > -1) period++;
+      if(desc.indexOf("Start Period") > -1) {
+        if(subtract) {
+          subtract = false;
+        }
+        else period++;
+      }
       if(period > totalperiods) totalperiods = period;
-      evt["period"] = period;
+      if(period === 0) {
+        subtract = true;
+        period = 1;
+      }
+      evt["period"] = period===0? 1 : period;
       //create player stats
       var teams = [self.homeplayers(), self.awayplayers()];
       for(var n=0;n<teams.length;n++) {
@@ -107,6 +117,15 @@ function playbyplay() {
                 mincorrect(evt, players[k], period);
               }
             }  
+          }
+        }
+        if(desc.indexOf(" Missed") > -1) {
+          for(var k in players) {
+            if((desc.split(" Missed")[0].indexOf(k + " ") > -1 || evt["player_code"] === players[k]["player_code"]) && evt["team_abr"] === players[k]["team"]) {
+                players[k].miss.push({time:evt.clock, period:period, evt:i});
+                mincorrect(evt, players[k], period);
+                break;
+            }
           }
         }
         if(desc.indexOf("Rebound") > -1) {
@@ -156,9 +175,6 @@ function playbyplay() {
         }
         if(desc.indexOf("Substitution ") > -1  && evt["team_abr"] === players[Object.keys(players)[0]]["team"]) {
           var subs = desc.split("replaced by");
-          if(evt["event"] == 53) {
-            console.log("stop");
-          }
           for(var j in players) {
             //in
             if(subs[1].indexOf(j) > -1) {
@@ -282,7 +298,7 @@ function playbyplay() {
       for(var i=0;i<self.data().length;i++) {
         var pt = self.data()[i];
         if(pt.sCORE !== null) currentscore = pt.sCORE;
-        if(self.timetoseconds(pt["period"], pt["clock"]) >= seconds) {
+        if(!rollover && self.timetoseconds(pt["period"], pt["clock"]) >= seconds) {
           var txt = pt["description"].split("] ")[1];
           if(txt != null) {
             txt = txt.split("(")[0];
@@ -318,6 +334,10 @@ function playbyplay() {
     }
     return self.awaycolor.val;
   }
+
+  var rollover = false;
+
+  var statson = {"Points":true, "Misses":false, "Assists":true, "Rebounds":false, "Steals": false, "TOs":false, "Blocks": false, "Fouls":false};
 
   self.draw=function() {
     var extraticks = [];
@@ -489,7 +509,7 @@ function playbyplay() {
           self.vis.append("svg:circle")
             .attr("class","fl-dot")
             .attr("fill","#FF00CC")
-            .attr("opacity",0)
+            .attr("opacity",statson["Fouls"]? 1:0)
             .attr("event", fl["evt"])
             .attr("r",3)
             .attr("cx",self.xScale(self.timetoseconds(fl.period,fl.time)))
@@ -500,7 +520,7 @@ function playbyplay() {
           self.vis.append("svg:circle")
             .attr("class","blk-dot")
             .attr("fill","#33FFCC")
-            .attr("opacity",0)
+            .attr("opacity",statson["Blocks"]?1:0)
             .attr("event", blk["evt"])
             .attr("r",3)
             .attr("cx",self.xScale(self.timetoseconds(blk.period,blk.time)))
@@ -511,7 +531,7 @@ function playbyplay() {
           self.vis.append("svg:circle")
             .attr("class","to-dot")
             .attr("fill","red")
-            .attr("opacity",0)
+            .attr("opacity",statson["TOs"]?1:0)
             .attr("event", to["evt"])
             .attr("r",3)
             .attr("cx",self.xScale(self.timetoseconds(to.period,to.time)))
@@ -521,8 +541,8 @@ function playbyplay() {
           var stl = player.stls[i];
           self.vis.append("svg:circle")
             .attr("class","stl-dot")
-            .attr("fill","purple")
-            .attr("opacity",0)
+            .attr("fill","#CC66FF")
+            .attr("opacity",statson["Steals"]?1:0)
             .attr("event", stl["evt"])
             .attr("r",3)
             .attr("cx",self.xScale(self.timetoseconds(stl.period,stl.time)))
@@ -533,10 +553,21 @@ function playbyplay() {
           self.vis.append("svg:circle")
             .attr("class","reb-dot")
             .attr("fill","blue")
-            .attr("opacity",0)
+            .attr("opacity",statson["Rebounds"]? 1 : 0)
             .attr("event", reb["evt"])
             .attr("r",3)
             .attr("cx",self.xScale(self.timetoseconds(reb.period,reb.time)))
+            .attr("cy",y);
+        }
+        for(var i=0;i<player.miss.length;i++) {
+          var miss = player.miss[i];
+          self.vis.append("svg:circle")
+            .attr("class","miss-dot")
+            .attr("fill","#996633")
+            .attr("opacity",statson["Misses"]?1:0)
+            .attr("event", miss["evt"])
+            .attr("r",3)
+            .attr("cx",self.xScale(self.timetoseconds(miss.period,miss.time)))
             .attr("cy",y);
         }
         for(var i=0;i<player.ast.length;i++) {
@@ -544,7 +575,7 @@ function playbyplay() {
           self.vis.append("svg:circle")
             .attr("class","assist-dot")
             .attr("fill","green")
-            .attr("opacity",1)
+            .attr("opacity",statson["Assists"]?1:0)
             .attr("event", ast["evt"])
             .attr("r",3)
             .attr("cx",self.xScale(self.timetoseconds(ast.period,ast.time)))
@@ -555,7 +586,7 @@ function playbyplay() {
           self.vis.append("svg:circle")
             .attr("class","point-dot")
             .attr("fill","orange")
-            .attr("opacity",1)
+            .attr("opacity",statson["Points"]?1:0)
             .attr("event", pt["evt"])
             .attr("r",3)
             .attr("cx",self.xScale(self.timetoseconds(pt.period,pt.time)))
@@ -571,7 +602,6 @@ function playbyplay() {
       self.vis.selectAll("circle")
         .style("cursor", "pointer")
         .on("click", function(d) {
-          console.log("yo");
           var evt = d3.select(this).attr("event");
           var url = "http://stats.nba.com/cvp.html?GameID="+gameID+"&GameEventID="+self.data()[evt]["event"]+"&mtype=&mtitle=";
           document.getElementById("video-title").innerHTML = self.data()[evt]["description"];
@@ -581,8 +611,18 @@ function playbyplay() {
             .attr("height", 350);
           if(d3.select("#video").style("display") === "none") $("#video").slideToggle();
         })
-        .on("mouseover", function() { d3.select(this).attr("r", 5); })
-        .on("mouseout", function() { d3.select(this).attr("r", 3); });
+        .on("mouseover", function() { 
+          d3.select(this).attr("r", 5);
+          var txt = self.data()[d3.select(this).attr("event")]["description"];
+          if(d3.select(this).attr("class") === "assist-dot") txt = txt.split(")")[1].split("(")[0]; 
+          else if(d3.select(this).attr("class") === "stl-dot") txt = txt.split(")")[1].split("(")[0]; 
+          else if(d3.select(this).attr("class") === "miss-dot") txt = txt.split("] ")[1].split(" Block")[0]; 
+          else if(d3.select(this).attr("class") === "blk-dot") txt = txt.split("Missed ")[1].split(" (")[0]; 
+          else txt = txt.split("] ")[1].split("(")[0]
+          self.vis.select(".play-text").text(txt);
+          rollover = true;
+        })
+        .on("mouseout", function() { d3.select(this).attr("r", 3); rollover = false;});
     };
 
     var latest = self.data()[self.data().length-1];
@@ -631,21 +671,38 @@ function playbyplay() {
     self.vis.append("svg:rect")
       .attr("class","legend-rect")
       .attr("fill","orange")
-      .attr("transform","translate(100,"+(self.h()+10)+")")
+      .attr("transform","translate(33,"+(self.h()+10)+")")
+      .attr("opacity", statson["Points"] ? 1:0.3)
       .attr("width",15)
       .attr("height",15)
       .attr("text","Points");
     self.vis.append("svg:text")
       .attr("class","legend-text")
-      .attr("transform","translate(120,"+(self.h()+16)+")")
+      .attr("transform","translate(53,"+(self.h()+16)+")")
       .attr("dy", ".35em")
       .style("font-size", "15px")
       .text("Points");
 
     self.vis.append("svg:rect")
       .attr("class","legend-rect")
+      .attr("fill","#996633")
+      .attr("transform","translate(97,"+(self.h()+10)+")")
+      .attr("opacity", statson["Misses"] ? 1:0.3)
+      .attr("width",15)
+      .attr("height",15)
+      .attr("text","Misses");
+    self.vis.append("svg:text")
+      .attr("class","legend-text")
+      .attr("transform","translate(117,"+(self.h()+16)+")")
+      .attr("dy", ".35em")
+      .style("font-size", "15px")
+      .text("Misses");
+
+    self.vis.append("svg:rect")
+      .attr("class","legend-rect")
       .attr("fill","green")
       .attr("transform","translate(167,"+(self.h()+10)+")")
+      .attr("opacity", statson["Assists"] ? 1:0.3)
       .attr("width",15)
       .attr("height",15)
       .attr("text","Assists");
@@ -659,7 +716,7 @@ function playbyplay() {
     self.vis.append("svg:rect")
       .attr("class","legend-rect")
       .attr("fill","blue")
-      .attr("opacity", 0.3)
+      .attr("opacity", statson["Rebounds"] ? 1:0.3)
       .attr("transform","translate(240,"+(self.h()+10)+")")
       .attr("width",15)
       .attr("height",15)
@@ -673,8 +730,8 @@ function playbyplay() {
 
     self.vis.append("svg:rect")
       .attr("class","legend-rect")
-      .attr("fill","purple")
-      .attr("opacity", 0.3)
+      .attr("fill","#CC66FF")
+      .attr("opacity", statson["Steals"] ? 1:0.3)
       .attr("transform","translate(325,"+(self.h()+10)+")")
       .attr("width",15)
       .attr("height",15)
@@ -689,7 +746,7 @@ function playbyplay() {
     self.vis.append("svg:rect")
       .attr("class","legend-rect")
       .attr("fill","red")
-      .attr("opacity", 0.3)
+      .attr("opacity", statson["TOs"] ? 1:0.3)
       .attr("transform","translate(385,"+(self.h()+10)+")")
       .attr("width",15)
       .attr("height",15)
@@ -704,7 +761,7 @@ function playbyplay() {
     self.vis.append("svg:rect")
       .attr("class","legend-rect")
       .attr("fill","#33FFCC")
-      .attr("opacity", 0.3)
+      .attr("opacity", statson["Blocks"] ? 1:0.3)
       .attr("transform","translate(435,"+(self.h()+10)+")")
       .attr("width",15)
       .attr("height",15)
@@ -719,7 +776,7 @@ function playbyplay() {
     self.vis.append("svg:rect")
       .attr("class","legend-rect")
       .attr("fill","#FF00CC")
-      .attr("opacity", 0.3)
+      .attr("opacity", statson["Fouls"] ? 1:0.3)
       .attr("transform","translate(500,"+(self.h()+10)+")")
       .attr("width",15)
       .attr("height",15)
@@ -737,6 +794,7 @@ function playbyplay() {
         txt = txt ? txt : d3.select(this).attr("text");
         var op, selector;
         if(txt === "Points") selector = ".point-dot";
+        if(txt === "Misses") selector = ".miss-dot";
         if(txt === "Assists") selector = ".assist-dot";
         if(txt === "Rebounds") selector = ".reb-dot";
         if(txt === "Steals") selector = ".stl-dot";
@@ -746,7 +804,9 @@ function playbyplay() {
         op = Math.abs(self.vis.select(selector).attr("opacity")-1);
         self.vis.selectAll(selector).attr("opacity",op);
         self.vis.select(".legend-rect[text='"+txt+"']")
-          .attr("opacity", op + 0.3);
+          .attr("opacity", op + 0.3)
+          .style("pointer-events", op+0.3==1.3 ? "" : "none");
+        statson[txt] = op+0.3==1.3;
       });
 
     self.vis.on("mousemove",function(d,i) {
