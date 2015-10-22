@@ -143,6 +143,28 @@ td, th {
 .schedule-game:hover {
   background-color:#99CCFF;
 }
+
+.period {
+  font-size:12px;
+  top:0px;
+  position:absolute;
+  width:50px;
+  margin:auto;
+  text-align:center;
+}
+.game-live {
+  color:red;
+}
+
+.info {
+  font-size:12px;
+  top:12px;
+  position:absolute;
+  width:50px;
+  margin:auto;
+  text-align:center;
+}
+
 .schedule-game div {
   position:absolute;
   bottom:0px;

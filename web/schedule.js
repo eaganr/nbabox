@@ -28,11 +28,15 @@ function schedule() {
 				},
 				success:function (data) {
           data = data["sports_content"]["games"]["game"];
-          
+          console.log(data);
 					for(var i=0;i<data.length;i++) {
             var hometeam = data[i]["home"]["abbreviation"];
             var awayteam = data[i]["visitor"]["abbreviation"];
-						self.games.push({gameid:data[i]["id"], hometeam:hometeam, awayteam:awayteam});
+            var homescore = data[i]["home"]["score"];
+            var awayscore = data[i]["visitor"]["score"];
+            var period = data[i]["period_time"]["period_status"];
+
+						self.games.push({gameid:data[i]["id"], hometeam:hometeam, awayteam:awayteam, homescore:homescore, awayscore:awayscore, period:period});
 					}
           self.loaded = true;
 					self.draw();
@@ -111,6 +115,23 @@ function schedule() {
 			img.className="home-logo";
 			img.src="http://stats.nba.com/media/img/teams/logos/"+self.games[i].hometeam+"_logo.svg";
 			game.appendChild(img);
+
+      //score or game time
+      var period = document.createElement("span");
+      period.className="period";
+      period.innerHTML=self.games[i]["period"];
+      if(self.games[i]["period"].indexOf(" ET") === -1) {
+        var info = document.createElement("span");
+        info.className="info";
+        info.innerHTML=self.games[i]["awayscore"]+"-"+self.games[i]["homescore"];
+        if(self.games[i]["period"] !== "Final") {
+          period.className+=" game-live"; 
+          info.className+=" game-live"; 
+         }
+        game.appendChild(info);
+      }
+      game.appendChild(period);
+    
 
 			var txt = document.createElement("div");
 			txt.innerHTML = self.games[i].awayteam+" vs. "+self.games[i].hometeam;

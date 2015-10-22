@@ -156,6 +156,9 @@ function playbyplay() {
         }
         if(desc.indexOf("Substitution ") > -1  && evt["team_abr"] === players[Object.keys(players)[0]]["team"]) {
           var subs = desc.split("replaced by");
+          if(evt["event"] == 53) {
+            console.log("stop");
+          }
           for(var j in players) {
             //in
             if(subs[1].indexOf(j) > -1) {
@@ -176,7 +179,7 @@ function playbyplay() {
               else {
                 var intime = "12:00";
                 if(period > 4) intime = "5:00";
-                players[j].mins.push({intime:"5:00", inperiod:period, outtime:evt.clock, outperiod:period});
+                players[j].mins.push({intime:intime, inperiod:period, outtime:evt.clock, outperiod:period});
               }
             }
           }
@@ -290,7 +293,7 @@ function playbyplay() {
         }
       }
       self.vis.select(".hover-line").attr("x1",x).attr("x2",x);
-      timelabel = timelabel + " / " + pt["home_score"] + " - " + pt["visitor_score"];
+      timelabel = timelabel + " / " + pt["visitor_score"] + " - " + pt["home_score"];
       self.vis.select(".time-text")
         .text(timelabel);
 
