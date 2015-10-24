@@ -2,6 +2,7 @@
 <html>
 
 <head>
+  <title>NBA Play By PLay</title>
   <link rel="stylesheet" type="text/css" href="boxscore.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
@@ -76,6 +77,7 @@
               awayTeam.color = teamcolors(awayTeam.abbrev, homeTeam.color);
               homeTeam.score = data["home"]["stats"]["points"];
               awayTeam.score = data["visitor"]["stats"]["points"];
+              document.getElementsByTagName("title")[0].innerHTML = homeTeam.score + " " + homeTeam.abbrev + " - " + awayTeam.abbrev + " " + awayTeam.score;
 
             
               document.getElementById("away-score").innerHTML = awayTeam.score;

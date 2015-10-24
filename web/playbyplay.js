@@ -128,7 +128,7 @@ function playbyplay() {
             }
           }
         }
-        if(desc.indexOf("Rebound") > -1) {
+        if(desc.indexOf("Rebound") > -1 && desc.indexOf("Team Rebound") === -1) {
           for(var k in players) {
             if((desc.split("Rebound")[0].indexOf(k + " ") > -1 || evt["player_code"] === players[k]["player_code"]) && evt["team_abr"] === players[k]["team"]) {
                 players[k].rebs.push({time:evt.clock, period:period, evt:i});
@@ -298,13 +298,15 @@ function playbyplay() {
       for(var i=0;i<self.data().length;i++) {
         var pt = self.data()[i];
         if(pt.sCORE !== null) currentscore = pt.sCORE;
-        if(!rollover && self.timetoseconds(pt["period"], pt["clock"]) >= seconds) {
-          var txt = pt["description"].split("] ")[1];
-          if(txt != null) {
-            txt = txt.split("(")[0];
-            self.vis.select(".play-text").text(txt);
+        if(self.timetoseconds(pt["period"], pt["clock"]) >= seconds) {
+          if(!rollover) {
+            var txt = pt["description"].split("] ")[1];
+            if(txt != null) {
+              txt = txt.split("(")[0];
+              self.vis.select(".play-text").text(txt);
+            }
+            else self.vis.select(".play-text").text("");
           }
-          else self.vis.select(".play-text").text("");
           break;
         }
       }
@@ -602,6 +604,7 @@ function playbyplay() {
       self.vis.selectAll("circle")
         .style("cursor", "pointer")
         .on("click", function(d) {
+          //show video of play
           var evt = d3.select(this).attr("event");
           var url = "http://stats.nba.com/cvp.html?GameID="+gameID+"&GameEventID="+self.data()[evt]["event"]+"&mtype=&mtitle=";
           document.getElementById("video-title").innerHTML = self.data()[evt]["description"];
@@ -802,10 +805,10 @@ function playbyplay() {
         if(txt === "Blocks") selector = ".blk-dot";
         if(txt === "Fouls") selector = ".fl-dot";
         op = Math.abs(self.vis.select(selector).attr("opacity")-1);
-        self.vis.selectAll(selector).attr("opacity",op);
-        self.vis.select(".legend-rect[text='"+txt+"']")
-          .attr("opacity", op + 0.3)
+        self.vis.selectAll(selector).attr("opacity",op)
           .style("pointer-events", op+0.3==1.3 ? "" : "none");
+        self.vis.select(".legend-rect[text='"+txt+"']")
+          .attr("opacity", op + 0.3);
         statson[txt] = op+0.3==1.3;
       });
 

@@ -3,7 +3,7 @@ function schedule() {
 
 	//private vars
 	var today = new Date();
-  if(today.getHours() < 15) today.setDate(today.getDate() - 1);
+  if(today.getHours() < 14) today.setDate(today.getDate() - 1);
 	var date = today.getMonth()+1+"/"+today.getDate()+"/"+today.getFullYear();
 	//var date = "03/10/2015";
 	self.games=[];

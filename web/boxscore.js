@@ -8,10 +8,10 @@ function boxscore(id, data) {
   table.setAttribute("cellspacing",0);
   var stats = {first_name:"Player",
                minutes:"Min",
+               points:"Pts",
                field_goals_made:"FGM-A",
                three_pointers_made:"3PM-A",
                free_throws_made:"FTM-A",
-               points:"Pts",
                rebounds_offensive:"OfR",
                rebounds_defensive:"DeR",
                total_rebounds:"Rebs",
@@ -39,6 +39,7 @@ function boxscore(id, data) {
     for(var k in stats) {
       //modify and format      
       if(k === "minutes") player[k] = player[k]+":"+(player["seconds"].length > 1 ? player["seconds"] : "0"+player["seconds"]);
+      if(k === "points") player[k] = "&nbsp; "+player[k]+" &nbsp;";
       if(k === "first_name") player[k] = player[k] + " " + player["last_name"];
       if(k === "field_goals_made") player[k] = player[k]+"-"+player["field_goals_attempted"];
       if(k === "three_pointers_made") player[k] = player[k]+"-"+player["three_pointers_attempted"];
