@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>NBA Play By PLay</title>
+  <title>NBA Play By Play</title>
   <link rel="stylesheet" type="text/css" href="boxscore.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
@@ -77,15 +77,18 @@
               awayTeam.color = teamcolors(awayTeam.abbrev, homeTeam.color);
               homeTeam.score = data["home"]["stats"]["points"];
               awayTeam.score = data["visitor"]["stats"]["points"];
+
               document.getElementsByTagName("title")[0].innerHTML = homeTeam.score + " " + homeTeam.abbrev + " - " + awayTeam.abbrev + " " + awayTeam.score;
 
-            
+                          
               document.getElementById("away-score").innerHTML = awayTeam.score;
               document.getElementById("home-score").innerHTML = homeTeam.score;
               document.getElementById("away-logo").src = "http://stats.nba.com/media/img/teams/logos/"+awayTeam.abbrev+"_logo.svg";
               document.getElementById("home-logo").src = "http://stats.nba.com/media/img/teams/logos/"+homeTeam.abbrev+"_logo.svg";
               document.getElementById("home-name").innerHTML = homeTeam.abbrev;
+              document.getElementById("home-name").setAttribute("style", "color:"+homeTeam.color);
               document.getElementById("away-name").innerHTML = awayTeam.abbrev;
+              document.getElementById("away-name").setAttribute("style", "color:"+awayTeam.color);
               document.getElementById("box-home").innerHTML = homeTeam.abbrev;
               document.getElementById("box-away").innerHTML = awayTeam.abbrev;
               
@@ -115,6 +118,7 @@
                 .label(function(d) { return d.data["last_name"]+" - "+d.data["points"];})
                 .title(homeTeam.abbrev + " Scoring")
                 .draw();  
+              d3.selectAll(".charts .pie").style("display", "block");
 
               awayTeam.scoring = new pie("#awayscoring")
                 .w(250).h(250)
@@ -137,7 +141,7 @@
                 {abbrev:awayTeam.abbrev, reb:data["visitor"]["stats"]["rebounds_defensive"]},
                 {abbrev:homeTeam.abbrev, reb:data["home"]["stats"]["rebounds_offensive"]}
               ];
-
+              /*
               homeTeam.rebounds = new pie("#homerebounding")
                 .w(250).h(250)
                 .value("reb")
@@ -157,6 +161,7 @@
                 .color(homeawaycolors, true)
                 .title(awayTeam.abbrev + " Basket Rebounds")
                 .draw();
+              */
 
               var threes = [
                 {abbrev:homeTeam.abbrev, threes:data["home"]["stats"]["three_pointers_made"]},
@@ -286,13 +291,20 @@
               }
             });
           }
-          else document.getElementById("game-data").innerHTML = "<h1>This game has not started</h1>";
+          else  {
+            document.getElementById("game-data").innerHTML = "<h1>This game has not started</h1>";
+            document.getElementById("game-data").setAttribute("style", "margin-top:200px;");
+          }
           d3.select("#game-data").style("display", "");
         }
       });
     }
     getData();
-    if(livegame) setInterval(function() { getData(); }, 60000);
+    if(livegame) setInterval(function() { 
+      //reload schedule for live games
+      sched.getschedule();
+      getData(); 
+    }, 60000);
 
     function closeVideo() {
       $("#video").slideToggle();
@@ -303,6 +315,11 @@
 </head>
 
 <body>
+  <div class="topbar">
+    <img src="../bball%20nuc.png" class="logo" />
+    <span class="page-title">Ballin' Box Score</span>
+  </div>
+
   <div class="content">  
     <div id="schedule"></div>
     <div id="game-data" style="display:none">
@@ -316,7 +333,7 @@
         </div>
 
       <div id="video">
-        <button id="close-video" onclick="closeVideo()">Close</button>
+        <input id="close-video" onclick="closeVideo()" type="image" src="img/close.svg" alt="Close" width="20" height="20">
         <span id="video-title"></span>
         <iframe id="video-frame" width="0" height="0" align="center" frameBorder="0" scrolling="no" ></iframe>
       </div>
@@ -327,12 +344,12 @@
           <div class="team-name" id="away-name"></div>
           <div class="team-name" id="home-name"></div>
         </div>
-        <div id="pbpchart"><svg id="chart" width="1050" height="550"></svg></div>
+        <div id="pbpchart"><svg id="chart" width="1000" height="550"></svg></div>
       </div>
 
       <div id="boxscores">
         <div>
-          <div style="float:left;width:700px;">
+          <div class="boxscore">
             <h3 id="box-away"></h3>
             <div class="boxscore" id="awaybox"></div>
           </div>
@@ -341,8 +358,8 @@
             <div class="pie" id="awayrebounding"></div>
           </div>
         </div>
-        <div>
-          <div style="float:left;width:700px;">
+        <div class="team-box">
+          <div class="boxscore">
             <h3 id="box-home"></h3>
             <div class="boxscore" id="homebox"></div>
           </div>
