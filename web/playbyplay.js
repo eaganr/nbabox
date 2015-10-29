@@ -311,6 +311,13 @@ function playbyplay() {
         }
       }
       self.vis.select(".hover-line").attr("x1",x).attr("x2",x);
+      //end of quarters
+      if(timelabel === "2 - 12:00") timelabel = "End of 1st Qtr";
+      if(timelabel === "3 - 12:00") timelabel = "Halftime";
+      if(timelabel === "4 - 12:00") timelabel = "End of 3rd Qtr";
+      if(timelabel === "4 - 0:00") timelabel = "Game Over";
+
+
       timelabel = timelabel + " / " + pt["visitor_score"] + " - " + pt["home_score"];
       self.vis.select(".time-text")
         .text(timelabel);
@@ -600,11 +607,11 @@ function playbyplay() {
     }
 
     //click events for circles
-    if(neutral.period === "Final") {
-      self.vis.selectAll("circle")
-        .style("cursor", "pointer")
-        .on("click", function(d) {
+    self.vis.selectAll("circle")
+      .style("cursor", neutral.period === "Final"? "pointer": "")
+      .on("click", function(d) {
           //show video of play
+          if(neutral.period === "Final") {
           var evt = d3.select(this).attr("event");
           var url = "http://stats.nba.com/cvp.html?GameID="+gameID+"&GameEventID="+self.data()[evt]["event"]+"&mtype=&mtitle=";
           document.getElementById("video-title").innerHTML = self.data()[evt]["description"];
@@ -613,20 +620,20 @@ function playbyplay() {
             .attr("width", 604)
             .attr("height", 350);
           if(d3.select("#video").style("display") === "none") $("#video").slideToggle();
-        })
-        .on("mouseover", function() { 
-          d3.select(this).attr("r", 5);
-          var txt = self.data()[d3.select(this).attr("event")]["description"];
-          if(d3.select(this).attr("class") === "assist-dot") txt = txt.split(")")[1].split("(")[0]; 
-          else if(d3.select(this).attr("class") === "stl-dot") txt = txt.split(")")[1].split("(")[0]; 
-          else if(d3.select(this).attr("class") === "miss-dot") txt = txt.split("] ")[1].split(" Block")[0]; 
-          else if(d3.select(this).attr("class") === "blk-dot") txt = txt.split("Missed ")[1].split(" (")[0]; 
-          else txt = txt.split("] ")[1].split("(")[0]
-          self.vis.select(".play-text").text(txt);
-          rollover = true;
-        })
-        .on("mouseout", function() { d3.select(this).attr("r", 3); rollover = false;});
-    };
+        }
+      })
+      .on("mouseover", function() { 
+        d3.select(this).attr("r", 5);
+        var txt = self.data()[d3.select(this).attr("event")]["description"];
+        if(d3.select(this).attr("class") === "assist-dot") txt = txt.split(")")[1].split("(")[0]; 
+        else if(d3.select(this).attr("class") === "stl-dot") txt = txt.split(")")[1].split("(")[0]; 
+        else if(d3.select(this).attr("class") === "miss-dot") txt = txt.split("] ")[1].split(" Block")[0]; 
+        else if(d3.select(this).attr("class") === "blk-dot") txt = txt.split("Missed ")[1].split(" (")[0]; 
+        else txt = txt.split("] ")[1].split("(")[0]
+        self.vis.select(".play-text").text(txt);
+        rollover = true;
+      })
+      .on("mouseout", function() { d3.select(this).attr("r", 3); rollover = false;});
 
     var latest = self.data()[self.data().length-1];
     var t = self.timetoseconds(totalperiods, latest.clock);

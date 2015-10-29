@@ -11,7 +11,6 @@ function schedule() {
 
 	self.getschedule=function() {
 		var maindiv = document.getElementById(self.id());
-		if(maindiv) maindiv.innerHTML = "";
 		self.games = [];
     var accur = 3;
     var d = new Date(date);
@@ -60,38 +59,49 @@ function schedule() {
     var d = new Date(date); 
     d.setDate(d.getDate() + dir);
     date = d.getMonth()+1+"/"+d.getDate()+"/"+d.getFullYear();
+    document.getElementById("datepicker").value = date;
     self.getschedule();
   };
+  
+  var firstdraw = true;
 
 	self.draw=function() {
 		var maindiv = document.getElementById(self.id());
-		maindiv.innerHTML = "";
+    d3.selectAll(".schedule-game,h2")
+      .remove();
+    
+    if(firstdraw) {
+      var bbutton = document.createElement("button");
+      bbutton.innerHTML = "<";
+      bbutton.className = "move-btn";
+      bbutton.onclick = function() { movedate(-1); };
+      maindiv.appendChild(bbutton);
 
-    var bbutton = document.createElement("button");
-    bbutton.innerHTML = "<";
-    bbutton.className = "move-btn";
-    bbutton.onclick = function() { movedate(-1); };
-    maindiv.appendChild(bbutton);
+      var datepicker = document.createElement("input");
+      datepicker.id = "datepicker";
+      datepicker.value = date;
+      maindiv.appendChild(datepicker);
 
-		var datepicker = document.createElement("input");
-		datepicker.id = "datepicker";
-    datepicker.value = date;
-		maindiv.appendChild(datepicker);
+      var fbutton = document.createElement("button");
+      fbutton.innerHTML = ">";
+      fbutton.className = "move-btn";
+      fbutton.onclick = function() { movedate(1); };
+      maindiv.appendChild(fbutton);
 
-    var fbutton = document.createElement("button");
-    fbutton.innerHTML = ">";
-    fbutton.className = "move-btn";
-    fbutton.onclick = function() { movedate(1); };
-    maindiv.appendChild(fbutton);
+      
+      $("#datepicker").datepicker();
+      $("#datepicker").change(function() {
+        date = $(this).val();
+        self.getschedule();
+      });
+      firstdraw = false;
+    }
 
-		
-		$("#datepicker").datepicker();
-		$("#datepicker").change(function() {
-			date = $(this).val();
-			self.getschedule();
-		});
-
-		
+	  if(self.games.length === 0) {
+      var nogames = document.createElement("h2");
+      nogames.innerHTML = "No Games Scheduled";
+      maindiv.appendChild(nogames);
+    }	
 	
 		for(var i=0;i<self.games.length;i++) {
 			var game = document.createElement("div");	
@@ -120,6 +130,7 @@ function schedule() {
       //score or game time
       var period = document.createElement("span");
       period.className="period";
+      if(self.games[i]["period"].indexOf("End of") > -1) self.games[i]["period"] = self.games[i]["period"].substring(0,10);
       period.innerHTML=self.games[i]["period"];
       if(self.games[i]["period"].indexOf(" ET") === -1) {
         var info = document.createElement("span");
