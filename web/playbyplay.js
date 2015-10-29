@@ -315,7 +315,7 @@ function playbyplay() {
       if(timelabel === "2 - 12:00") timelabel = "End of 1st Qtr";
       if(timelabel === "3 - 12:00") timelabel = "Halftime";
       if(timelabel === "4 - 12:00") timelabel = "End of 3rd Qtr";
-      if(timelabel === "4 - 0:00") timelabel = "Game Over";
+      if(timelabel === "4 - 0:00" && self.data()[self.data().length-1]["home_score"] !== self.data()[self.data().length-1]["visitor_score"]) timelabel = "Game Over";
 
 
       timelabel = timelabel + " / " + pt["visitor_score"] + " - " + pt["home_score"];
@@ -614,6 +614,7 @@ function playbyplay() {
           if(neutral.period === "Final") {
           var evt = d3.select(this).attr("event");
           var url = "http://stats.nba.com/cvp.html?GameID="+gameID+"&GameEventID="+self.data()[evt]["event"]+"&mtype=&mtitle=";
+          //var url = "http://stats.nba.com/movement/#!/?GameID="+gameID+"&GameEventID="+self.data()[evt]["event"]+"&mtype=&mtitle=";
           document.getElementById("video-title").innerHTML = self.data()[evt]["description"];
           d3.select("#video-frame")
             .attr("src", url)
