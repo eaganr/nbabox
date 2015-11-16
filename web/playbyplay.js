@@ -11,9 +11,13 @@ function playbyplay() {
     return self.selector.val;
   }
   
+	var hometeam;
+	var awayteam;
+	
   self.homeplayers=function(h) {
     if(h) {
       for(var k in h) {
+				if(!hometeam) hometeam = h[k]["team"];
         h[k] = {player_code:h[k]["player_code"], on_court:h[k]["on_court"], team:h[k]["team"], pts:[], miss:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
       }
       self.homeplayers.val=h;
@@ -22,9 +26,133 @@ function playbyplay() {
     return self.homeplayers.val ? self.homeplayers.val : [];
   }  
 
+ 	self.homelineups=[];
+  self.awaylineups=[];
+  self.currenthomelineup = {players:[], start:null, end:null};
+  self.currentawaylineup = {players:[], start:null, end:null};
+
+	function addtocurrent(playername, player, team, specific) {
+		var lineup = specific;
+		if(specific === undefined) {
+			if(hometeam === team) lineup = self.currenthomelineup;
+			if(awayteam === team) lineup = self.currentawaylineup;
+		}
+
+		var found = false;
+		for(var i=0;i<lineup["players"].length;i++) {
+			if(lineup["players"][i]["player_code"] === player["player_code"]) found = true;
+		}
+		if(!found && lineup["players"].length < 5) {
+			player["playername"] = playername;
+			lineup["players"].push(player);
+		}
+	}
+
+
+	function changelineup(playerin, playerout, team, evt) {
+		//home
+		if(hometeam === team || team === "both") {
+			var nextlineup = JSON.parse(JSON.stringify(self.currenthomelineup));
+			var scorediff =  parseInt(evt["visitor_score"]) - parseInt(evt["home_score"]);
+			self.currenthomelineup["end"] = evt;
+			nextlineup["start"] = evt;
+			self.homelineups.push(JSON.parse(JSON.stringify(self.currenthomelineup)));
+			
+			if(playerin && playerout) {
+				for(var i=0;i<nextlineup["players"].length;i++) {
+					if(nextlineup["players"][i]["player_code"] === playerout["player_code"]) {
+						nextlineup["players"].splice(i, 1);
+						break;
+					}
+				}
+				nextlineup["players"].push(playerin);
+			}
+			else {
+				nextlineup["players"] = [];
+			}
+			self.currenthomelineup = nextlineup; 
+		}
+		//away
+		if(awayteam === team || team === "both") {
+			var nextlineup = JSON.parse(JSON.stringify(self.currentawaylineup));
+			var scorediff =  parseInt(evt["home_score"]) - parseInt(evt["visitor_score"]);
+			self.currentawaylineup["end"] = evt;
+			nextlineup["start"] = evt;
+			self.awaylineups.push(JSON.parse(JSON.stringify(self.currentawaylineup)));
+			
+			if(playerin && playerout) {
+				for(var i=0;i<nextlineup["players"].length;i++) {
+					if(nextlineup["players"][i]["player_code"] === playerout["player_code"]) {
+						nextlineup["players"].splice(i, 1);
+						break;
+					}
+				}
+				nextlineup["players"].push(playerin);
+			}
+			else {
+				nextlineup["players"] = [];
+			}
+			self.currentawaylineup = nextlineup; 
+		}
+	}
+
+	function combinelineups() {
+		var lineups = [self.homelineups, self.awaylineups];
+		for(var a=0;a<lineups.length;a++) {
+			var lineup = lineups[a];
+			var templineup = [];
+			for(var i=0;i<lineup.length;i++) {
+				var notzero = false;
+				while(!notzero) {
+					if("description" in lineup[i]["end"] && lineup[i]["end"]["description"].indexOf("Start Period") > -1) lineup[i]["end"]["clock"] = "12:00"; 
+					if("description" in lineup[i]["start"] && lineup[i]["start"]["description"].indexOf("Start Period") > -1) lineup[i]["start"]["clock"] = "12:00"; 
+					var secs = timetoseconds(lineup[i]["end"]["period"], lineup[i]["end"]["clock"]) - timetoseconds(lineup[i]["start"]["period"], lineup[i]["start"]["clock"]);
+					if(secs != 0) notzero = true;
+					else i++;
+				}
+
+				var players1 = lineup[i]["players"];
+
+				var found = false;
+				for(var j=0;j<templineup.length;j++) {
+					var players2 = templineup[j]["players"];
+					var match = 0;
+					for(var n=0;n<players1.length;n++) {
+						for(var p=0;p<players2.length;p++) {
+							if(players1[n]["playername"] === players2[p]["playername"]) match++;
+						}
+					}	
+					if(match === 5) {
+						found = true;
+						var diff = (lineup[i]["end"]["home_score"]-lineup[i]["end"]["visitor_score"])-(lineup[i]["start"]["home_score"]-lineup[i]["start"]["visitor_score"]);
+						if(a === 1) diff = diff*-1;
+						templineup[j]["diff"] += diff;
+						templineup[j]["secs"] += secs;
+						templineup[j]["num"]++;
+					}
+				}
+				//if not found add to templineup
+				if(!found) {
+					if(lineup[i]["players"].length === 4) {
+						console.log(lineup[i]);
+					}
+					var diff = (lineup[i]["end"]["home_score"]-lineup[i]["end"]["visitor_score"])-(lineup[i]["start"]["home_score"]-lineup[i]["start"]["visitor_score"]);
+					if(a === 1) diff = diff*-1;
+					templineup.push({players:lineup[i]["players"],
+													 diff:diff,
+													 num:1,
+													 secs:secs});
+				}	
+			}
+			if(a === 0)  self.homelineups = templineup;
+			if(a === 1)  self.awaylineups = templineup;
+		}
+	}
+
   self.awayplayers=function(a) {
     if(a) {
       for(var k in a) {
+				if(!awayteam) awayteam = a[k]["team"];
         a[k] = {player_code:a[k]["player_code"], on_court:a[k]["on_court"], team:a[k]["team"], pts:[], miss:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
       }
       self.awayplayers.val=a;
@@ -44,14 +172,16 @@ function playbyplay() {
 
   self.scoringmargins = [{margin:0, time:"12:00", period:1}];
 
-  function mincorrect(evt, player, period) {
+  function mincorrect(evt, player, playername, period, evt) {
     //fixes missing minutes from starts of quarters
+		addtocurrent(playername, player, player["team"]);
     var recent = player.mins[player.mins.length-1];
     if(player.mins.length === 0 || (recent.outtime !== null && recent.outperiod < period)) {
       var intime = "12:00";
       if(period > 4) intime = "5:00";
       player.mins.push({intime:intime, inperiod:period, outtime:null, outperiod:null});
       recent = player.mins[player.mins.length-1];
+			lineupcorrect(period, intime, player, playername);
     }
     //if play an entire quarter, no substitution
     if(recent.outtime === null && recent.inperiod < period) {
@@ -63,6 +193,33 @@ function playbyplay() {
       player.mins.push({intime:intime, inperiod:period, outtime:null, outperiod:null});
     }
   }
+	
+	function lineupcorrect(period, intime, player, playername) {
+			var t = timetoseconds(period, intime);	
+			//add to lineup, may be missing
+			var lineup;
+			var current;
+			if(player["team"] === hometeam) {
+				lineup = self.homelineups;
+				current = self.currenthomelineup;
+			}
+			if(player["team"] === awayteam) {
+				lineup = self.awaylineups;
+				current = self.currentawaylineup;
+			}
+			for(var j=0;j<lineup.length;j++) {
+				var s = timetoseconds(lineup[j]["start"]["period"], lineup[j]["start"]["clock"]);
+				var e = timetoseconds(lineup[j]["end"]["period"], lineup[j]["end"]["clock"]);
+				if(t >= s && t < e) {
+					addtocurrent(playername, player, player["team"], lineup[j]);
+				}
+			}
+
+			if("description" in current["start"] && current["start"]["description"].indexOf("Start Period") > -1) current["start"]["clock"] = period < 5? "12:00" : "5:00"; 
+			var s = timetoseconds(current["start"]["period"], current["start"]["clock"]);
+			if(playername === "Sessions") console.log(current);
+			if(t > s) addtocurrent(playername, player, player["team"], lineup[j]);
+	}
 
 
   self.parse=function() {
@@ -72,6 +229,11 @@ function playbyplay() {
     for(var k in self.awayplayers.val) {
       self.awayplayers.val[k] = {player_code:self.awayplayers.val[k]["player_code"], on_court:self.awayplayers.val[k]["on_court"], team:self.awayplayers.val[k]["team"], pts:[], miss:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
     }
+		
+		self.homelineups = [];
+		self.awaylineups = [];
+	  self.currenthomelineup = {players:[], start:{clock:"12:00", period:"1", home_score:"0", visitor_score:"0"}, end:null};
+ 		self.currentawaylineup = {players:[], start:{clock:"12:00", period:"1", home_score:"0", visitor_score:"0"}, end:null};
 
     self.scoringmargins = [{margin:0, time:"12:00", period:1}];
     var period = 0;
@@ -83,7 +245,11 @@ function playbyplay() {
         if(subtract) {
           subtract = false;
         }
-        else period++;
+        else  {
+					period++;
+					evt["period"] = period;
+					if(period != 1) changelineup(null, null, "both", evt);
+				}
       }
       if(period > totalperiods) totalperiods = period;
       if(period === 0) {
@@ -109,12 +275,12 @@ function playbyplay() {
               players[k].pts.push(pt);
               pt.desc = desc;
               self.scoringmargins.push(pt);
-              mincorrect(evt, players[k], period);
+              mincorrect(evt, players[k], k, period, evt);
             }
             if(assisted) {
               if(sections[1].indexOf(k + " ") > -1 && evt["team_abr"] === players[k]["team"]) {
                 players[k].ast.push({time:evt.clock, period:period, evt:i});
-                mincorrect(evt, players[k], period);
+              	mincorrect(evt, players[k], k, period, evt);
               }
             }  
           }
@@ -123,7 +289,7 @@ function playbyplay() {
           for(var k in players) {
             if((desc.split(" Missed")[0].indexOf(k + " ") > -1 || evt["player_code"] === players[k]["player_code"]) && evt["team_abr"] === players[k]["team"]) {
                 players[k].miss.push({time:evt.clock, period:period, evt:i});
-                mincorrect(evt, players[k], period);
+              	mincorrect(evt, players[k], k, period, evt);
                 break;
             }
           }
@@ -132,7 +298,7 @@ function playbyplay() {
           for(var k in players) {
             if((desc.split("Rebound")[0].indexOf(k + " ") > -1 || evt["player_code"] === players[k]["player_code"]) && evt["team_abr"] === players[k]["team"]) {
                 players[k].rebs.push({time:evt.clock, period:period, evt:i});
-                mincorrect(evt, players[k], period);
+              	mincorrect(evt, players[k], k, period, evt);
                 break;
             }
           }
@@ -141,7 +307,7 @@ function playbyplay() {
           for(var k in players) {
             if(desc.split("TO)")[1].indexOf(k + " ") > -1 && evt["team_abr"] !== players[k]["team"]) {
                 players[k].stls.push({time:evt.clock, period:period, evt:i});
-                mincorrect(evt, players[k], period);
+              	mincorrect(evt, players[k], k, period, evt);
                 break;
             }
           }
@@ -150,7 +316,7 @@ function playbyplay() {
           for(var k in players) {
             if((desc.split("Turnover")[0].indexOf(k + " ") > -1 || evt["player_code"] === players[k]["player_code"]) && evt["team_abr"] === players[k]["team"]) {
                 players[k].tos.push({time:evt.clock, period:period, evt:i});
-                mincorrect(evt, players[k], period);
+              	mincorrect(evt, players[k], k, period, evt);
                 break;
             }
           }
@@ -159,7 +325,7 @@ function playbyplay() {
           for(var k in players) {
             if(desc.split("Block: ")[1].indexOf(k+" ") > -1 && evt["team_abr"] !== players[k]["team"]) {
                 players[k].blks.push({time:evt.clock, period:period, evt:i});
-                mincorrect(evt, players[k], period);
+              	mincorrect(evt, players[k], k, period, evt);
                 break;
             }
           }
@@ -168,16 +334,20 @@ function playbyplay() {
           for(var k in players) {
             if((desc.split("Foul:")[0].indexOf(k+" ") > -1 || evt["player_code"] === players[k]["player_code"]) && evt["team_abr"] === players[k]["team"]) {
                 players[k].fls.push({time:evt.clock, period:period, evt:i});
-                mincorrect(evt, players[k], period);
+              	mincorrect(evt, players[k], k, period, evt);
                 break;
             }
           }
         }
         if(desc.indexOf("Substitution ") > -1  && evt["team_abr"] === players[Object.keys(players)[0]]["team"]) {
           var subs = desc.split("replaced by");
+					var inplayer;
+					var outplayer;
           for(var j in players) {
             //in
             if(subs[1].indexOf(j) > -1) {
+							players[j]["playername"] = j;
+							inplayer = players[j];
               var len = players[j].mins.length;
               if(len > 0 && players[j].mins[len-1].outtime === null) {
                 players[j].mins[len-1].outtime = "0:00";
@@ -187,6 +357,9 @@ function playbyplay() {
             }
             //out
             if(subs[0].indexOf(j) > -1 || evt["player_code"] === players[j]["player_code"]) {
+							players[j]["playername"] = j;
+							mincorrect(evt, players[j], j, period, evt);
+							outplayer = players[j];
               var len = players[j].mins.length;
               if(len > 0) {
                 players[j].mins[len-1].outtime = evt.clock;
@@ -199,6 +372,7 @@ function playbyplay() {
               }
             }
           }
+					changelineup(inplayer, outplayer, players[Object.keys(players)[0]]["team"], evt);
         }
       }
     }
@@ -226,6 +400,14 @@ function playbyplay() {
         i--;
       }
     }
+	
+		var evt = self.data()[self.data().length-1];
+		self.currenthomelineup["end"] = evt; 
+		self.currentawaylineup["end"] = evt; 
+		self.homelineups.push(JSON.parse(JSON.stringify(self.currenthomelineup)));
+		self.awaylineups.push(JSON.parse(JSON.stringify(self.currentawaylineup)));
+
+		combinelineups();
 
     return self;
   };
@@ -254,7 +436,7 @@ function playbyplay() {
     return self.margins.val ? self.margins.val : {top:50,right:20,left:50,bottom:20};
   }
 
-  self.timetoseconds=function(p,t) {
+  timetoseconds=function(p,t) {
     var m = parseInt(t.split(":")[0]);
     var sec = parseInt(t.split(":")[1]);
     if(p <= 4) return (p-1)*720 + (12-m)*60-sec;
@@ -298,7 +480,7 @@ function playbyplay() {
       for(var i=0;i<self.data().length;i++) {
         var pt = self.data()[i];
         if(pt.sCORE !== null) currentscore = pt.sCORE;
-        if(self.timetoseconds(pt["period"], pt["clock"]) >= seconds) {
+        if(timetoseconds(pt["period"], pt["clock"]) >= seconds) {
           if(!rollover) {
             var txt = pt["description"].split("] ")[1];
             if(txt != null) {
@@ -444,7 +626,7 @@ function playbyplay() {
 
     var lineGen = d3.svg.line()
       .x(function(d) {
-          var x = self.xScale(3+self.timetoseconds(d.period, d.time));
+          var x = self.xScale(3+timetoseconds(d.period, d.time));
           return x;
       })
       .y(function(d) {
@@ -503,8 +685,8 @@ function playbyplay() {
 
           self.vis.append("svg:line")  
             .attr("class", "min-line")
-            .attr("x1",self.xScale(self.timetoseconds(min.inperiod,min.intime)))
-            .attr("x2",self.xScale(self.timetoseconds(min.outperiod,min.outtime)))
+            .attr("x1",self.xScale(timetoseconds(min.inperiod,min.intime)))
+            .attr("x2",self.xScale(timetoseconds(min.outperiod,min.outtime)))
             .attr("y1",y).attr("y2",y)
             .attr("stroke","#3399FF")
             .attr("stroke-linecap","round")
@@ -521,7 +703,7 @@ function playbyplay() {
             .attr("opacity",statson["Fouls"]? 1:0)
             .attr("event", fl["evt"])
             .attr("r",3)
-            .attr("cx",self.xScale(self.timetoseconds(fl.period,fl.time)))
+            .attr("cx",self.xScale(timetoseconds(fl.period,fl.time)))
             .attr("cy",y);
         }
         for(var i=0;i<player.blks.length;i++) {
@@ -532,7 +714,7 @@ function playbyplay() {
             .attr("opacity",statson["Blocks"]?1:0)
             .attr("event", blk["evt"])
             .attr("r",3)
-            .attr("cx",self.xScale(self.timetoseconds(blk.period,blk.time)))
+            .attr("cx",self.xScale(timetoseconds(blk.period,blk.time)))
             .attr("cy",y);
         }
         for(var i=0;i<player.tos.length;i++) {
@@ -543,7 +725,7 @@ function playbyplay() {
             .attr("opacity",statson["TOs"]?1:0)
             .attr("event", to["evt"])
             .attr("r",3)
-            .attr("cx",self.xScale(self.timetoseconds(to.period,to.time)))
+            .attr("cx",self.xScale(timetoseconds(to.period,to.time)))
             .attr("cy",y);
         }
         for(var i=0;i<player.stls.length;i++) {
@@ -554,7 +736,7 @@ function playbyplay() {
             .attr("opacity",statson["Steals"]?1:0)
             .attr("event", stl["evt"])
             .attr("r",3)
-            .attr("cx",self.xScale(self.timetoseconds(stl.period,stl.time)))
+            .attr("cx",self.xScale(timetoseconds(stl.period,stl.time)))
             .attr("cy",y);
         }
         for(var i=0;i<player.rebs.length;i++) {
@@ -565,7 +747,7 @@ function playbyplay() {
             .attr("opacity",statson["Rebounds"]? 1 : 0)
             .attr("event", reb["evt"])
             .attr("r",3)
-            .attr("cx",self.xScale(self.timetoseconds(reb.period,reb.time)))
+            .attr("cx",self.xScale(timetoseconds(reb.period,reb.time)))
             .attr("cy",y);
         }
         for(var i=0;i<player.miss.length;i++) {
@@ -576,7 +758,7 @@ function playbyplay() {
             .attr("opacity",statson["Misses"]?1:0)
             .attr("event", miss["evt"])
             .attr("r",3)
-            .attr("cx",self.xScale(self.timetoseconds(miss.period,miss.time)))
+            .attr("cx",self.xScale(timetoseconds(miss.period,miss.time)))
             .attr("cy",y);
         }
         for(var i=0;i<player.ast.length;i++) {
@@ -587,7 +769,7 @@ function playbyplay() {
             .attr("opacity",statson["Assists"]?1:0)
             .attr("event", ast["evt"])
             .attr("r",3)
-            .attr("cx",self.xScale(self.timetoseconds(ast.period,ast.time)))
+            .attr("cx",self.xScale(timetoseconds(ast.period,ast.time)))
             .attr("cy",y);
         }
         for(var i=0;i<player.pts.length;i++) {
@@ -598,7 +780,7 @@ function playbyplay() {
             .attr("opacity",statson["Points"]?1:0)
             .attr("event", pt["evt"])
             .attr("r",3)
-            .attr("cx",self.xScale(self.timetoseconds(pt.period,pt.time)))
+            .attr("cx",self.xScale(timetoseconds(pt.period,pt.time)))
             .attr("cy",y);
         }
 
@@ -636,7 +818,7 @@ function playbyplay() {
       .on("mouseout", function() { d3.select(this).attr("r", 3); rollover = false;});
 
     var latest = self.data()[self.data().length-1];
-    var t = self.timetoseconds(totalperiods, latest.clock);
+    var t = timetoseconds(totalperiods, latest.clock);
 
     self.vis.append('svg:line')
       .attr("class", "hover-line")
@@ -850,7 +1032,7 @@ function playbyplay() {
 
   function mouseoff() {
     var latest = self.data()[self.data().length-1];
-    var t = self.timetoseconds(latest.period, latest.clock);
+    var t = timetoseconds(latest.period, latest.clock);
     updatemenu(t);
 
     self.vis.selectAll(".min-line")

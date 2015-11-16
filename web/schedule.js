@@ -67,8 +67,9 @@ function schedule() {
 
 	self.draw=function() {
 		var maindiv = document.getElementById(self.id());
-    d3.selectAll(".schedule-game,h2")
+    d3.selectAll(".schedule-game")
       .remove();
+		d3.select("#"+self.id()).selectAll("h2").remove();
     
     if(firstdraw) {
       var bbutton = document.createElement("button");

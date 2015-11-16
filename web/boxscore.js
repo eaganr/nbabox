@@ -46,6 +46,7 @@ function boxscore(id, data) {
       if(k === "three_pointers_made") val = player[k]+"-"+player["three_pointers_attempted"];
       if(k === "free_throws_made") val = player[k]+"-"+player["free_throws_attempted"];
       if(k === "total_rebounds") val = parseInt(player["rebounds_offensive"]) + parseInt(player["rebounds_defensive"]);
+			if(k === "plus_minus") val = (parseInt(player[k]) > 0? "+" : "") + player[k];
       td = document.createElement("td");
       td.innerHTML = val!==null ? val : 0;
       tr.appendChild(td);

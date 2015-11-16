@@ -275,3 +275,97 @@ html, body {
   font: inherit;
   vertical-align: baseline;
 }
+
+.lineups {
+	width:900px;
+	position:relative;
+	left:10%;
+}
+
+.lineup-player {
+	display:inline-block;
+	width:105px;
+	margin-left:10px;
+	margin-right:10px;
+}
+
+.lineup-name {
+	display:block;
+  width:100px;
+  margin:auto;
+	text-align:center;
+}
+
+.lineup-pic {
+	width:100px;
+	height:80px;
+}
+
+.lineup-used {
+	display:inline-block;
+	margin-left:10px;
+	margin-right:10px;
+	text-align:center;
+	font-size:20px;
+	position:relative;
+	top:-35px;
+	line-height:30px;
+	width:70px;
+}
+
+.lineup-pm {
+	display:inline-block;
+	margin-left:10px;
+	margin-right:10px;
+	text-align:center;
+	font-size:20px;
+	position:relative;
+	top:-35px;
+	line-height:30px;
+	width:70px;
+}
+
+.lineup-mins {
+	display:inline-block;
+	margin-left:10px;
+	margin-right:10px;
+	text-align:center;
+	font-size:20px;
+	position:relative;
+	top:-35px;
+	line-height:30px;
+	width:70px;
+}
+
+.lineup-title {
+	margin-top:50px;
+	position:relative;
+	margin-left:6%;
+}
+
+.limit-btn {
+	width:25px;
+	height:25px;
+	margin-left:5px;
+}
+
+.limit-btn:active {
+  background-color:black;
+	border-radius:100px;
+}
+.limit-btn:focus {
+  outline:none;
+}
+
+.sort-btn {
+	display:inline-block;
+}
+
+.arrow {
+	position:relative;
+	top:4px;
+	float:right;
+	width:20px;
+	height:20px;
+}
+

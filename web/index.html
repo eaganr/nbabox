@@ -9,6 +9,7 @@
   <script src="pie.js"></script>
   <script src="boxscore.js"></script>
   <script src="playbyplay.js"></script>
+  <script src="lineups.js"></script>
   <script src="schedule.js"></script>
   <script src="teams.js"></script>
   <script src="util.js"></script>
@@ -51,6 +52,8 @@
     } 
 
     var pbp = new playbyplay();
+    var homelines = new lineups();
+    var awaylines = new lineups();
     function getData() {
       $.ajax({
           type : 'POST',
@@ -96,7 +99,7 @@
               homeTeam.players = data["home"]["players"]["player"];
               awayTeam.players = data["visitor"]["players"]["player"];
 
-              //get rid of players with no minuts
+              //get rid of players with no minutes
               for(var i=0;i<homeTeam.players.length;i++) {
                 if(parseInt(homeTeam.players[i]["minutes"]) + parseInt(homeTeam.players[i]["seconds"]) === 0) {
                   homeTeam.players.splice(i,1);
@@ -288,6 +291,16 @@
                     .awaycolor(awayTeam.color)
                     .draw();
 
+									homelines.data(pbp.homelineups)
+										.color(homeTeam.color)
+										.id("home-lineups")
+										.draw();
+
+									awaylines.data(pbp.awaylineups)
+										.color(awayTeam.color)
+										.id("away-lineups")
+										.draw();
+
               }
             });
           }
@@ -320,6 +333,7 @@
     <span class="page-title">Ballin' Box Score</span>
   </div>
 
+
   <div class="content">  
     <div id="schedule"></div>
     <div id="game-data" style="display:none">
@@ -347,26 +361,35 @@
         <div id="pbpchart"><svg id="chart" width="1000" height="550"></svg></div>
       </div>
 
+
+			</div>
+
       <div id="boxscores">
         <div>
           <div class="boxscore">
-            <h3 id="box-away"></h3>
+            <h2 id="box-away"></h2>
             <div class="boxscore" id="awaybox"></div>
           </div>
           <div class="charts">
             <div class="pie" id="awayscoring"></div>
             <div class="pie" id="awayrebounding"></div>
           </div>
+					<br />
+					<h3 class="lineup-title">Lineups</h3>
+					<div id="away-lineups" class="lineups">
         </div>
         <div class="team-box">
           <div class="boxscore">
-            <h3 id="box-home"></h3>
+            <h2 id="box-home"></h2>
             <div class="boxscore" id="homebox"></div>
           </div>
           <div class="charts">
             <div class="pie" id="homescoring"></div>
             <div class="pie" id="homerebounding"></div>
           </div>
+					<br />
+					<h3 class="lineup-title">Lineups</h3>
+					<div id="home-lineups" class="lineups">
         </div>
       </div>
       <br /><br />
