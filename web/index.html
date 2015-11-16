@@ -321,7 +321,24 @@
 
     function closeVideo() {
       $("#video").slideToggle();
-      setTimeout(function() {document.getElementById("video-frame").setAttribute("src", "");}, 500);
+      setTimeout(function() {
+        document.getElementById("video-frame").setAttribute("src", "");
+        document.getElementById("vidormove").src = "img/movement.png";
+      }, 500);
+      
+    }
+    function toggleVidMove() {
+      var url = document.getElementById("video-frame").src;
+      if(url.indexOf("movement") > -1) {
+        url = url.replace("movement/#!/", "cvp.html");
+        document.getElementById("video-frame").src = url;
+        document.getElementById("vidormove").src = "img/movement.png";
+      }
+      else {
+        url = url.replace("cvp.html", "movement/#!/");
+        document.getElementById("video-frame").src = url;
+        document.getElementById("vidormove").src = "img/video.png";
+      }
     }
   </script>
 
@@ -348,6 +365,7 @@
 
       <div id="video">
         <input id="close-video" onclick="closeVideo()" type="image" src="img/close.svg" alt="Close" width="20" height="20">
+        <input id="vidormove" onclick="toggleVidMove()" type="image" src="img/movement.png" alt="Close" width="20" height="20">
         <span id="video-title"></span>
         <iframe id="video-frame" width="0" height="0" align="center" frameBorder="0" scrolling="no" ></iframe>
       </div>
