@@ -103,13 +103,16 @@ function playbyplay() {
 			var templineup = [];
 			for(var i=0;i<lineup.length;i++) {
 				var notzero = false;
-				while(!notzero) {
+				while(!notzero && lineup[i] !== undefined) {
 					if("description" in lineup[i]["end"] && lineup[i]["end"]["description"].indexOf("Start Period") > -1) lineup[i]["end"]["clock"] = "12:00"; 
 					if("description" in lineup[i]["start"] && lineup[i]["start"]["description"].indexOf("Start Period") > -1) lineup[i]["start"]["clock"] = "12:00"; 
 					var secs = timetoseconds(lineup[i]["end"]["period"], lineup[i]["end"]["clock"]) - timetoseconds(lineup[i]["start"]["period"], lineup[i]["start"]["clock"]);
 					if(secs != 0) notzero = true;
 					else i++;
 				}
+        if(lineup[i] === undefined) {
+          continue;
+        }
 
 				var players1 = lineup[i]["players"];
 
