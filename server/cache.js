@@ -169,7 +169,7 @@ function getSchedule(res, period, date) {
 //requestBoxScore("0041400406");
 //console.log(getFile("minute","0041400406"));
 
-function savePlayerPic(code) {
+function savePlayerPic(code, res) {
   var fs = require('fs');
   var request = require('request');  
 	var url = "http://i.cdn.turner.com/nba/nba/.element/img/2.0/sect/statscube/players/large/"+code+".png"
@@ -177,7 +177,10 @@ function savePlayerPic(code) {
     console.log('content-type:', res.headers['content-type']);
     console.log('content-length:', res.headers['content-length']);
 
-    request(url).pipe(fs.createWriteStream(folder+"web/img/players/"+code+".png")).on('close', function() { console.log("saved");});
+    request(url).pipe(fs.createWriteStream(folder+"web/img/players/"+code+".png")).on('close', function() {
+      //res.send("");
+      console.log("saved");
+    });
   });
 
 }
@@ -200,7 +203,7 @@ function savePlayerPic(code) {
     if(req.body.func === "getBoxScore") getBoxScore(res,req.body.accur? req.body.accur : 3,req.body.gameID, req.body.date);
     if(req.body.func === "getPlayByPlay") getPlayByPlay(res,req.body.accur? req.body.accur : 3,req.body.gameID, req.body.date);
     if(req.body.func === "getSchedule") getSchedule(res,req.body.accur? req.body.accur : 3,req.body.date);
-    if(req.body.func === "savePlayerPic") savePlayerPic(req.body.code); 
+    if(req.body.func === "savePlayerPic") savePlayerPic(req.body.code, res); 
   });
 }).call(this);
 

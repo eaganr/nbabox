@@ -118,14 +118,14 @@ function schedule() {
       };
 
 			var img = document.createElement("img");
-			img.src="http://stats.nba.com/media/img/teams/logos/"+self.games[i].awayteam+"_logo.svg";
+			img.src="img/logos/"+self.games[i].awayteam+"_logo.svg";
 			img.width=25;
 			img.height=25;
 			img.className="away-logo";
 			game.appendChild(img);
 			img = img.cloneNode(true);
 			img.className="home-logo";
-			img.src="http://stats.nba.com/media/img/teams/logos/"+self.games[i].hometeam+"_logo.svg";
+			img.src="img/logos/"+self.games[i].hometeam+"_logo.svg";
 			game.appendChild(img);
 
       //score or game time

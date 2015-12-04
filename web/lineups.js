@@ -76,21 +76,23 @@ function lineups() {
 					pic.src = "img/players/"+line["players"][n]["player_code"]+".png"
           pic.setAttribute("player_code", line["players"][n]["player_code"]);
           pic.onerror = function() {
-					  this.src = "http://i.cdn.turner.com/nba/nba/.element/img/2.0/sect/statscube/players/large/"+this.getAttribute("player_code")+".png"
+            if(!this.getAttribute("error")) {
+              this.setAttribute("error", "true");
+              this.src = "http://i.cdn.turner.com/nba/nba/.element/img/2.0/sect/statscube/players/large/"+this.getAttribute("player_code")+".png"
 
-            //server to save
-            $.ajax({
-                type : 'POST',
-                url : 'http://eaganr.com:3000',           
-                data: {
-                  func: "savePlayerPic",
-                  code : this.getAttribute("player_code"),
-                },
-                success:function (data) {
-                  console.log("success");  
-                }
-            });
-
+              //server to save
+              $.ajax({
+                  type : 'POST',
+                  url : 'http://eaganr.com:3000',           
+                  data: {
+                    func: "savePlayerPic",
+                    code : this.getAttribute("player_code"),
+                  },
+                  success:function (data) {
+                    console.log("success");  
+                  }
+              });
+            }
           };
 					pname.innerHTML = line["players"][n]["playername"];
 				}
