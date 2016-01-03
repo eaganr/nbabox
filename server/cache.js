@@ -60,10 +60,9 @@ function requestBoxScore(res, gameID, date) {
   request(url, function (error, response, body) {
     if(!error && response.statusCode == 200) {
       var response = JSON.parse(body);
-      console.log(response);
       fs.writeFile(folder+"cache/minute/boxscore/"+gameID+"boxscore"+getTime()+".json", JSON.stringify(response), function(err2) {
         if(err2) console.log(err2);
-        console.log("saved");
+        console.log("box saved");
         res.jsonp(response);
       });
     }
@@ -103,7 +102,6 @@ function getFile(period, filetype, id) {
 function requestPlayByPlay(res, gameID, date, plays, q) {
   var request = require('request');  
   var url = "http://data.nba.com/10s/json/cms/noseason/game/"+date+"/"+gameID+"/pbp_"+q+".json";
-  console.log(url);
   request(url, function (error, response, body) {
     if(!error && response.statusCode == 200) {
       var response = JSON.parse(body);
@@ -116,7 +114,7 @@ function requestPlayByPlay(res, gameID, date, plays, q) {
       var fs = require('fs');
       fs.writeFile(folder+"cache/minute/playbyplay/"+gameID+"playbyplay"+getTime()+".json", JSON.stringify(plays), function(err2) {
         if(err2) console.log(err2);
-        console.log("saved");
+        console.log("pbp saved");
         res.jsonp(plays);
       });
     }
@@ -139,16 +137,19 @@ function getPlayByPlay(res, period, gameID, date) {
 function requestSchedule(res, date) {
   var fs = require('fs');
   var request = require('request');  
-  date = date.replace(new RegExp("/", 'g'), "-");
-  if(date.length === 9) date = date.substring(0,3)+"0"+date.substring(3);
-  date = date.substring(6)+date.substring(0,2)+date.substring(3,5);
+	var dates = date.split("/");
+	var yr = dates[2];
+	var day = dates[1].length > 1 ? dates[1] : "0"+dates[1];
+	var mnth = dates[0].length > 1 ? dates[0] : "0"+dates[0];
+	date = yr+mnth+day;
   var url = "http://data.nba.com/json/cms/noseason/scoreboard/"+date+"/games.json";
   request(url, function (error, response, body) {
+		console.log(url);
     if(!error && response.statusCode == 200) {
       var response = JSON.parse(body);
       fs.writeFile(folder+"cache/minute/schedule/"+date+"schedule"+getTime()+".json", JSON.stringify(response), function(err2) {
         if(err2) console.log(err2);
-        console.log("saved");
+        console.log("sched saved");
         res.jsonp(response);
       });
     }
@@ -174,12 +175,10 @@ function savePlayerPic(code, res) {
   var request = require('request');  
 	var url = "http://i.cdn.turner.com/nba/nba/.element/img/2.0/sect/statscube/players/large/"+code+".png"
   request.head(url, function(err, res, body){
-    console.log('content-type:', res.headers['content-type']);
-    console.log('content-length:', res.headers['content-length']);
-
     request(url).pipe(fs.createWriteStream(folder+"web/img/players/"+code+".png")).on('close', function() {
       //res.send("");
-      console.log("saved");
+      console.log("pic saved");
+
     });
   });
 
@@ -198,7 +197,6 @@ function savePlayerPic(code, res) {
   });
 
   app.post('/',function(req,res){
-    console.log(req.body);
     res.header("Access-Control-Allow-Origin", "*");
     if(req.body.func === "getBoxScore") getBoxScore(res,req.body.accur? req.body.accur : 3,req.body.gameID, req.body.date);
     if(req.body.func === "getPlayByPlay") getPlayByPlay(res,req.body.accur? req.body.accur : 3,req.body.gameID, req.body.date);
