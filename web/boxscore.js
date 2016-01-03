@@ -41,7 +41,10 @@ function boxscore(id, data) {
       var val = player[k];
       if(k === "minutes") val = player[k]+":"+(player["seconds"].length > 1 ? player["seconds"] : "0"+player["seconds"]);
       if(k === "points") val = "&nbsp; "+player[k]+" &nbsp;";
-      if(k === "first_name") val = player[k] + " " + player["last_name"];
+      if(k === "first_name") {
+				val = (player[k] + " " + player["last_name"]).substring(0,18);
+				val = val.split(" ")[0] + " " + val.split(" ")[1];
+			}
       if(k === "field_goals_made") val = player[k]+"-"+player["field_goals_attempted"];
       if(k === "three_pointers_made") val = player[k]+"-"+player["three_pointers_attempted"];
       if(k === "free_throws_made") val = player[k]+"-"+player["free_throws_attempted"];
