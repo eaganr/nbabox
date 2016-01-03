@@ -19,7 +19,7 @@ function schedule() {
     } 
 		$.ajax({
 				type : 'POST',
-				url : 'http://eaganr.com:3000',           
+				url : server,           
 				data: {
 					func: "getSchedule",
 					date : date,

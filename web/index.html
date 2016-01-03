@@ -22,6 +22,7 @@
 
   <script>
     //schedule
+		var server = "http://"+document.domain+":3000";
     var sched = new schedule()
       .id("schedule")
       .getschedule();
@@ -60,7 +61,7 @@
     function getData() {
       $.ajax({
           type : 'POST',
-          url : 'http://eaganr.com:3000',           
+          url : server,           
           data: {
             func: "getBoxScore",
             gameID : gameID,
@@ -229,7 +230,7 @@
 
             $.ajax({
                 type : 'POST',
-                url : 'http://eaganr.com:3000',           
+                url : server,
                 data: {
                   func: "getPlayByPlay",
                   gameID : gameID,

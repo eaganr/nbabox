@@ -83,7 +83,7 @@ function lineups() {
               //server to save
               $.ajax({
                   type : 'POST',
-                  url : 'http://eaganr.com:3000',           
+                  url : server, 
                   data: {
                     func: "savePlayerPic",
                     code : this.getAttribute("player_code"),
