@@ -137,7 +137,6 @@ function playbyplay() {
 				//if not found add to templineup
 				if(!found) {
 					if(lineup[i]["players"].length === 4) {
-						console.log(lineup[i]);
 					}
 					var diff = (lineup[i]["end"]["home_score"]-lineup[i]["end"]["visitor_score"])-(lineup[i]["start"]["home_score"]-lineup[i]["start"]["visitor_score"]);
 					if(a === 1) diff = diff*-1;
@@ -220,7 +219,6 @@ function playbyplay() {
 
 			if("description" in current["start"] && current["start"]["description"].indexOf("Start Period") > -1) current["start"]["clock"] = period < 5? "12:00" : "5:00"; 
 			var s = timetoseconds(current["start"]["period"], current["start"]["clock"]);
-			if(playername === "Sessions") console.log(current);
 			if(t > s) addtocurrent(playername, player, player["team"], lineup[j]);
 	}
 
@@ -267,6 +265,7 @@ function playbyplay() {
         if(desc.indexOf("PTS)") > -1) {
           var sections = desc.split("(");
           var assisted = desc.indexOf("AST)") > -1;
+          var three = desc.indexOf("3pt") > -1;
           var found = 0;
           for(var k in players) {
             if((sections[0].indexOf(k + " ") > -1 || sections[0].indexOf(k+",") > -1 || evt["player_code"] === players[k]["player_code"]) && evt["team_abr"] === players[k]["team"]) {
@@ -274,6 +273,7 @@ function playbyplay() {
                         period:period,
                         pts:parseInt(sections[1].split(" PTS)")[0]),
                         margin:parseInt(evt["home_score"]) - parseInt(evt["visitor_score"]),
+                        three:three,
                         evt:i};
               players[k].pts.push(pt);
               pt.desc = desc;
@@ -544,16 +544,21 @@ function playbyplay() {
     }
 
     self.vis=d3.select(self.selector());
-    document.getElementById(self.selector().substring(1)).innerHTML="<linearGradient id=\"score-gradient\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"553\"><stop offset=\"0%\"></stop><stop offset=\"50%\"></stop><stop offset=\"50%\"></stop><stop offset=\"100%\"></stop></linearGradient>";
-    $(self.selector() + " stop")[0].setAttribute("stop-color",self.awaycolor());
-    $(self.selector() + " stop")[1].setAttribute("stop-color",self.awaycolor());
-    $(self.selector() + " stop")[2].setAttribute("stop-color",self.homecolor());
-    $(self.selector() + " stop")[3].setAttribute("stop-color",self.homecolor());
-
-
+    document.getElementById(self.selector().substring(1)).innerHTML = "";
+    var lg = document.createElement("svg");
+		lg.id="gradient-svg";
+    lg.className = "gradient-svg";
+    self.vis.html("<linearGradient id=\"score-gradient\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" x2=\"0\" y1=\"0\" y2=\"553\"><stop offset=\"0%\"></stop><stop offset=\"50%\"></stop><stop offset=\"50%\"></stop><stop offset=\"100%\"></stop></linearGradient>");
+    lg.innerHTML="<linearGradient id=\"score-gradient\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"553\"><stop offset=\"0%\"></stop><stop offset=\"50%\"></stop><stop offset=\"50%\"></stop><stop offset=\"100%\"></stop></linearGradient>";
+    document.getElementById(self.selector().substring(1)).appendChild(lg);
+    if($(self.selector() + " stop").length) {
+      $(self.selector() + " stop")[0].setAttribute("stop-color",self.awaycolor());
+      $(self.selector() + " stop")[1].setAttribute("stop-color",self.awaycolor());
+      $(self.selector() + " stop")[2].setAttribute("stop-color",self.homecolor());
+      $(self.selector() + " stop")[3].setAttribute("stop-color",self.homecolor());
+    }
+  
     self.xScale = d3.scale.linear().range([self.margins().left, self.w() - self.margins().right]).domain([0, totalseconds]);
-
-
 
     //get limits
     var max = 0;
@@ -637,7 +642,7 @@ function playbyplay() {
           if(!isNaN(d.margin)) margin = parseInt(d.margin);
           return self.yScale(margin);
       })
-      .interpolate("monotone");
+      .interpolate("step-after");
     var latest = self.data()[self.data().length-1];
     self.scoringmargins.push({margin:self.scoringmargins[self.scoringmargins.length-1].margin, time:latest.clock, period:latest.period});
     for(var i=0;i<self.scoringmargins.length;i++) {
@@ -785,6 +790,15 @@ function playbyplay() {
             .attr("r",3)
             .attr("cx",self.xScale(timetoseconds(pt.period,pt.time)))
             .attr("cy",y);
+          if(pt.three) {
+            self.vis.append("svg:circle")
+              .attr("class","threepointer")
+              .attr("fill","red")
+              .attr("opacity",statson["Points"]?1:0)
+              .attr("r",1.2)
+              .attr("cx",self.xScale(timetoseconds(pt.period,pt.time)))
+              .attr("cy",y);
+          }
         }
 
 
@@ -989,7 +1003,7 @@ function playbyplay() {
         var txt = d3.select(this).text();
         txt = txt ? txt : d3.select(this).attr("text");
         var op, selector;
-        if(txt === "Points") selector = ".point-dot";
+        if(txt === "Points") selector = ".point-dot, .threepointer";
         if(txt === "Misses") selector = ".miss-dot";
         if(txt === "Assists") selector = ".assist-dot";
         if(txt === "Rebounds") selector = ".reb-dot";
@@ -1031,6 +1045,7 @@ function playbyplay() {
 
     mouseoff();
 
+    //document.getElementsByClassName("gradient-svg")[0].innerHTML = document.getElementsByClassName("gradient-svg")[0].innerHTML.replace("gradientunits", "gradientUnits");
     return self;
   };
 

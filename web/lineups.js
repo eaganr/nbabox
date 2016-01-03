@@ -94,7 +94,7 @@ function lineups() {
               });
             }
           };
-					pname.innerHTML = line["players"][n]["playername"];
+					pname.innerHTML = line["players"][n]["playername"].substring(0,14);
 				}
 
 				player.appendChild(pic);

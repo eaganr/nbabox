@@ -6,6 +6,7 @@
   <link rel="stylesheet" type="text/css" href="boxscore.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+  
   <script src="pie.js"></script>
   <script src="boxscore.js"></script>
   <script src="playbyplay.js"></script>
@@ -83,7 +84,7 @@
               homeTeam.score = data["home"]["stats"]["points"];
               awayTeam.score = data["visitor"]["stats"]["points"];
 
-              document.getElementsByTagName("title")[0].innerHTML = homeTeam.score + " " + homeTeam.abbrev + " - " + awayTeam.abbrev + " " + awayTeam.score;
+              document.getElementsByTagName("title")[0].innerHTML = awayTeam.score + " " + awayTeam.abbrev + " - " + homeTeam.abbrev + " " + homeTeam.score + " | Ballin' BS";
 
                           
               document.getElementById("away-score").innerHTML = awayTeam.score;
@@ -116,7 +117,7 @@
               }
 
               homeTeam.scoring = new pie("#homescoring")
-                .w(250).h(250)
+                .w(300).h(300)
                 .value("points")
                 .data(homeTeam.players)
                 .diff("person_id")
@@ -126,7 +127,7 @@
               d3.selectAll(".charts .pie").style("display", "block");
 
               awayTeam.scoring = new pie("#awayscoring")
-                .w(250).h(250)
+                .w(300).h(300)
                 .value("points")
                 .data(awayTeam.players)
                 .diff("person_id")
@@ -394,7 +395,6 @@
             <div class="pie" id="awayscoring"></div>
             <div class="pie" id="awayrebounding"></div>
           </div>
-					<br />
 					<h3 class="lineup-title">Lineups</h3>
 					<div id="away-lineups" class="lineups">
         </div>
@@ -407,7 +407,6 @@
             <div class="pie" id="homescoring"></div>
             <div class="pie" id="homerebounding"></div>
           </div>
-					<br />
 					<h3 class="lineup-title">Lineups</h3>
 					<div id="home-lineups" class="lineups">
         </div>
@@ -419,7 +418,7 @@
       <div class="team" id="hometeam">
       </div>
     
-      <h1>Comparison Stats</h1>
+      <h1 id="comparison">Comparison Stats</h1>
       <br />
       <div class="stats">
         <div class="pie" id="threes"></div>

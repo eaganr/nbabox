@@ -151,7 +151,7 @@ function pie(selector) {
       })
       .on("mouseout",function(d) {
         self.svg.select(".label[diff=\""+d.data[self.diff()]+"\"]")
-          .attr("opacity", (self.data().length < 5 || d.data[self.value()] > self.total / 7)? 1 : 0);
+          .attr("opacity", (self.data().length < 5 || d.data[self.value()] > self.total / 10)? 1 : 0);
       });
   
     self.svg.selectAll(".label")
@@ -167,7 +167,7 @@ function pie(selector) {
         return "#ffffff";
       })
       .attr("opacity",function(d) { 
-        if(self.data().length < 5 || d.data[self.value()] > self.total / 7) return 1;
+        if(self.data().length < 5 || d.data[self.value()] > self.total / 10) return 1;
         else return 0;
       })
       .style("text-anchor", "middle")
