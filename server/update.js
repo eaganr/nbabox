@@ -57,25 +57,23 @@ function updateCache() {
                );
       }
     }
+		//day check
+		var files = fs.readdirSync(folder+"cache/day/"+types[n]);
+		for(var i=0;i<files.length;i++) {
+			var filename = files[i];
+			var fileDate = toTime(getTimeStamp(filename, types[n]));
+			var thisDay = new Date();
+			thisDay.setHours(0);
+			if(thisDay - fileDate > 86400000) {
+				//move file to hour folder
+				fs.unlink(folder+"cache/day/"+types[n]+"/"+filename,
+								function(err) {
+									if(err) console.log(err);
+								}
+							 );
+			}
+		}
   }
-  /*
-  //day check
-  var files = fs.readdirSync(folder+"cache/day");
-  for(var i=0;i<files.length;i++) {
-    var filename = files[i];
-    var fileDate = toTime(getTimeStamp(filename));
-    var thisDay = new Date();
-    thisDay.setHours(0);
-    if(thisDay - fileDate > 86400000) {
-      //move file to hour folder
-      fs.unlink(folder+"cache/day/"+filename,
-              function(err) {
-                if(err) console.log(err);
-              }
-             );
-    }
-  }
-  */
 }
 
 
