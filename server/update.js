@@ -3,6 +3,11 @@ var folder = "/root/nbabox/"
 
 function getTimeStamp(filename, filetype) {
   var stamp = filename.substring(10+filetype.length, filename.length-5);
+	//schedule
+	if(filetype == "schedule") {
+		stamp = filename.substring(8+filetype.length, filename.length-5);
+		console.log(stamp);
+	}
   return stamp;
 }
 

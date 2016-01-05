@@ -82,10 +82,16 @@ function getBoxScore(res, period, gameID, date) {
 
 //period = minute,hour,day
 function getFile(period, filetype, id) {
-	console.log(filetype+": " + period);
   var fs = require('fs');
   var j = [];
-  if(filetype === "schedule") id=id.replace(new RegExp("/", 'g'), "-");
+
+  if(filetype === "schedule") {
+		var dates = id.split("/");
+		var yr = dates[2];
+		var day = dates[1].length > 1 ? dates[1] : "0"+dates[1];
+		var mnth = dates[0].length > 1 ? dates[0] : "0"+dates[0];
+		id = yr+mnth+day;
+	}
 
   var files = fs.readdirSync(folder+"cache/"+period+"/"+filetype);
   for(var i=0;i<files.length;i++) {
@@ -145,7 +151,6 @@ function requestSchedule(res, date) {
 	date = yr+mnth+day;
   var url = "http://data.nba.com/json/cms/noseason/scoreboard/"+date+"/games.json";
   request(url, function (error, response, body) {
-		console.log(url);
     if(!error && response.statusCode == 200) {
       var response = JSON.parse(body);
       fs.writeFile(folder+"cache/minute/schedule/"+date+"schedule"+getTime()+".json", JSON.stringify(response), function(err2) {
