@@ -27,11 +27,11 @@
       .id("schedule")
       .getschedule();
 
-    var gameID = "0041400406";//finals agme 6
+    var gameID = "";//finals agme 6
     //var gameID = "0021400962"; //1OT
     //var gameID = "0021400491";
     //var gameID = "0041400123"; //2OT
-    var gameDate = "20150616";
+    var gameDate = "";
     var mainurl = window.location.href;
     if(mainurl.indexOf("gameid") > -1) {
       var params = mainurl.substring(mainurl.indexOf("gameid")+7);
@@ -70,6 +70,8 @@
           },
           success:function (data) {
             data = data["sports_content"]["game"];
+						gameID = data["id"];
+						gameDate = data["home_start_date"];
             console.log(data);
 
             neutral.period = data["period_time"]["period_status"];

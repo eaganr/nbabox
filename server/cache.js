@@ -73,8 +73,8 @@ function requestBoxScore(res, gameID, date) {
 function getBoxScore(res, period, gameID, date) {
   var j = [];
   if(period > 0) j = getFile("minute", "boxscore", gameID);
-  if(j.length === 0 && period > 1) j = getFile("hour", "boxscore", gameID);
-  if(j.length === 0 && period > 2) j = getFile("day", "boxscore", gameID);
+  if((j.length === 0 || j["sports_content"]["game"]["id"] == "" ) && (period > 1 || gameID == "")) j = getFile("hour", "boxscore", gameID);
+  if((j.length === 0 || j["sports_content"]["game"]["id"] == "" ) && (period > 1 || gameID == "")) j = getFile("day", "boxscore", gameID);
 
   if(j.length === 0) requestBoxScore(res, gameID, date);
   else res.jsonp(j);
@@ -82,6 +82,7 @@ function getBoxScore(res, period, gameID, date) {
 
 //period = minute,hour,day
 function getFile(period, filetype, id) {
+	console.log(filetype+": " + period);
   var fs = require('fs');
   var j = [];
   if(filetype === "schedule") id=id.replace(new RegExp("/", 'g'), "-");
@@ -89,7 +90,7 @@ function getFile(period, filetype, id) {
   var files = fs.readdirSync(folder+"cache/"+period+"/"+filetype);
   for(var i=0;i<files.length;i++) {
     var f = files[i];
-    if(f.indexOf(id+filetype) > -1) {
+    if(f.indexOf(id+filetype) > -1 || id == "") {
       j = require(folder+"cache/"+period+"/"+filetype+"/"+f);
       break;
     }
