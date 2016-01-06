@@ -548,9 +548,23 @@ function playbyplay() {
     var lg = document.createElement("svg");
 		lg.id="gradient-svg";
     lg.className = "gradient-svg";
-    self.vis.html("<linearGradient id=\"score-gradient\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" x2=\"0\" y1=\"0\" y2=\"553\"><stop offset=\"0%\"></stop><stop offset=\"50%\"></stop><stop offset=\"50%\"></stop><stop offset=\"100%\"></stop></linearGradient>");
-    lg.innerHTML="<linearGradient id=\"score-gradient\" gradientUnits=\"userSpaceOnUse\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"553\"><stop offset=\"0%\"></stop><stop offset=\"50%\"></stop><stop offset=\"50%\"></stop><stop offset=\"100%\"></stop></linearGradient>";
-    document.getElementById(self.selector().substring(1)).appendChild(lg);
+		self.vis.append("linearGradient")
+			.attr("id", "score-gradient")
+			.attr("gradientUnits", "userSpaceOnUse")
+			.attr("x1", 0)
+			.attr("x2", 0)
+			.attr("y1", 0)
+			.attr("y2", 553);
+
+		self.vis.select("#score-gradient").append("stop")
+			.attr("offset", "0%");
+		self.vis.select("#score-gradient").append("stop")
+			.attr("offset", "50%");
+		self.vis.select("#score-gradient").append("stop")
+			.attr("offset", "50%");
+		self.vis.select("#score-gradient").append("stop")
+			.attr("offset", "100%");
+
     if($(self.selector() + " stop").length) {
       $(self.selector() + " stop")[0].setAttribute("stop-color",self.awaycolor());
       $(self.selector() + " stop")[1].setAttribute("stop-color",self.awaycolor());

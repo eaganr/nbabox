@@ -72,6 +72,13 @@
             data = data["sports_content"]["game"];
 						gameID = data["id"];
 						gameDate = data["home_start_date"];
+
+						var yr = gameDate.substring(0,4);
+						var mnth = gameDate.substring(4,6);
+						var dy = gameDate.substring(6,8);
+						var d = new Date(mnth+"/"+dy+"/"+yr) + "";
+		
+						document.getElementById("game-date").innerHTML = d.split(" 00:00")[0];
             console.log(data);
 
             neutral.period = data["period_time"]["period_status"];
@@ -86,6 +93,7 @@
               awayTeam.color = teamcolors(awayTeam.abbrev, homeTeam.color);
               homeTeam.score = data["home"]["stats"]["points"];
               awayTeam.score = data["visitor"]["stats"]["points"];
+				
 
               document.getElementsByTagName("title")[0].innerHTML = awayTeam.score + " " + awayTeam.abbrev + " - " + homeTeam.abbrev + " " + homeTeam.score + " | Ballin' BS";
 
@@ -313,6 +321,7 @@
           else  {
             document.getElementById("game-data").innerHTML = "<h1>This game has not started</h1>";
             document.getElementById("game-data").setAttribute("style", "margin-top:200px;");
+						document.getElementById("boxscores").remove();
           }
           d3.select("#game-data").style("display", "");
         }
@@ -362,10 +371,11 @@
     <div id="game-data" style="display:none">
        <br /> 
        <br /> 
+				<div id="game-date"></div>
         <div id="scoreline">
-          <div id="away-score"></div>
+          <div id="away-score" class="team-score"></div>
           <img id="away-logo" class="score-logo"></img>
-          <div id="home-score"></div>
+          <div id="home-score" class="team-score"></div>
           <img id="home-logo" class="score-logo"></img>
         </div>
 
@@ -376,7 +386,7 @@
         <iframe id="video-frame" width="0" height="0" align="center" frameBorder="0" scrolling="no" ></iframe>
       </div>
 
-      <h1>Play By Play</h1>
+      <h1 id="pbp-title">Play By Play</h1>
       <div id="playbyplay">
         <div id="team-names">
           <div class="team-name" id="away-name"></div>
@@ -389,7 +399,7 @@
 			</div>
 
       <div id="boxscores">
-        <div>
+        <div id="away-container" class="box-container">
           <div class="boxscore">
             <h2 id="box-away"></h2>
             <div class="boxscore" id="awaybox"></div>
@@ -399,9 +409,10 @@
             <div class="pie" id="awayrebounding"></div>
           </div>
 					<h3 class="lineup-title">Lineups</h3>
-					<div id="away-lineups" class="lineups">
+					<div id="away-lineups" class="lineups"></div>
         </div>
-        <div class="team-box">
+				
+        <div id="home-container" class="box-container">
           <div class="boxscore">
             <h2 id="box-home"></h2>
             <div class="boxscore" id="homebox"></div>

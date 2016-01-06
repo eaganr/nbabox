@@ -203,6 +203,7 @@ function savePlayerPic(code, res) {
   });
 
   app.post('/',function(req,res){
+		console.log(req.body);
     res.header("Access-Control-Allow-Origin", "*");
     if(req.body.func === "getBoxScore") getBoxScore(res,req.body.accur? req.body.accur : 3,req.body.gameID, req.body.date);
     if(req.body.func === "getPlayByPlay") getPlayByPlay(res,req.body.accur? req.body.accur : 3,req.body.gameID, req.body.date);

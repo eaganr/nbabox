@@ -12,7 +12,7 @@ function schedule() {
 	self.getschedule=function() {
 		var maindiv = document.getElementById(self.id());
 		self.games = [];
-    var accur = 3;
+    var accur = 1;
     var d = new Date(date);
     if(today.getDate() === d.getDate() && today.getFullYear() === d.getFullYear() && today.getMonth() === d.getMonth()) {
       accur = 1;
@@ -26,7 +26,6 @@ function schedule() {
           accur : accur
 				},
 				success:function (data) {
-					console.log("sports");
           data = data["sports_content"]["games"]["game"];
 					for(var i=0;i<data.length;i++) {
             var hometeam = data[i]["home"]["abbreviation"];
@@ -113,8 +112,8 @@ function schedule() {
 			game.onclick=function(e) { 
 				d = date.split("/");
 				var yr = d[2];
-				var mnth = d[0].length > 1 ? d[1] : "0"+d[0];
-				var day = d[1].length > 1 ? d[2] : "0"+d[1];
+				var mnth = d[0].length > 1 ? d[0] : "0"+d[0];
+				var day = d[1].length > 1 ? d[1] : "0"+d[1];
 				d = yr+mnth+day;
         //check for cmd-click
         if(e.metaKey || e.ctrlKey) window.open("?gameid="+this.gameid+"&date="+d, "_blank");

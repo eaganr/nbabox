@@ -41,6 +41,9 @@
   width:480px;
   margin:auto;
   height:100px;
+	position:relative;
+	background-color:wheat;
+	border-radius:10px;
 }
 
 #scoreline img {
@@ -48,11 +51,26 @@
   margin-left:30px;
   margin-right:30px;
 }
-#scoreline div {
+
+
+#game-date {
+	font-size:15px;
+	text-align:center;
+	margin-top:10px;
+	font-weight:bold;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+.team-score {
+	font-size:50px;
   display:inline;
-  font-size:50px;
   position:relative;
   top:25px;
+}
+
+#scoreline div {
 }
 
 .team-name {
@@ -62,7 +80,7 @@
 	-webkit-transform: rotate(-90deg);
   -webkit-transform-origin: left top 0;
   position:relative;
-  left:50px;
+  left:30px;
 }
 
 #video {
@@ -126,6 +144,9 @@
 .box-table tr:nth-child(odd) {
   background-color:#E0E0E0;
 }
+.box-table tr:nth-child(even) {
+  background-color:#F5F5F5;
+}
 
 h3 {
   margin-left:8%;
@@ -163,13 +184,29 @@ td, th {
   width:100%;
   margin:auto;
 }
+
+.legend-text {
+	fill:black;
+}
+
 #pbpchart {
   display:inline-block;
   margin:auto;
+	background-color:white;
+	border-radius:10px;
+	margin-top:20px;
+}
+
+.tick {
+	fill:black;
 }
 
 .team-box {
-  margin-top:50px;
+}
+.box-container {
+	margin-top:50px;
+	border-radius:10px;
+	background-color:#C5DBEC;
 }
 
 .boxscore {
@@ -193,12 +230,21 @@ td, th {
   min-width:270px;
   width:24%;
   margin:auto;
+	margin-top:10px;
 }
 .stats {
   display:block;
   width:100%;
   margin:0 auto;
+	border-radius:10px;
+	background-color:#C5DBEC;
+	margin-bottom:30px;
 }
+.stats .pie {
+	position:relative;
+	top:30px;
+}
+
 #datepicker {
   width:80px;
   position:relative;
@@ -271,9 +317,11 @@ td, th {
 }
 #away-score {
   float:left;
+	left:10px;
 }
 #home-score {
   float:right;
+	right:10px;
 }
 #home-logo {
   float:right; 
