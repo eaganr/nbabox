@@ -30,6 +30,7 @@
   </script>
 
   <script>
+
     //schedule
 		var server = "http://"+document.domain+":3000";
     var sched = new schedule()
@@ -371,6 +372,25 @@
 </head>
 
 <body>
+
+  <script>
+    function checkOrientation() {
+      if(window.orientation === 0) {
+        var cover = document.createElement("div");
+        cover.id = "cover";
+        cover.innerHTML = "<br><br>Ballin' Box Score<br><br><br>Change to Landscape Orientation<br><img src=\"../bball%20nuc.png\">";
+        document.body.appendChild(cover);
+      }
+      else {
+        if(document.getElementById("cover")) {
+          document.body.removeChild(document.getElementById("cover"));
+        }
+      }
+    }
+    checkOrientation();
+    window.addEventListener("orientationchange", function() { checkOrientation(); }, false);
+  </script>
+
   <div class="topbar">
     <a href="http://eaganr.com"><img src="../bball%20nuc.png" class="logo" /></a>
     <span class="page-title">Ballin' Box Score</span>
