@@ -21,6 +21,15 @@
   <meta name="viewport" content="width=1200">
 
   <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-54664304-1', 'auto');
+    ga('send', 'pageview');
+  </script>
+
+  <script>
     //schedule
 		var server = "http://"+document.domain+":3000";
     var sched = new schedule()
@@ -77,8 +86,10 @@
 						var mnth = gameDate.substring(4,6);
 						var dy = gameDate.substring(6,8);
 						var d = new Date(mnth+"/"+dy+"/"+yr) + "";
+            d = d.split(" 00:00")[0];
+            if(d[8] === "0") d = d.substring(0,8)+d.substring(9,d.length);
 		
-						document.getElementById("game-date").innerHTML = d.split(" 00:00")[0];
+						document.getElementById("game-date").innerHTML = d;
             console.log(data);
 
             neutral.period = data["period_time"]["period_status"];
@@ -361,7 +372,7 @@
 
 <body>
   <div class="topbar">
-    <img src="../bball%20nuc.png" class="logo" />
+    <a href="http://eaganr.com"><img src="../bball%20nuc.png" class="logo" /></a>
     <span class="page-title">Ballin' Box Score</span>
   </div>
 
@@ -392,7 +403,10 @@
           <div class="team-name" id="away-name"></div>
           <div class="team-name" id="home-name"></div>
         </div>
-        <div id="pbpchart"><svg id="chart" width="1000" height="550"></svg></div>
+        <div id="pbpchart">
+          <svg id="chart" width="1000" height="550"></svg>
+          <div id="pbp-note">After game, click on dots for video of play</div>
+        </div>
       </div>
 
 

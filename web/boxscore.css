@@ -197,6 +197,12 @@ td, th {
 	margin-top:20px;
 }
 
+#pbp-note {
+  font-size:12px;
+  margin-bottom:5px;
+  margin-left:20px;
+}
+
 .tick {
 	fill:black;
 }
@@ -243,6 +249,7 @@ td, th {
 .stats .pie {
 	position:relative;
 	top:30px;
+  margin:auto;
 }
 
 #datepicker {
