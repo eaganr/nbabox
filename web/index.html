@@ -89,8 +89,8 @@
 						var d = new Date(mnth+"/"+dy+"/"+yr) + "";
             d = d.split(" 00:00")[0];
             if(d[8] === "0") d = d.substring(0,8)+d.substring(9,d.length);
-		
-						document.getElementById("game-date").innerHTML = d;
+	          var html = "<a onclick=\"changeDate()\">"+d+"</a>";	
+						document.getElementById("game-date").innerHTML = html;
             console.log(data);
 
             neutral.period = data["period_time"]["period_status"];
@@ -367,6 +367,20 @@
         document.getElementById("vidormove").src = "img/video.png";
       }
     }
+    function changeDate() {
+      var d = gameDate.substring(4,6)+"/";
+      d += gameDate.substring(6,8)+"/"
+      d += gameDate.substring(0,4);
+      $("#datepicker").val(d);
+      var e = new Event('change');
+      document.getElementById("datepicker").dispatchEvent(e);
+    }
+
+    document.onkeydown = function(event) {
+      if(event.keyCode === 37) sched.movedate(-1);
+      if(event.keyCode === 39) sched.movedate(1);
+    }
+
   </script>
 
 </head>

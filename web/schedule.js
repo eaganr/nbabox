@@ -55,7 +55,7 @@ function schedule() {
     return date;
   }
   
-  var movedate = function(dir) {
+  self.movedate = function(dir) {
     var d = new Date(date); 
     d.setDate(d.getDate() + dir);
     date = d.getMonth()+1+"/"+d.getDate()+"/"+d.getFullYear();
@@ -75,7 +75,7 @@ function schedule() {
       var bbutton = document.createElement("button");
       bbutton.innerHTML = "<";
       bbutton.className = "move-btn";
-      bbutton.onclick = function() { movedate(-1); };
+      bbutton.onclick = function() { self.movedate(-1); };
       maindiv.appendChild(bbutton);
 
       var datepicker = document.createElement("input");
@@ -86,7 +86,7 @@ function schedule() {
       var fbutton = document.createElement("button");
       fbutton.innerHTML = ">";
       fbutton.className = "move-btn";
-      fbutton.onclick = function() { movedate(1); };
+      fbutton.onclick = function() { self.movedate(1); };
       maindiv.appendChild(fbutton);
 
       
