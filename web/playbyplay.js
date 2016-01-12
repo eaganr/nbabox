@@ -240,6 +240,13 @@ function playbyplay() {
     var period = 0;
     var subtract = false;
     for(var i=0;i<self.data().length;i++) {
+      //move game over to back of list
+      if(period === 4 && self.data()[i].clock === "00:00") {
+        var temp = self.data()[self.data().length-1];
+        self.data()[self.data().length-1] = self.data()[i];
+        self.data()[i] = temp;
+      }
+
       var evt = self.data()[i];
       var desc = evt["description"];
       if(desc.indexOf("Start Period") > -1) {
