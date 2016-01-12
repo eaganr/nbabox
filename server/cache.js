@@ -93,13 +93,25 @@ function getFile(period, filetype, id) {
 		id = yr+mnth+day;
 	}
 
+  var gameid = 0;
+  var currgame = 0;
   var files = fs.readdirSync(folder+"cache/"+period+"/"+filetype);
   for(var i=0;i<files.length;i++) {
     var f = files[i];
-    if(f.indexOf(id+filetype) > -1 || id == "") {
+    if(id != "" && f.indexOf(id+filetype) > -1) {
       j = require(folder+"cache/"+period+"/"+filetype+"/"+f);
       break;
     }
+    if(id === "") {
+      var gid = parseInt(f.substring(0,10));
+      if(gid > gameid) {
+        gameid = gid;
+        currgame = i;
+      }
+    }
+  }
+  if(id === "" && files.length > 0) {
+    j = require(folder+"cache/"+period+"/"+filetype+"/"+files[currgame]);
   }
   return j;
 }
