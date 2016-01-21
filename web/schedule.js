@@ -77,7 +77,7 @@ function schedule() {
       bbutton.className = "move-btn";
       bbutton.onclick = function() { self.movedate(-1); };
       maindiv.appendChild(bbutton);
-
+  
       var datepicker = document.createElement("input");
       datepicker.id = "datepicker";
       datepicker.value = date;

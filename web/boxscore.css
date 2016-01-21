@@ -284,6 +284,22 @@ td, th {
 .move-btn:hover {
   background-color:#CCCCCC;
 }
+.today-btn {
+	height:19px;
+  position:absolute;
+  border:none;
+  top:-4px;
+  left:40px;
+  width:42px;
+  text-align:center;
+  outline:none;
+  background-color:#999999;
+}
+.today-btn:hover {
+  background-color:#CCCCCC;
+}
+
+
 #schedule {
   position:relative;
   top:20px;
