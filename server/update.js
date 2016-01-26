@@ -4,11 +4,18 @@ var folder = "/root/nbabox/"
 function getTimeStamp(filename, filetype) {
   var stamp = filename.substring(10+filetype.length, filename.length-5);
 	//schedule
-	if(filetype == "schedule") {
+	if(filetype === "schedule") {
 		stamp = filename.substring(8+filetype.length, filename.length-5);
-		console.log(stamp);
 	}
   return stamp;
+}
+
+function getID(filename, filetype) {
+  var id = filename.substring(0,10);
+  if(filetype === "schedule") {
+    id = filename.substring(0,8);
+  }
+  return id;
 }
 
 
@@ -32,6 +39,8 @@ function updateCache() {
     for(var i=0;i<files.length;i++) {
       var filename = files[i];
       var fileDate = toTime(getTimeStamp(filename, types[n]));
+      var id = getID(filename, types[n]);
+
       var thisMin = new Date();
       thisMin.setSeconds(0);
       if(thisMin - fileDate > 60000) {
@@ -50,6 +59,31 @@ function updateCache() {
     for(var i=0;i<files.length;i++) {
       var filename = files[i];
       var fileDate = toTime(getTimeStamp(filename, types[n]));
+      var id = getID(filename, types[n]);
+
+      //check for duplicates
+      for(var j=0;j<files.length;j++) {
+        if(j !== i) {
+          var id2 = getID(files[j], types[n]);
+          console.log(id + " - " + id2);
+          if(id === id2) {
+            console.log("removed: " + id);
+            var fileDate2 = toTime(getTimeStamp(files[j], types[n]));
+            var toremove = files[j];
+            if(fileDate2 > fileDate) toremove = files[i];
+            //remove file
+            fs.unlink(folder+"cache/hour/"+types[n]+"/"+toremove,
+              function(err) {
+                if(err) console.log(err);
+              }
+            );
+            i = -1;
+            files = fs.readdirSync(folder+"cache/hour/"+types[n]);
+            break;
+          }
+        }
+      }
+
       var thisHour = new Date();
       thisHour.setMinutes(0);
       if(thisHour - fileDate > 3600000) {
@@ -67,10 +101,35 @@ function updateCache() {
 		for(var i=0;i<files.length;i++) {
 			var filename = files[i];
 			var fileDate = toTime(getTimeStamp(filename, types[n]));
+      var id = getID(filename, types[n]);
+      
+      //check for duplicates
+      for(var j=0;j<files.length;j++) {
+        if(j !== i) {
+          var id2 = getID(files[j], types[n]);
+          if(id === id2) {
+            console.log("removed: " + id);
+            var fileDate2 = toTime(getTimeStamp(files[j], types[n]));
+            var toremove = files[j];
+            if(fileDate2 > fileDate) toremove = files[i];
+            //remove file
+            fs.unlinkSync(folder+"cache/day/"+types[n]+"/"+toremove,
+              function(err) {
+                if(err) console.log(err);
+              }
+            );
+            i = -1;
+            files = fs.readdirSync(folder+"cache/day/"+types[n]);
+            break;
+          }
+        }
+      }
+      
+
 			var thisDay = new Date();
 			thisDay.setHours(0);
 			if(thisDay - fileDate > 86400000) {
-				//move file to hour folder
+				//remove file
 				fs.unlink(folder+"cache/day/"+types[n]+"/"+filename,
 								function(err) {
 									if(err) console.log(err);
