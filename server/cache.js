@@ -60,11 +60,13 @@ function requestBoxScore(res, gameID, date) {
   request(url, function (error, response, body) {
     if(!error && response.statusCode == 200) {
       var response = JSON.parse(body);
-      fs.writeFile(folder+"cache/minute/boxscore/"+gameID+"boxscore"+getTime()+".json", JSON.stringify(response), function(err2) {
-        if(err2) console.log(err2);
-        console.log("box saved");
-        res.jsonp(response);
-      });
+      if(response["sports_content"]["game"]["period_time"]["period_status"].indexOf(" ET") === -1) {
+        fs.writeFile(folder+"cache/minute/boxscore/"+gameID+"boxscore"+getTime()+".json", JSON.stringify(response), function(err2) {
+          if(err2) console.log(err2);
+          console.log("box saved");
+        });
+      }
+      res.jsonp(response);
     }
   });
 }
@@ -134,8 +136,8 @@ function requestPlayByPlay(res, gameID, date, plays, q) {
       fs.writeFile(folder+"cache/minute/playbyplay/"+gameID+"playbyplay"+getTime()+".json", JSON.stringify(plays), function(err2) {
         if(err2) console.log(err2);
         console.log("pbp saved");
-        res.jsonp(plays);
       });
+      res.jsonp(plays);
     }
   });
 }
@@ -168,8 +170,8 @@ function requestSchedule(res, date) {
       fs.writeFile(folder+"cache/minute/schedule/"+date+"schedule"+getTime()+".json", JSON.stringify(response), function(err2) {
         if(err2) console.log(err2);
         console.log("sched saved");
-        res.jsonp(response);
       });
+      res.jsonp(response);
     }
   });
 }
