@@ -532,7 +532,7 @@ function playbyplay() {
 
   var rollover = false;
 
-  var statson = {"Points":true, "Misses":false, "Assists":true, "Rebounds":false, "Steals": false, "TOs":false, "Blocks": false, "Fouls":false};
+  var statson = {"Points":true, "Misses":false, "Assists":true, "Rebounds":true, "Steals": false, "TOs":false, "Blocks": false, "Fouls":false};
 
   self.draw=function() {
     var extraticks = [];
