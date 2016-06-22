@@ -79,6 +79,7 @@
             accur : 1 
           },
           success:function (data) {
+            thelabel: {
             data = data["sports_content"]["game"];
 						gameID = data["id"];
 						gameDate = data["home_start_date"];
@@ -91,7 +92,15 @@
             if(d[8] === "0") d = d.substring(0,8)+d.substring(9,d.length);
 	          var html = "<a onclick=\"changeDate()\">"+d+"</a>";	
 						document.getElementById("game-date").innerHTML = html;
-            console.log(data);
+
+            //if no game selected
+            if(data["id"] === "") {
+              var title = document.createElement("h1");
+              title.innerHTML = "Select Game From Schedule";
+              document.getElementsByClassName("content")[0].appendChild(title);
+              d3.select("#boxscores").style("display", "none");
+              break thelabel;
+            }
 
             neutral.period = data["period_time"]["period_status"];
 
@@ -337,6 +346,7 @@
           }
           d3.select("#game-data").style("display", "");
         }
+        }
       });
     }
     getData();
@@ -493,5 +503,11 @@
     </div>
   </div>
 </body>
+
+<script>
+
+sched.draw();
+
+</script>
 
 </html
