@@ -97,6 +97,7 @@ function lineups() {
 					pname.innerHTML = line["players"][n]["playername"].substring(0,14);
 				}
 
+        pic.setAttribute("onerror","this.src='img/logos/default.png'")
 				player.appendChild(pic);
 				player.appendChild(pname);
 				row.appendChild(player);

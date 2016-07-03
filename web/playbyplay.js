@@ -519,7 +519,7 @@ function playbyplay() {
       self.homecolor.val = c;
       return self;
     }
-    return self.homecolor.val;
+    return self.homecolor.val ? self.homecolor.val : "black";
   }
 
   self.awaycolor = function(c) {
@@ -527,7 +527,7 @@ function playbyplay() {
       self.awaycolor.val = c;
       return self;
     }
-    return self.awaycolor.val;
+    return self.awaycolor.val ? self.awaycolor.val : "black";
   }
 
   var rollover = false;

@@ -36,5 +36,5 @@ var teamcolors = function(val, color2) {
         }
       }
     }
-    return color;
+    return color? color : "black";
 };

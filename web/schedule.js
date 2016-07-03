@@ -122,6 +122,7 @@ function schedule() {
 
 			var img = document.createElement("img");
 			img.src="img/logos/"+self.games[i].awayteam+"_logo.svg";
+      img.setAttribute("onerror","this.src='img/logos/none.png'")
 			img.width=25;
 			img.height=25;
 			img.className="away-logo";
@@ -129,6 +130,7 @@ function schedule() {
 			img = img.cloneNode(true);
 			img.className="home-logo";
 			img.src="img/logos/"+self.games[i].hometeam+"_logo.svg";
+      img.setAttribute("onerror","this.src='img/logos/none.png'")
 			game.appendChild(img);
 
       //score or game time
