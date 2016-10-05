@@ -269,7 +269,11 @@ function playbyplay() {
           var three = desc.indexOf("3pt") > -1;
           var found = 0;
           for(var k in players) {
-            if((sections[0].indexOf(k + " ") > -1 || sections[0].indexOf(k+",") > -1 || evt["player_code"] === players[k]["player_code"]) && evt["team_abr"] === players[k]["team"]) {
+            var testkey = "player_code";
+            if(players[k]["player_code"] === "") {
+              testkey = "person_id";
+            }
+            if((sections[0].indexOf(k + " ") > -1 || sections[0].indexOf(k+",") > -1 || evt[testkey] === players[k][testkey]) && evt["team_abr"] === players[k]["team"]) {
               var pt = {time:evt.clock,
                         period:period,
                         pts:parseInt(sections[1].split(" PTS)")[0]),
@@ -291,7 +295,7 @@ function playbyplay() {
         }
         if(desc.indexOf(" Missed") > -1) {
           for(var k in players) {
-            if((desc.split(" Missed")[0].indexOf(k + " ") > -1 || evt["player_code"] === players[k]["player_code"]) && evt["team_abr"] === players[k]["team"]) {
+            if((desc.split(" Missed")[0].indexOf(k + " ") > -1 || evt[testkey] === players[k][testkey]) && evt["team_abr"] === players[k]["team"]) {
                 players[k].miss.push({time:evt.clock, period:period, evt:i});
               	mincorrect(evt, players[k], k, period, evt);
                 break;
@@ -300,7 +304,7 @@ function playbyplay() {
         }
         if(desc.indexOf("Rebound") > -1 && desc.indexOf("Team Rebound") === -1) {
           for(var k in players) {
-            if((desc.split("Rebound")[0].indexOf(k + " ") > -1 || evt["player_code"] === players[k]["player_code"]) && evt["team_abr"] === players[k]["team"]) {
+            if((desc.split("Rebound")[0].indexOf(k + " ") > -1 || evt[testkey] === players[k][testkey]) && evt["team_abr"] === players[k]["team"]) {
                 players[k].rebs.push({time:evt.clock, period:period, evt:i});
               	mincorrect(evt, players[k], k, period, evt);
                 break;
@@ -318,7 +322,7 @@ function playbyplay() {
         }
         if(desc.indexOf("Turnover") > -1) {
           for(var k in players) {
-            if((desc.split("Turnover")[0].indexOf(k + " ") > -1 || evt["player_code"] === players[k]["player_code"]) && evt["team_abr"] === players[k]["team"]) {
+            if((desc.split("Turnover")[0].indexOf(k + " ") > -1 || evt[testkey] === players[k][testkey]) && evt["team_abr"] === players[k]["team"]) {
                 players[k].tos.push({time:evt.clock, period:period, evt:i});
               	mincorrect(evt, players[k], k, period, evt);
                 break;
@@ -336,7 +340,7 @@ function playbyplay() {
         }
         if(desc.indexOf("Foul:") > -1) {
           for(var k in players) {
-            if((desc.split("Foul:")[0].indexOf(k+" ") > -1 || evt["player_code"] === players[k]["player_code"]) && evt["team_abr"] === players[k]["team"]) {
+            if((desc.split("Foul:")[0].indexOf(k+" ") > -1 || evt[testkey] === players[k][testkey]) && evt["team_abr"] === players[k]["team"]) {
                 players[k].fls.push({time:evt.clock, period:period, evt:i});
               	mincorrect(evt, players[k], k, period, evt);
                 break;
@@ -360,7 +364,7 @@ function playbyplay() {
               players[j].mins.push({intime:evt.clock, inperiod:period, outtime:null, outperiod:null});
             }
             //out
-            if(subs[0].indexOf(j) > -1 || evt["player_code"] === players[j]["player_code"]) {
+            if(subs[0].indexOf(j) > -1 || evt[testkey] === players[j][testkey]) {
 							players[j]["playername"] = j;
 							mincorrect(evt, players[j], j, period, evt);
 							outplayer = players[j];

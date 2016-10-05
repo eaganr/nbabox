@@ -49,6 +49,9 @@
       gameID = params[0];
       gameDate = params[1]; 
     }
+    else {
+      //window.location = "http://eaganr.com/nba/?gameid=0041500407&date=20160619";
+    }
 
     var homeTeam = {};
     var awayTeam = {};
@@ -81,6 +84,7 @@
           success:function (data) {
             thelabel: {
             data = data["sports_content"]["game"];
+            console.log(data);
 						gameID = data["id"];
 						gameDate = data["home_start_date"];
 
@@ -142,6 +146,7 @@
                 }
               }
               for(var i=0;i<awayTeam.players.length;i++) {
+                awayTeam.players[i]["first_name"] = awayTeam.players[i]["first_name"].split(" ")[0];
                 if(parseInt(awayTeam.players[i]["minutes"]) + parseInt(awayTeam.players[i]["seconds"]) === 0) {
                   awayTeam.players.splice(i,1);
                   i--;
@@ -271,6 +276,7 @@
                 success:function (data) {
                   var homeplayers = homeTeam.players.map(function(d) { return d["last_name"]? d["last_name"] : d["first_name"]; });
                   var awayplayers = awayTeam.players.map(function(d) { return d["last_name"]? d["last_name"] : d["first_name"]; });
+                  console.log(awayplayers);
 
                   //same name players
                   var allplayers = [homeplayers, awayplayers];
@@ -418,6 +424,7 @@
   <div class="topbar">
     <a href="http://eaganr.com"><img src="../bball%20nuc.png" class="logo" /></a>
     <span class="page-title">Ballin' Box Score</span>
+    <div id="twitter-btn"> <a href="https://twitter.com/share?text=%20&hashtags=NBA,NBAPreseason" class="twitter-share-button" data-show-count="false">Tweet</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></div>
   </div>
 
 

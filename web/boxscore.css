@@ -4,6 +4,12 @@
   width:100%;
 }
 
+#twitter-btn {
+  right:10%;
+  position:absolute;
+  top:20px;
+}
+
 .logo {
   width: 30px;
   height: 30px;
@@ -445,7 +451,7 @@ html, body {
 }
 
 .lineup-title {
-	margin-top:50px;
+	margin-top:150px;
 	position:relative;
 	margin-left:6%;
 }

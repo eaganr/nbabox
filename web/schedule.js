@@ -107,6 +107,7 @@ function schedule() {
 		for(var i=0;i<self.games.length;i++) {
 			var game = document.createElement("div");	
 			game.className = "schedule-game";
+      if(self.games[i]["gameid"] === gameID) game.style = "background-color:#66bcff";
 			if(i >= 8) game.className += " schedule-game-2nd";
 			game.gameid=self.games[i].gameid;
 			game.onclick=function(e) { 
