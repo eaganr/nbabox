@@ -1,14 +1,18 @@
-/*
-TODO: 
-  - cache for minute, hour, day
-  - cron to move/delete old cache files
-  - cron to autopull live game data to cache
-
-
-
-*/
 
 var folder = "/root/nbabox/"
+
+//logging
+var fs = require('fs');
+var util = require('util');
+var log_file = fs.createWriteStream(__dirname + '/server.log', {flags : 'w'});
+var log_stdout = process.stdout;
+
+console.log = function(d) { //
+  log_file.write(util.format(d) + '\n');
+  log_stdout.write(util.format(d) + '\n');
+};
+
+
 
 //time
 function getTime() {
@@ -54,7 +58,6 @@ function toTime(dateString) {
 
 //box score
 function requestBoxScore(res, gameID, date) {
-  var fs = require('fs');
   var request = require('request');  
   var url = "http://data.nba.com/10s/json/cms/noseason/game/"+date+"/"+gameID+"/boxscore.json";
   request(url, function (error, response, body) {
@@ -85,7 +88,6 @@ function getBoxScore(res, period, gameID, date, finger) {
 
 //period = minute,hour,day
 function getFile(period, filetype, id) {
-  var fs = require('fs');
   var j = [];
 
   if(filetype === "schedule") {
@@ -133,7 +135,6 @@ function requestPlayByPlay(res, gameID, date, plays, q) {
       requestPlayByPlay(res, gameID, date, plays, q);
     } 
     if(!body) {
-      var fs = require('fs');
       fs.writeFile(folder+"cache/minute/playbyplay/"+gameID+"playbyplay"+getTime()+".json", JSON.stringify(plays), function(err2) {
         if(err2) console.log(err2);
       });
@@ -156,7 +157,6 @@ function getPlayByPlay(res, period, gameID, date) {
 
 //schedule
 function requestSchedule(res, date) {
-  var fs = require('fs');
   var request = require('request');  
 	var dates = date.split("/");
 	var yr = dates[2];
@@ -190,7 +190,6 @@ function getSchedule(res, period, date) {
 //console.log(getFile("minute","0041400406"));
 
 function savePlayerPic(code, res) {
-  var fs = require('fs');
   var request = require('request');  
 	var url = "http://i.cdn.turner.com/nba/nba/.element/img/2.0/sect/statscube/players/large/"+code+".png"
   request.head(url, function(err, res, body){
