@@ -72,7 +72,8 @@ function requestBoxScore(res, gameID, date) {
 }
 
 //period = 1 - minute, 2 - hour, 3 - day
-function getBoxScore(res, period, gameID, date) {
+function getBoxScore(res, period, gameID, date, finger) {
+  addOne(gameID, finger);
   var j = [];
   if(period > 0) j = getFile("minute", "boxscore", gameID);
   if((j.length === 0 || j["sports_content"]["game"]["id"] == "" ) && (period > 1 || gameID == "")) j = getFile("hour", "boxscore", gameID);
@@ -135,7 +136,6 @@ function requestPlayByPlay(res, gameID, date, plays, q) {
       var fs = require('fs');
       fs.writeFile(folder+"cache/minute/playbyplay/"+gameID+"playbyplay"+getTime()+".json", JSON.stringify(plays), function(err2) {
         if(err2) console.log(err2);
-        console.log("pbp saved");
       });
       res.jsonp(plays);
     }
@@ -169,7 +169,6 @@ function requestSchedule(res, date) {
       var response = JSON.parse(body);
       fs.writeFile(folder+"cache/minute/schedule/"+date+"schedule"+getTime()+".json", JSON.stringify(response), function(err2) {
         if(err2) console.log(err2);
-        console.log("sched saved");
       });
       res.jsonp(response);
     }
@@ -197,11 +196,68 @@ function savePlayerPic(code, res) {
   request.head(url, function(err, res, body){
     request(url).pipe(fs.createWriteStream(folder+"web/img/players/"+code+".png")).on('close', function() {
       //res.send("");
-      console.log("pic saved");
 
     });
   });
 
+}
+
+
+//MySQL page views
+var mysql = require('mysql');
+var settings = require("./settings.js");
+var connection = mysql.createConnection(
+  {
+    host     : settings.host,
+    user     : settings.user,
+    password : settings.password,
+    database : settings.database,
+  }
+);
+connection.connect();
+
+function addOne(gameid,finger) {
+  var d = new Date();
+
+  query = 'INSERT INTO pageview (timestamp, gameid, fingerprint) VALUES ("'+d+'","'+gameid+'","'+finger+'");';
+  connection.query(query, function(err, rows, fields) {
+    if(err) console.log(err);
+  });
+
+  var year = d.getFullYear()+"";
+
+  var month = d.getMonth()+1;
+  if(month<10) {
+    month = "0"+month;
+  }
+  else month = month + "";
+
+  var day = d.getDate();
+  if(day<10) {
+    day = "0"+day;
+  }
+  else day = day + "";
+
+  var dt = year+"-"+month+"-"+day;
+  var query = 'SELECT views from views WHERE date="'+dt+'" AND gameid="'+gameid+'";';
+  connection.query(query, function(err, rows, fields) {
+    if(err) console.log(err);
+    if(rows.length) {
+      var v = +rows[0]["views"];
+      v++;
+  
+      query = 'UPDATE views SET views='+v+' WHERE date="'+dt+'" AND gameid="'+gameid+'";';
+      connection.query(query, function(err, rows, fields) {
+        if(err) console.log(err);
+      });
+    }
+    else {
+      query = 'INSERT INTO views (date, views, gameid) VALUES ("'+dt+'",1,"'+gameid+'");';
+      connection.query(query, function(err, rows, fields) {
+        if(err) console.log(err);
+      });
+    }
+  });
 }
 
 
@@ -217,9 +273,9 @@ function savePlayerPic(code, res) {
   });
 
   app.post('/',function(req,res){
-		console.log(req.body);
+    console.log(req.body);
     res.header("Access-Control-Allow-Origin", "*");
-    if(req.body.func === "getBoxScore") getBoxScore(res,req.body.accur? req.body.accur : 3,req.body.gameID, req.body.date);
+    if(req.body.func === "getBoxScore") getBoxScore(res,req.body.accur? req.body.accur : 3,req.body.gameID, req.body.date, req.body.finger);
     if(req.body.func === "getPlayByPlay") getPlayByPlay(res,req.body.accur? req.body.accur : 3,req.body.gameID, req.body.date);
     if(req.body.func === "getSchedule") getSchedule(res,req.body.accur? req.body.accur : 3,req.body.date);
     if(req.body.func === "savePlayerPic") savePlayerPic(req.body.code, res); 

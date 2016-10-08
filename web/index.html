@@ -6,6 +6,7 @@
   <link rel="stylesheet" type="text/css" href="boxscore.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fingerprintjs2/1.4.1/fingerprint2.min.js"></script>
   
   <script src="pie.js"></script>
   <script src="boxscore.js"></script>
@@ -30,6 +31,11 @@
   </script>
 
   <script>
+
+    //get fingerprint
+    var fp ="";
+    new Fingerprint2().get(function(result, components){
+      fp = result; });
 
     //schedule
 		var server = "http://"+document.domain+":3000";
@@ -71,7 +77,7 @@
     var pbp = new playbyplay();
     var homelines = new lineups();
     var awaylines = new lineups();
-    function getData() {
+    function getData(refresh = false) {
       $.ajax({
           type : 'POST',
           url : server,           
@@ -79,7 +85,9 @@
             func: "getBoxScore",
             gameID : gameID,
             date : gameDate,
-            accur : 1 
+            accur : 1,
+            finger: fp,
+            refresh:refresh
           },
           success:function (data) {
             thelabel: {
@@ -276,7 +284,6 @@
                 success:function (data) {
                   var homeplayers = homeTeam.players.map(function(d) { return d["last_name"]? d["last_name"] : d["first_name"]; });
                   var awayplayers = awayTeam.players.map(function(d) { return d["last_name"]? d["last_name"] : d["first_name"]; });
-                  console.log(awayplayers);
 
                   //same name players
                   var allplayers = [homeplayers, awayplayers];
@@ -355,11 +362,16 @@
         }
       });
     }
-    getData();
+    var intid = setInterval(function() {
+      if(fp !== "") {
+        clearInterval(intid);
+        getData();
+      }
+    },100);
     if(livegame) setInterval(function() { 
       //reload schedule for live games
       sched.getschedule();
-      getData(); 
+      getData(true); 
     }, 60000);
 
     function closeVideo() {
