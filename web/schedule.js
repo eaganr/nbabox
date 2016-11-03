@@ -137,8 +137,8 @@ function schedule() {
       //score or game time
       var period = document.createElement("span");
       period.className="period";
-      if(self.games[i]["period"].indexOf("End of") > -1) self.games[i]["period"] = self.games[i]["period"].substring(0,10);
-      if(self.games[i]["period"].indexOf("Start of") > -1) self.games[i]["period"] = self.games[i]["period"].substring(0,12);
+      if(self.games[i]["period"].indexOf("End of") > -1) self.games[i]["period"] = self.games[i]["period"].substring(7);
+      if(self.games[i]["period"].indexOf("Start of") > -1) self.games[i]["period"] = self.games[i]["period"].substring(9);
       period.innerHTML=self.games[i]["period"];
       if(self.games[i]["period"].indexOf(" ET") === -1) {
         var info = document.createElement("span");

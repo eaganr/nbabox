@@ -2,7 +2,8 @@
 <html>
 
 <head>
-  <title>NBA Play By Play</title>
+  <title>Ballin' Box Score - NBA Game Visualization</title>
+  <meta name="description" content="NBA Box Score and Play by Play visualization. Follow live NBA games!" >
   <link rel="stylesheet" type="text/css" href="boxscore.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
@@ -77,10 +78,11 @@
     var pbp = new playbyplay();
     var homelines = new lineups();
     var awaylines = new lineups();
-    function getData(refresh = false) {
+    function getData(refresh) {
+      if(!refresh) refresh = false;
       $.ajax({
           type : 'POST',
-          url : server,           
+          url : server,
           data: {
             func: "getBoxScore",
             gameID : gameID,
@@ -89,10 +91,17 @@
             finger: fp,
             refresh:refresh
           },
+          error:function(x,y) {
+            if("id" in homeTeam) return;
+            document.getElementById("game-data").innerHTML = "<h1>Having trouble connecting to server.<br> Please try to reload.</h1>";
+            document.getElementById("game-data").setAttribute("style", "margin-top:200px;");
+						document.getElementById("boxscores").remove();
+          },
           success:function (data) {
             thelabel: {
             data = data["sports_content"]["game"];
             console.log(data);
+            livegame = data["period_time"]["period_status"] !== "Final";
 						gameID = data["id"];
 						gameDate = data["home_start_date"];
 
@@ -128,7 +137,7 @@
               awayTeam.score = data["visitor"]["stats"]["points"];
 				
 
-              document.getElementsByTagName("title")[0].innerHTML = awayTeam.score + " " + awayTeam.abbrev + " - " + homeTeam.abbrev + " " + homeTeam.score + " | Ballin' BS";
+              //document.getElementsByTagName("title")[0].innerHTML = awayTeam.score + " " + awayTeam.abbrev + " - " + homeTeam.abbrev + " " + homeTeam.score + " | Ballin' BS";
 
                           
               document.getElementById("away-score").innerHTML = awayTeam.score;
@@ -315,23 +324,23 @@
                     }                                                                          
                   }
 
-                  var temp = {};
+                  var hometemp = {};
                   for(var i=0;i<homeplayers.length;i++) {
-                    temp[homeplayers[i]] = {player_code:homeTeam.players[i]["player_code"],
+                    hometemp[homeplayers[i]] = {player_code:homeTeam.players[i]["player_code"],
+                                            person_id:homeTeam.players[i]["person_id"],
                                             on_court:homeTeam.players[i]["on_court"],
                                             team:homeTeam.abbrev};
                   }
-                  homeplayers = temp;
-                  var temp2 = {};
+                  var awaytemp = {};
                   for(var i=0;i<awayplayers.length;i++) {
-                    temp2[awayplayers[i]] = {player_code:awayTeam.players[i]["player_code"],
+                    awaytemp[awayplayers[i]] = {player_code:awayTeam.players[i]["player_code"],
+                                             person_id:awayTeam.players[i]["person_id"],
                                              on_court:awayTeam.players[i]["on_court"],
                                              team:awayTeam.abbrev};
                   }
-                  awayplayers = temp2;
-    
-                  pbp.homeplayers(homeplayers)
-                    .awayplayers(awayplayers)
+                  console.log(hometemp);
+                  pbp.homeplayers(hometemp)
+                    .awayplayers(awaytemp)
                     .selector("#chart")
                     .data(data)
                     .parse()
@@ -366,7 +375,11 @@
       if(fp !== "") {
         clearInterval(intid);
         getData();
+        return 0;
       }
+      var d = document.createElement("div");
+      d.innerHTML = "no fp";
+      document.body.appendChild(d);
     },100);
     if(livegame) setInterval(function() { 
       //reload schedule for live games
@@ -420,12 +433,12 @@
       if(window.orientation === 0) {
         var cover = document.createElement("div");
         cover.id = "cover";
-        cover.innerHTML = "<br><br>Ballin' Box Score<br><br><br>Change to Landscape Orientation<br><img src=\"../bball%20nuc.png\">";
-        document.body.appendChild(cover);
+        cover.innerHTML = "<br><br>Ballin' Box Score<br><br><br>Change to Landscape Orientation<br><br>Mobile Use is Not Recommended<br><img src=\"../bball%20nuc.png\"";
+        //document.body.appendChild(cover);
       }
       else {
         if(document.getElementById("cover")) {
-          document.body.removeChild(document.getElementById("cover"));
+          //document.body.removeChild(document.getElementById("cover"));
         }
       }
     }
@@ -436,9 +449,8 @@
   <div class="topbar">
     <a href="http://eaganr.com"><img src="../bball%20nuc.png" class="logo" /></a>
     <span class="page-title">Ballin' Box Score</span>
-    <div id="twitter-btn"> <a href="https://twitter.com/share?text=%20&hashtags=NBA,NBAPreseason" class="twitter-share-button" data-show-count="false">Tweet</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></div>
+    <div id="twitter-btn"><a href="https://twitter.com/eaganr" class="twitter-follow-button" data-show-count="false">Follow @eaganr</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></div>
   </div>
-
 
   <div class="content">  
     <div id="schedule"></div>
@@ -468,7 +480,9 @@
         </div>
         <div id="pbpchart">
           <svg id="chart" width="1000" height="550"></svg>
-          <div id="pbp-note">After game, click on dots for video of play</div>
+          <div id="pbp-note"><!--After game, click on dots for video of play -->
+            <span class="twitter-share-btn"><a href="https://twitter.com/share?text=%20&hashtags=NBA,NBAPreseason" class="twitter-share-button" data-show-count="false">Tweet</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></span>
+          </div>
         </div>
       </div>
 
@@ -526,6 +540,7 @@
 <script>
 
 sched.draw();
+
 
 </script>
 

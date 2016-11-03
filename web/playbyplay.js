@@ -18,7 +18,7 @@ function playbyplay() {
     if(h) {
       for(var k in h) {
 				if(!hometeam) hometeam = h[k]["team"];
-        h[k] = {player_code:h[k]["player_code"], on_court:h[k]["on_court"], team:h[k]["team"], pts:[], miss:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+        h[k] = {player_code:h[k]["player_code"], person_id:h[k]["person_id"], on_court:h[k]["on_court"], team:h[k]["team"], pts:[], miss:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
       }
       self.homeplayers.val=h;
       return self;
@@ -46,6 +46,16 @@ function playbyplay() {
 			player["playername"] = playername;
 			lineup["players"].push(player);
 		}
+    if(team === awayteam) {
+      for(var i=0;i<self.awaylineups.length;i++) {
+        if(self.awaylineups[i]["players"].length < 5) self.awaylineups[i]["players"].push(player);
+      }
+    }
+    if(team === hometeam) {
+      for(var i=0;i<self.homelineups.length;i++) {
+        if(self.homelineups[i]["players"].length < 5) self.homelineups[i]["players"].push(player);
+      }
+    }
 	}
 
 
@@ -155,7 +165,7 @@ function playbyplay() {
     if(a) {
       for(var k in a) {
 				if(!awayteam) awayteam = a[k]["team"];
-        a[k] = {player_code:a[k]["player_code"], on_court:a[k]["on_court"], team:a[k]["team"], pts:[], miss:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+        a[k] = {player_code:a[k]["player_code"], person_id:a[k]["person_id"], on_court:a[k]["on_court"], team:a[k]["team"], pts:[], miss:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
       }
       self.awayplayers.val=a;
 
@@ -225,10 +235,10 @@ function playbyplay() {
 
   self.parse=function() {
     for(var k in self.homeplayers.val) {
-      self.homeplayers.val[k] = {player_code:self.homeplayers.val[k]["player_code"], on_court:self.homeplayers.val[k]["on_court"], team:self.homeplayers.val[k]["team"], pts:[], miss:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+      self.homeplayers.val[k] = {player_code:self.homeplayers.val[k]["player_code"], person_id:self.homeplayers.val[k]["person_id"], on_court:self.homeplayers.val[k]["on_court"], team:self.homeplayers.val[k]["team"], pts:[], miss:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
     }
     for(var k in self.awayplayers.val) {
-      self.awayplayers.val[k] = {player_code:self.awayplayers.val[k]["player_code"], on_court:self.awayplayers.val[k]["on_court"], team:self.awayplayers.val[k]["team"], pts:[], miss:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
+      self.awayplayers.val[k] = {player_code:self.awayplayers.val[k]["player_code"], person_id:self.awayplayers.val[k]["person_id"], on_court:self.awayplayers.val[k]["on_court"], team:self.awayplayers.val[k]["team"], pts:[], miss:[], ast:[], rebs:[], stls:[], tos:[], blks:[], fls:[], mins:[]};
     }
 		
 		self.homelineups = [];

@@ -73,12 +73,13 @@ function lineups() {
 				pname.innerHTML = "unknown";
 
 				if(line["players"].length > n) {
-					pic.src = "img/players/"+line["players"][n]["player_code"]+".png"
+					pic.src = "img/players/"+line["players"][n]["player_code"].toLowerCase()+".png"
           pic.setAttribute("player_code", line["players"][n]["player_code"]);
+          pic.setAttribute("person_id", line["players"][n]["person_id"]);
           pic.onerror = function() {
             if(!this.getAttribute("error")) {
               this.setAttribute("error", "true");
-              this.src = "http://i.cdn.turner.com/nba/nba/.element/img/2.0/sect/statscube/players/large/"+this.getAttribute("player_code")+".png"
+              this.src = "https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/"+this.getAttribute("person_id")+".png";
 
               //server to save
               $.ajax({
@@ -86,18 +87,18 @@ function lineups() {
                   url : server, 
                   data: {
                     func: "savePlayerPic",
-                    code : this.getAttribute("player_code"),
+                    code : this.getAttribute("person_id"),
                   },
                   success:function (data) {
                     console.log("success");  
                   }
               });
             }
+            else this.src="img/logos/default.png";
           };
 					pname.innerHTML = line["players"][n]["playername"].substring(0,14);
 				}
 
-        pic.setAttribute("onerror","this.src='img/logos/default.png'")
 				player.appendChild(pic);
 				player.appendChild(pname);
 				row.appendChild(player);
