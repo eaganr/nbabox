@@ -1,6 +1,8 @@
 
 var folder = "/root/nbabox/"
 
+var request = require('request');  
+
 //logging
 var fs = require('fs');
 var util = require('util');
@@ -58,7 +60,6 @@ function toTime(dateString) {
 
 //box score
 function requestBoxScore(res, gameID, date) {
-  var request = require('request');  
   var url = "http://data.nba.com/10s/json/cms/noseason/game/"+date+"/"+gameID+"/boxscore.json";
   request(url, function (error, response, body) {
     if(!error && response.statusCode == 200) {
@@ -75,8 +76,8 @@ function requestBoxScore(res, gameID, date) {
 }
 
 //period = 1 - minute, 2 - hour, 3 - day
-function getBoxScore(res, period, gameID, date, finger) {
-  addOne(gameID, finger);
+function getBoxScore(res, period, gameID, date) {
+  addOne(gameID);
   var j = [];
   if(period > 0) j = getFile("minute", "boxscore", gameID);
   if((j.length === 0 || j["sports_content"]["game"]["id"] == "" ) && (period > 1 || gameID == "")) j = getFile("hour", "boxscore", gameID);
@@ -124,7 +125,6 @@ function getFile(period, filetype, id) {
 
 //play by play
 function requestPlayByPlay(res, gameID, date, plays, q) {
-  var request = require('request');  
   var url = "http://data.nba.com/10s/json/cms/noseason/game/"+date+"/"+gameID+"/pbp_"+q+".json";
   request(url, function (error, response, body) {
     if(!error && response.statusCode == 200) {
@@ -157,7 +157,6 @@ function getPlayByPlay(res, period, gameID, date) {
 
 //schedule
 function requestSchedule(res, date) {
-  var request = require('request');  
 	var dates = date.split("/");
 	var yr = dates[2];
 	var day = dates[1].length > 1 ? dates[1] : "0"+dates[1];
@@ -186,12 +185,30 @@ function getSchedule(res, period, date) {
   else res.jsonp(j);
 }
 
+function getVideoURL(gameid, eventid, res) {
+  var url = "http://stats.nba.com/stats/videoevents?GameEventID="+eventid+"&GameID="+gameid;
+  request(url, function (error, response, body) {
+    if(!error && response.statusCode == 200) {
+      var response = JSON.parse(body);
+      var uid = response["resultSets"]["Meta"]["videoUrls"][0]["uuid"];
+      url = "http://www.nba.com/video/wsc/league/"+uid+".xml";
+      request(url, function (error, response, body) {
+        if(!error && response.statusCode == 200) {
+          try {
+            res.jsonp([body.split('key="turner_mp4_768x432_1500">')[1].split('</file>')[0]]);
+          }
+          catch(ex) { console.log(ex) }
+        }
+      });
+    }
+  });
+}
+
 //requestBoxScore("0041400406");
 //console.log(getFile("minute","0041400406"));
 
 function savePlayerPic(code, res) {
-  var request = require('request');  
-	var url = "http://i.cdn.turner.com/nba/nba/.element/img/2.0/sect/statscube/players/large/"+code+".png"
+  var url = "https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/"+code+".png";
   request.head(url, function(err, res, body){
     request(url).pipe(fs.createWriteStream(folder+"web/img/players/"+code+".png")).on('close', function() {
       //res.send("");
@@ -215,13 +232,9 @@ var connection = mysql.createConnection(
 );
 connection.connect();
 
-function addOne(gameid,finger) {
+function addOne(gameid) {
   var d = new Date();
-
-  query = 'INSERT INTO pageview (timestamp, gameid, fingerprint) VALUES ("'+d+'","'+gameid+'","'+finger+'");';
-  connection.query(query, function(err, rows, fields) {
-    if(err) console.log(err);
-  });
+  d.setHours(d.getHours());
 
   var year = d.getFullYear()+"";
 
@@ -236,27 +249,6 @@ function addOne(gameid,finger) {
     day = "0"+day;
   }
   else day = day + "";
-
-  var dt = year+"-"+month+"-"+day;
-  var query = 'SELECT views from views WHERE date="'+dt+'" AND gameid="'+gameid+'";';
-  connection.query(query, function(err, rows, fields) {
-    if(err) console.log(err);
-    if(rows.length) {
-      var v = +rows[0]["views"];
-      v++;
-  
-      query = 'UPDATE views SET views='+v+' WHERE date="'+dt+'" AND gameid="'+gameid+'";';
-      connection.query(query, function(err, rows, fields) {
-        if(err) console.log(err);
-      });
-    }
-    else {
-      query = 'INSERT INTO views (date, views, gameid) VALUES ("'+dt+'",1,"'+gameid+'");';
-      connection.query(query, function(err, rows, fields) {
-        if(err) console.log(err);
-      });
-    }
-  });
 }
 
 
@@ -274,10 +266,11 @@ function addOne(gameid,finger) {
   app.post('/',function(req,res){
     console.log(req.body);
     res.header("Access-Control-Allow-Origin", "*");
-    if(req.body.func === "getBoxScore") getBoxScore(res,req.body.accur? req.body.accur : 3,req.body.gameID, req.body.date, req.body.finger);
+    if(req.body.func === "getBoxScore") getBoxScore(res,req.body.accur? req.body.accur : 3,req.body.gameID, req.body.date);
     if(req.body.func === "getPlayByPlay") getPlayByPlay(res,req.body.accur? req.body.accur : 3,req.body.gameID, req.body.date);
     if(req.body.func === "getSchedule") getSchedule(res,req.body.accur? req.body.accur : 3,req.body.date);
     if(req.body.func === "savePlayerPic") savePlayerPic(req.body.code, res); 
+    if(req.body.func === "getVideoURL") getVideoURL(req.body.gameid, req.body.eventid, res); 
   });
 }).call(this);
 
