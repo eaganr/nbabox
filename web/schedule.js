@@ -27,6 +27,7 @@ function schedule() {
 				},
 				success:function (data) {
           data = data["sports_content"]["games"]["game"];
+          self.games = []
 					for(var i=0;i<data.length;i++) {
             var hometeam = data[i]["home"]["abbreviation"];
             var awayteam = data[i]["visitor"]["abbreviation"];

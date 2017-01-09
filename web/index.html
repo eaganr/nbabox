@@ -33,11 +33,6 @@
 
   <script>
 
-    //get fingerprint
-    var fp ="";
-    new Fingerprint2().get(function(result, components){
-      fp = result; });
-
     //schedule
 		var server = "http://"+document.domain+":3000";
     var sched = new schedule()
@@ -88,7 +83,6 @@
             gameID : gameID,
             date : gameDate,
             accur : 1,
-            finger: fp,
             refresh:refresh
           },
           error:function(x,y) {
@@ -371,16 +365,7 @@
         }
       });
     }
-    var intid = setInterval(function() {
-      if(fp !== "") {
-        clearInterval(intid);
-        getData();
-        return 0;
-      }
-      var d = document.createElement("div");
-      d.innerHTML = "no fp";
-      document.body.appendChild(d);
-    },100);
+    getData();
     if(livegame) setInterval(function() { 
       //reload schedule for live games
       sched.getschedule();
@@ -467,7 +452,7 @@
 
       <div id="video">
         <input id="close-video" onclick="closeVideo()" type="image" src="img/close.svg" alt="Close" width="20" height="20">
-        <input id="vidormove" onclick="toggleVidMove()" type="image" src="img/movement.png" alt="Close" width="20" height="20">
+        <!-- <input id="vidormove" onclick="toggleVidMove()" type="image" src="img/movement.png" alt="Close" width="20" height="20"> -->
         <span id="video-title"></span>
         <iframe id="video-frame" width="0" height="0" align="center" frameBorder="0" scrolling="no" ></iframe>
       </div>
@@ -480,7 +465,7 @@
         </div>
         <div id="pbpchart">
           <svg id="chart" width="1000" height="550"></svg>
-          <div id="pbp-note"><!--After game, click on dots for video of play -->
+          <div id="pbp-note">After game, click on dots for video of play
             <span class="twitter-share-btn"><a href="https://twitter.com/share?text=%20&hashtags=NBA,NBAPreseason" class="twitter-share-button" data-show-count="false">Tweet</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script></span>
           </div>
         </div>

@@ -841,14 +841,26 @@ function playbyplay() {
           //show video of play
           if(neutral.period === "Final") {
           var evt = d3.select(this).attr("event");
-          var url = "http://stats.nba.com/cvp.html?GameID="+gameID+"&GameEventID="+self.data()[evt]["event"]+"&mtype=&mtitle=";
-          //var url = "http://stats.nba.com/movement/#!/?GameID="+gameID+"&GameEventID="+self.data()[evt]["event"]+"&mtype=&mtitle=";
-          document.getElementById("video-title").innerHTML = self.data()[evt]["description"];
-          d3.select("#video-frame")
-            .attr("src", url)
-            .attr("width", 604)
-            .attr("height", 350);
-          if(d3.select("#video").style("display") === "none") $("#video").slideToggle();
+          
+          $.ajax({
+              type : 'POST',
+              url : server,           
+              data: {
+                func: "getVideoURL",
+                gameid : gameID,
+                eventid : self.data()[evt]["event"]
+              },
+              success:function (data) {
+                console.log(data);
+                var url = data[0];
+                document.getElementById("video-title").innerHTML = self.data()[evt]["description"];
+                d3.select("#video-frame")
+                  .attr("src", "video.html?video="+url)
+                  .attr("width", 604)
+                  .attr("height", 350);
+                if(d3.select("#video").style("display") === "none") $("#video").slideToggle();
+              }
+          });
         }
       })
       .on("mouseover", function() { 

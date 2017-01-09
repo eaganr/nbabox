@@ -8,7 +8,7 @@ function lineups() {
 			self.data.val=d;
 			if(sort) self.sortby(sort, negsort);
 			else {
-				self.sortby("num");
+				self.sortby("diff");
 			}
 			return self;
 		}

@@ -215,6 +215,13 @@ td, th {
 	background-color:white;
 	border-radius:10px;
 	margin-top:20px;
+  position:relative;
+}
+
+.twitter-share-btn {
+  position:absolute;
+  right:10px;
+  bottom:5px;
 }
 
 #pbp-note {
