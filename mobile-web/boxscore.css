@@ -1,0 +1,571 @@
+.topbar {
+  height:200px;
+  background-color:black;
+  width:100%;
+}
+
+#twitter-btn {
+  right:10%;
+  position:absolute;
+  top:20px;
+}
+.twitter-follow-button {
+  width:500px;
+}
+
+.logo {
+  width: 80px;
+  height: 80px;
+  top: 60px;
+  position: relative;
+  left:5%
+}
+
+.page-title {
+  color:white;
+  position:relative;
+  left:7%;
+  top:50px;
+  font-size:80px;
+  font-family:"Book Antiqua", Palatino, "Palatino Linotype", "Palatino LT STD", Georgia, serif;
+}
+
+#cover {
+  position:absolute;
+  width:100%;
+  height:100vh;
+  background-color:#C5DBEC;
+  z-index:1000000;
+  text-align:center;
+  font-size:100px;
+}
+
+.content {
+  width:90%;
+  min-width:1100px;
+  margin:auto;
+}
+.team {
+  display:inline-block;
+  width:600px;
+}  
+.team h1 {
+  width:200px;
+  margin:auto;
+  margin-bottom:20px;
+  text-align:center;
+}
+
+#scoreline {
+  width:60%;
+  margin:auto;
+  height:200px;
+	position:relative;
+	background-color:wheat;
+	border-radius:10px;
+}
+
+#scoreline img {
+  width:150px;
+  top:25px;
+  position:relative;
+  margin-left:30px;
+  margin-right:30px;
+}
+
+
+#game-date {
+	font-size:35px;
+	text-align:center;
+	margin-top:10px;
+	font-weight:bold;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+#game-date a {
+  cursor:pointer;
+}
+
+.team-score {
+	font-size:80px;
+  display:inline;
+  position:relative;
+  top:60px;
+}
+
+#scoreline div {
+}
+
+.team-name {
+  width:100%;
+  text-align:center;
+  transform: rotate(-90deg);
+  transform-origin: left top 0;
+	-webkit-transform: rotate(-90deg);
+  -webkit-transform-origin: left top 0;
+  position:relative;
+  left:30px;
+}
+
+#video {
+  display:none;
+  position:relative;
+  width:90%;
+  margin:auto;
+}
+
+#video-frame {
+  width:100%;
+}
+
+#video-title {
+  font-size:40px;
+}
+
+#close-video, #vidormove {
+  float:right;
+  margin-right:5px;
+}
+
+#close-video:active {
+  background-color:black;
+  border-radius:100px;
+}
+
+#close-video:focus, #vidormove:focus {
+  outline:none;
+}
+
+#schedule h2 {
+  position:relative;
+  top:-10px;
+  width:400px;
+  margin:auto;
+  text-align:center;
+  font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+.threepointer {
+  font-size:7px;
+  font-weight:900;
+  pointer-events:none;
+}
+
+#game-data h1 {
+  width:60%;
+  margin:auto;
+  margin-top:30px;
+  text-align:center;
+  font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  font-size:80px;
+}
+
+.box-table {
+  border:solid;
+  border-width:1px;
+  font-size:40px;
+  width:150%;
+}
+
+.box-table tr, td {
+	height:70px;
+}
+
+.box-table tr td:first-child {
+  width:340px;
+}
+
+.box-table tr:nth-child(odd) {
+  background-color:#E0E0E0;
+}
+.box-table tr:nth-child(even) {
+  background-color:#F5F5F5;
+}
+
+h3 {
+  margin-left:8%;
+}
+.box-table tr:hover, .box-table tr:nth-child(odd):hover {
+  background-color:#FFFFCC;
+}
+
+.box-table tr:first-child, .box-table tr:first-child:hover {
+  background-color:#C0C0C0;
+}
+
+td, th {
+  text-align:center;
+}
+.scoring-title {
+  width:100px;
+  margin:auto;
+}
+#team-names {
+  display:none;
+  float:left;
+  font-size:80px;
+  height:500px;
+  width:9%;
+}
+#home-name {
+  position:relative;
+  top:390px;
+}
+#away-name {
+  position:relative;
+  top:200px;
+}
+#playbyplay {
+  display:block;
+  width:100%;
+  margin:auto;
+}
+
+.legend-text {
+	fill:black;
+}
+
+#pbpchart {
+  display:inline-block;
+  margin:auto;
+	background-color:white;
+	border-radius:10px;
+	margin-top:20px;
+  position:relative;
+  width:100%;
+  left:1%;
+  overflow-x: hidden;
+  white-space: nowrap;
+}
+
+.qtr-btn {
+  font-size:50px;
+  border:solid;
+  border-radius:5px;
+  position:absolute;
+  bottom:70px;
+  width:10%;
+  height:150px;
+  z-index:100;
+  text-align:center;
+}
+
+#right-btn {
+  right:0px;
+}
+
+#chart {
+  position:relative;
+  height:2000px;
+  width:400%;
+}
+
+.twitter-share-btn {
+  position:absolute;
+  right:10px;
+  bottom:5px;
+}
+
+#pbp-note {
+  font-size:30px;
+  margin-bottom:5px;
+  margin-left:20px;
+}
+
+.tick {
+	fill:black;
+}
+
+.team-box {
+}
+.box-container {
+	margin-top:50px;
+	border-radius:10px;
+	background-color:#C5DBEC;
+}
+
+.boxscore {
+  position:relative;
+  left:1%;
+  width:98%;
+  min-width:632px;
+  overflow-x:scroll;
+  overflow-y:visible;
+}
+
+.box-title {
+  font-size:70px;
+  position:relative;
+  left:2%;
+  top:5px;
+}
+
+.charts {
+  display:block;
+  min-width:280px;
+  width:95%;
+  margin:auto;
+  position:relative;
+  top:30px;
+	left:2.5%;
+	height:800px;
+}
+.pie {
+  min-width:270px;
+  width:80%;
+  margin:auto;
+}
+.stats {
+  display:block;
+  width:100%;
+  margin:0 auto;
+	border-radius:10px;
+	background-color:#C5DBEC;
+	margin-bottom:30px;
+}
+.stats .pie {
+	position:relative;
+	top:30px;
+  margin:auto;
+}
+
+.pickdiv {
+  width:95%;
+  margin:auto;
+}
+
+#datepicker {
+  width:75%;
+  height:70px;
+  position:relative;
+  top:10px;
+  text-align:center;
+  font-size:50px;
+}
+.move-btn {
+	height:70px;
+	width:9%;
+  position:relative;
+  top:10px;
+  border:none;
+  outline:none;
+  font-size:30px;
+  background-color:#999999;
+}
+.move-btn:hover {
+  background-color:#CCCCCC;
+}
+.today-btn {
+	height:19px;
+  position:absolute;
+  border:none;
+  top:-4px;
+  left:40px;
+  width:42px;
+  text-align:center;
+  outline:none;
+  background-color:#999999;
+}
+.today-btn:hover {
+  background-color:#CCCCCC;
+}
+
+
+#schedule {
+  position:relative;
+  top:20px;
+  width:95%;
+  margin:auto;
+}
+.schedule-games {
+  overflow-x: scroll;
+  white-space: nowrap;
+}
+.schedule-game {
+  top:10px;
+  position:relative;
+  display:inline-block;
+  margin-left:20px;
+  height:130px;
+  width:30%;
+  background-color:#C5DBEC;
+	margin-top:5px;
+  border-radius:5px;
+  cursor:pointer;
+}
+.schedule-game-2nd {
+}
+
+
+.schedule-game:hover {
+  background-color:#99CCFF;
+}
+
+.period {
+  position:absolute;
+  top:5px;
+  text-align:center;
+  font-size:35px;
+  width:100%;
+  display:block;
+}
+.game-live {
+  color:red;
+}
+
+.info {
+  position:absolute;
+  top:40px;
+  text-align:center;
+  font-size:35px;
+  width:100%;
+  display:block;
+}
+
+.schedule-game div {
+  position:absolute;
+  bottom:10px;
+  text-align:center;
+  font-size:40px;
+  width:100%;
+}
+#away-score {
+  float:left;
+	left:10px;
+}
+#home-score {
+  float:right;
+	right:10px;
+}
+#home-logo {
+  float:right; 
+}
+#away-logo {
+  float:left;
+}
+.home-logo {
+  width:45%;
+  height:45%;
+  position:relative;
+  right:-18%;
+}
+.away-logo {
+  width:45%;
+  height:45%;
+  position:relative;
+  left:-8%;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+	background-color:#F5F5F5;
+}
+
+.lineups {
+	width:95%;
+	position:relative;
+	left:2%;
+}
+
+.lineup-player {
+	display:inline-block;
+	width:12%;
+  margin-left:1%;
+  margin-right:1%;
+}
+
+.lineup-name {
+	display:block;
+  width:100%;
+  margin:auto;
+	text-align:center;
+  font-size:30px;
+}
+
+.lineup-pic {
+	width:98%;
+	height:98%;
+}
+
+.lineup-used {
+	display:inline-block;
+	margin-left:1%;
+	margin-right:1%;
+	text-align:center;
+	font-size:40px;
+	position:relative;
+	top:-55px;
+	line-height:50px;
+	width:70px;
+}
+
+.lineup-pm {
+	display:inline-block;
+	margin-left:1%;
+	margin-right:1%;
+	text-align:center;
+	font-size:40px;
+	position:relative;
+	top:-55px;
+	line-height:50px;
+	width:70px;
+}
+
+.lineup-mins {
+	display:inline-block;
+	margin-left:1%;
+	margin-right:1%;
+	text-align:center;
+	font-size:40px;
+	position:relative;
+	top:-55px;
+	line-height:50px;
+	width:70px;
+}
+
+.lineup-title {
+	margin-top:150px;
+	position:relative;
+	margin-left:6%;
+  font-size:50px;
+}
+
+.limit-btn {
+	width:5%;
+	height:5%;
+	margin-left:5px;
+}
+
+.limit-btn:active {
+  background-color:black;
+	border-radius:100px;
+}
+.limit-btn:focus {
+  outline:none;
+}
+
+.sort-btn {
+	display:inline-block;
+}
+
+.arrow {
+	position:relative;
+	top:4px;
+	float:right;
+	width:20px;
+	height:20px;
+}
+
+#comparison {
+	text-align:center;
+	font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  font-size:50px;
+}
+
